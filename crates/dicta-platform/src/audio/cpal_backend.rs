@@ -198,8 +198,13 @@ pub(super) fn capture_loop(
             });
         }
         if !recording && started.elapsed() >= NO_AUDIO_TIMEOUT {
+            #[cfg(not(windows))]
             bail!(
                 "No llegó audio en 8 segundos; revisá el micrófono y los permisos de audio del sistema"
+            );
+            #[cfg(windows)]
+            bail!(
+                "No llegó audio en 8 segundos; revisá el micrófono y Configuración > Privacidad y seguridad > Micrófono"
             );
         }
     };
@@ -466,12 +471,27 @@ fn to_i16(x: f32) -> i16 {
     (x * 32768.0).round().clamp(-32768.0, 32767.0) as i16
 }
 
+#[cfg(not(windows))]
+const PERMISSION_DENIED: &str = "El sistema negó el acceso al micrófono. Permití el micrófono para Mars voice en la privacidad del sistema y volvé a intentar";
+#[cfg(windows)]
+const PERMISSION_DENIED: &str = "Windows bloqueó el micrófono por privacidad. Abrí Configuración > Privacidad y seguridad > Micrófono, activá «Acceso al micrófono» y «Permitir que las aplicaciones de escritorio accedan al micrófono», y volvé a intentar";
+
+/// WASAPI reports a microphone blocked in the privacy settings as
+/// E_ACCESSDENIED, which cpal files under a generic backend error. Its text
+/// carries the HRESULT, as hex or as the signed OS error code.
+#[cfg_attr(not(windows), allow(dead_code))]
+fn access_denied(error: &cpal::Error) -> bool {
+    let text = error.to_string();
+    text.contains("0x80070005") || text.contains("-2147024891")
+}
+
 /// Opening/starting a stream failed.
 fn open_error(error: &cpal::Error, lost: &str) -> String {
     use cpal::ErrorKind::*;
     match error.kind() {
         DeviceNotAvailable | StreamInvalidated => lost.into(),
-        PermissionDenied => "El sistema negó el acceso al micrófono. Permití el micrófono para Mars voice en la privacidad del sistema y volvé a intentar".into(),
+        PermissionDenied => PERMISSION_DENIED.into(),
+        _ if cfg!(windows) && access_denied(error) => PERMISSION_DENIED.into(),
         DeviceBusy => "El micrófono está ocupado por otra aplicación. Cerrala o elegí otro en Ajustes > Micrófono".into(),
         HostUnavailable => format!("El servidor de audio del sistema no responde: {error}"),
         UnsupportedConfig => format!("El micrófono no ofrece un formato de audio compatible: {error}"),
@@ -645,6 +665,18 @@ mod tests {
         );
         let denied = cpal::Error::new(cpal::ErrorKind::PermissionDenied);
         assert!(open_error(&denied, DEFAULT_LOST).contains("privacidad"));
+        // WASAPI's E_ACCESSDENIED (privacy switch off) arrives as a backend error.
+        let blocked = cpal::Error::with_message(
+            cpal::ErrorKind::BackendError,
+            "Acceso denegado. (os error -2147024891)",
+        );
+        assert!(access_denied(&blocked));
+        assert!(!access_denied(&cpal::Error::with_message(
+            cpal::ErrorKind::BackendError,
+            "otro fallo (os error 2)"
+        )));
+        #[cfg(windows)]
+        assert!(open_error(&blocked, DEFAULT_LOST).contains("Privacidad y seguridad > Micrófono"));
         for kind in [
             cpal::ErrorKind::Xrun,
             cpal::ErrorKind::DeviceChanged,
