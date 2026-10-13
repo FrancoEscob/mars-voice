@@ -36,5 +36,19 @@ pipewire = { version = "0.10.0", optional = true }
 # CLOCK_MONOTONIC for shortcuts::event_stamp (Linux and macOS); process groups on Linux.
 libc = "0.2"
 [target.'cfg(windows)'.dependencies]
-# QueryPerformanceCounter for shortcuts::event_stamp.
-windows-sys = { version = "0.61", features = ["Win32_System_Performance"] }
+# QueryPerformanceCounter for shortcuts::event_stamp; focus, SendInput and the
+# clipboard sequence number for the Windows backend (src/backend/windows.rs).
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_System_DataExchange",
+    "Win32_System_Performance",
+    "Win32_System_Threading",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_WindowsAndMessaging",
+] }
+# Clipboard (text and, to restore it, images).
+arboard = "3.6"
+# Global shortcuts and tray, both on the shell thread (src/shell_windows.rs).
+global-hotkey = "0.8"
+# No default features: they only select the Linux (GTK) backend.
+tray-icon = { version = "0.26", default-features = false }

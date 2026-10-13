@@ -24,13 +24,20 @@ serde.workspace = true
 libc = "0.2"
 
 [target.'cfg(windows)'.dependencies]
-# Per-user named pipe for IPC (src/ipc/windows.rs).
+# Per-user named pipe for IPC (src/ipc/windows.rs); console attach, error
+# dialog and foreground hand-off for the GUI executable (src/main.rs).
 windows-sys = { version = "0.61", features = [
     "Win32_Foundation",
     "Win32_Security",
     "Win32_Security_Authorization",
     "Win32_Storage_FileSystem",
+    "Win32_System_Console",
     "Win32_System_IO",
     "Win32_System_Pipes",
     "Win32_System_Threading",
+    "Win32_UI_WindowsAndMessaging",
 ] }
+
+[target.'cfg(windows)'.build-dependencies]
+# App icon and version information in the executable (build.rs).
+embed-resource = "3"
