@@ -1,0 +1,16 @@
+[Unit]
+Description=Mars voice, dictado por voz
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart="%h/.local/bin/dicta" --background
+Restart=on-failure
+RestartSec=3
+# Dicta abre el micrófono únicamente por acción explícita.
+# Requiere WAYLAND_DISPLAY, XDG_RUNTIME_DIR y DBUS_SESSION_BUS_ADDRESS
+# importados en el entorno del gestor systemd del usuario.
+
+[Install]
+WantedBy=graphical-session.target

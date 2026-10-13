@@ -1,0 +1,129 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  # .cargo/config.toml limita a 2 trabajos para no saturar equipos de desarrollo.
+  CARGO_BUILD_JOBS: "4"
+  RUST_BACKTRACE: "1"
+
+jobs:
+  fmt:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.98.1
+        with:
+          components: rustfmt
+      - run: cargo fmt --all -- --check
+
+  linux:
+    name: Linux (${{ matrix.name }})
+    runs-on: ubuntu-24.04
+    container: ${{ matrix.container }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ubuntu-24.04
+            container: ""
+    steps:
+      - name: Dependencias (Ubuntu)
+        if: matrix.name == 'ubuntu-24.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential pkg-config clang libclang-dev \
+            libpipewire-0.3-dev libspa-0.2-dev libasound2-dev libdbus-1-dev \
+            libxkbcommon-dev libxkbcommon-x11-dev libxcb1-dev libx11-xcb-dev \
+            libwayland-dev libfontconfig-dev libfreetype-dev
+      - name: Dependencias (Arch)
+        if: matrix.name == 'arch'
+        run: |
+          pacman -Syu --noconfirm --needed git clang pkgconf pipewire alsa-lib dbus \
+            libxkbcommon-x11 libxcb wayland fontconfig freetype2 rustup
+          rustup default 1.98.1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.98.1
+        if: matrix.name == 'ubuntu-24.04'
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.name }}
+      - run: cargo test --workspace --locked
+      - run: cargo build -p dicta --release --locked
+
+  windows:
+    name: Windows (build + zip de prueba)
+    runs-on: windows-2025
+    env:
+      # Sin depender del runtime de Visual C++ instalado.
+      RUSTFLAGS: "-C target-feature=+crt-static"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.98.1
+      - name: libclang
+        shell: bash
+        run: echo "LIBCLANG_PATH=C:\\Program Files\\LLVM\\bin" >> "$GITHUB_ENV"
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test -p dicta-core -p dicta-provider -p dicta-platform --locked
+      - run: cargo build -p dicta --release --locked
+      - name: Empaquetar
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item target/release/dicta.exe dist/MarsVoice.exe
+          Copy-Item docs/WINDOWS.md dist/LEEME.md
+          Compress-Archive -Path dist/* -DestinationPath mars-voice-windows-x64.zip -Force
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mars-voice-windows-x64
+          path: mars-voice-windows-x64.zip
+          retention-days: 30
+
+  manual:
+    name: ${{ matrix.name }} (manual)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macos-15
+            os: macos-15
+            container: ""
+          - name: arch
+            os: ubuntu-24.04
+            container: archlinux:base-devel
+    steps:
+      - name: Dependencias (Arch)
+        if: matrix.name == 'arch'
+        run: |
+          pacman -Syu --noconfirm --needed git clang pkgconf pipewire alsa-lib dbus \
+            libxkbcommon-x11 libxcb wayland fontconfig freetype2 rustup
+          rustup default 1.98.1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.98.1
+        if: matrix.name == 'macos-15'
+      - name: Toolchain Metal (Xcode 26)
+        if: matrix.name == 'macos-15'
+        continue-on-error: true
+        run: xcodebuild -downloadComponent MetalToolchain
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.name }}
+      - run: cargo build --workspace --locked
+      - run: cargo test -p dicta-core -p dicta-provider --locked
+
+  licencias:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check licenses sources

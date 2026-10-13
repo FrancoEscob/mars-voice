@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dicta, ronda 2 de marca</title>
+<style>
+:root{
+  --display:"Archivo","Archivo Expanded","Helvetica Neue","Nimbus Sans","Noto Sans",Arial,sans-serif;
+  --mono:"IBM Plex Mono","DejaVu Sans Mono",ui-monospace,monospace;
+  --orange:#FF4F00; --ink:#16130F; --night:#14110E; --pale:#CFE3C4;
+  --grain-d:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .09 0 0 0 0 .07 0 0 0 0 .05 0 0 0 1.6 -.75'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --grain-c:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.42' numOctaves='3' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .14 0 0 0 0 .06 0 0 0 2.4 -1.3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --grain-l:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .93 0 0 0 0 .9 0 0 0 0 .85 0 0 0 1.7 -.85'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --ease:cubic-bezier(.23,1,.32,1);
+}
+*{box-sizing:border-box}
+body{margin:0;background:#E7EEE1;color:var(--ink);font:15px/1.5 var(--display);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.top{max-width:1360px;margin:0 auto;padding:28px 24px 16px;display:flex;flex-wrap:wrap;gap:16px 32px;align-items:end;justify-content:space-between}
+h1{margin:0;font-size:clamp(22px,3vw,30px);font-weight:700;font-stretch:115%;letter-spacing:-.01em;line-height:1.15}
+.top p{margin:6px 0 0;max-width:62ch;color:#4A5545}
+.controls{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center}
+.seg{display:inline-flex;padding:3px;border-radius:12px;background:#D6E2CD;gap:2px;flex-wrap:wrap}
+.seg button{min-height:32px;padding:4px 12px;border:0;border-radius:9px;background:transparent;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.seg button[aria-selected=true],.seg button[aria-checked=true]{background:#FBFDF8;box-shadow:0 1px 0 #B9CCAE}
+.seg small{font-size:12px;font-weight:500;color:#4A5545}
+.ctl-label{font-size:13px;color:#4A5545;margin-right:6px}
+main{max-width:1360px;margin:0 auto;padding:8px 24px 48px}
+
+/* direcciones */
+.dir{--ground:#D6E5CB;--surf:#EFF5E9;--surf2:#E1EBD7;--line:#B9CCAE;--fg:#16130F;--fg2:#4A5545;--tent:#5E685A;--mk:#16130F;--go:.3;--ring:#16130F;
+  display:none;gap:16px;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);grid-template-areas:"stage brand" "stage mini";color:var(--fg)}
+.dir[data-dir=regolito]{--ground:#CCDEBF;--surf:#EAF1E2;--surf2:#DCE7D1;--line:#A9C09C;--go:.55}
+.dir[data-dir=noche]{--ground:#14110E;--surf:#211C18;--surf2:#2C2621;--line:#463D35;--fg:#E4EEDC;--fg2:#A6B59E;--tent:#909C8A;--mk:#CFE3C4;--ring:#CFE3C4;--go:.45}
+main[data-view=senal] [data-dir=senal],main[data-view=regolito] [data-dir=regolito],main[data-view=noche] [data-dir=noche]{display:grid}
+.dir :focus-visible{outline-color:var(--ring)}
+.stage{grid-area:stage;position:relative;isolation:isolate;min-height:400px;border-radius:20px;background:var(--ground);display:grid;place-items:center;padding:40px 20px;overflow:hidden}
+.stage::before{content:"";position:absolute;inset:0;z-index:-1;background-image:var(--grain-d);opacity:var(--go);pointer-events:none}
+[data-dir=regolito] .stage::before{background-image:var(--grain-c),var(--grain-d)}
+[data-dir=noche] .stage::before{background-image:var(--grain-l)}
+.panel{background:var(--surf);border-radius:16px;padding:20px}
+[data-dir=noche] .panel{background:#1C1815;box-shadow:inset 0 0 0 1px var(--line)}
+.brand{grid-area:brand}.mini{grid-area:mini}
+.lockup{display:flex;align-items:center;gap:14px}
+.lockup svg{width:72px;height:72px;color:var(--mk);flex:none}
+.word{font-size:44px;font-weight:700;font-stretch:125%;letter-spacing:-.03em;line-height:1}
+.idea{margin:14px 0 0;color:var(--fg2);max-width:52ch}
+.sizes{display:flex;gap:8px;margin-top:16px}
+.tile{display:flex;align-items:center;gap:14px;padding:10px 14px;border-radius:10px;background:#EEE8DF;color:#16130F}
+.tile.dk{background:#14110E;color:#CFE3C4}
+.tile svg{flex:none}.tile span{font-size:12px}
+.badge{display:inline-block;margin-top:12px;padding:2px 10px;border-radius:99px;background:var(--orange);color:#16130F;font-size:12px;font-weight:700}
+
+/* overlay común */
+.ov{position:relative;width:min(100%,460px);color:var(--fg)}
+.wave{display:flex;align-items:center;justify-content:center;height:44px;flex:1;min-width:0}
+.partial{margin:0;font-size:15px;line-height:1.45;min-height:2.9em}
+.partial .t{color:var(--tent)}
+.partial .caret{display:inline-block;width:2px;height:1.05em;margin-left:2px;vertical-align:-2px;background:var(--orange)}
+.status{display:flex;align-items:center;gap:8px;margin:0;font-size:13px;color:var(--fg2)}
+.time{font:500 13px var(--mono);font-variant-numeric:tabular-nums;color:var(--fg2)}
+.act{min-height:36px;padding:0 16px;border:0;border-radius:10px;background:var(--orange);color:#16130F;font-weight:700;font-size:14px;flex:none;transition:transform .12s var(--ease)}
+.act:active{transform:scale(.97)}
+.act[disabled]{opacity:.55;cursor:default}
+.ov[data-state=done] .act{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--fg)}
+.ov[data-state=error] .status{color:var(--fg)}
+.mic-ic{width:16px;height:16px;flex:none}
+
+/* 1 Señal: píldora, onda en el centro, el planeta es el botón */
+.ov-senal{background:var(--surf);border-radius:22px;padding:12px 12px 14px;box-shadow:0 10px 28px rgba(22,19,15,.16),0 1px 0 #B9CCAE}
+.ov-senal .row{display:flex;align-items:center;gap:10px}
+.ov-senal .orb-btn{width:44px;height:44px;color:var(--mk);flex:none}
+.ov-senal .orb-btn svg{width:44px;height:44px}
+.ov-senal .wave i{display:block;width:3px;margin:0 1.5px;height:40px;border-radius:2px;background:var(--fg);transform-origin:center;transform:scaleY(.08)}
+.ov-senal .text{padding:10px 8px 0 8px}
+.ov-senal .status{margin-top:6px}
+
+/* 2 Regolito: planeta grande asomando, voz en puntos */
+.ov-rego{overflow:hidden;background:var(--surf);border-radius:18px;padding:16px 18px 18px;box-shadow:0 12px 30px rgba(40,30,15,.2)}
+.ov-rego::before{content:"";position:absolute;inset:0;background-image:var(--grain-c);opacity:.13;pointer-events:none}
+.ov-rego .big{position:absolute;width:170px;height:170px;right:-78px;top:-62px;pointer-events:none}
+.ov-rego .head{position:relative;display:flex;align-items:center;gap:10px;min-height:44px;padding-right:90px}
+.ov-rego .wave{position:relative;height:56px;margin:8px 0 10px;justify-content:space-between}
+.ov-rego .wave span{display:flex;flex-direction:column-reverse;gap:3px;align-items:center}
+.ov-rego .wave b{width:5px;height:5px;border-radius:50%;background:var(--fg);opacity:.12}
+.ov-rego .wave b.on{opacity:1}
+.ov-rego .wave span:nth-child(3n) b.on{background:#B23A00}
+.ov-rego .foot{position:relative;display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px}
+.ov-rego .partial{position:relative;font-size:16px}
+
+/* 3 Noche: panel carbón, control verde pálido, voz como línea */
+.ov-noche{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;align-items:center;background:var(--surf);border-radius:20px;padding:14px 16px 14px 14px;box-shadow:inset 0 0 0 1px var(--line),0 16px 36px rgba(0,0,0,.5);overflow:hidden}
+.ov-noche::before{content:"";position:absolute;inset:0;background-image:var(--grain-l);opacity:.22;pointer-events:none;border-radius:inherit}
+.ov-noche .ctrl{width:52px;height:52px;border-radius:50%;border:0;background:var(--pale);color:#16130F;display:grid;place-items:center;grid-row:span 2}
+.ov-noche .ctrl svg{width:22px;height:22px}
+.ov-noche .wave{height:40px}
+.ov-noche .wave svg{width:100%;height:40px;overflow:visible}
+.ov-noche .wave path{fill:none;stroke:var(--pale);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ov-noche .meta{display:flex;align-items:center;gap:8px;justify-content:space-between;grid-column:1/-1;margin-top:8px;position:relative}
+.ov-noche .rec{display:flex;align-items:center;gap:8px}
+.ov-noche .partial{position:relative}
+
+/* ajustes mini */
+.mini h2{margin:0 0 6px;font-size:16px;font-weight:700;font-stretch:112%}
+.set{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.set:first-of-type{border-top:0}
+kbd{font:500 12px var(--mono);padding:3px 7px;border-radius:6px;background:var(--surf2);box-shadow:inset 0 -1px 0 var(--line);color:var(--fg)}
+.pick{min-height:32px;padding:0 12px;border-radius:9px;border:1px solid var(--line);background:transparent;font-size:14px;color:var(--fg)}
+.sw{width:44px;height:26px;border-radius:99px;border:0;padding:3px;background:var(--line);display:flex;transition:background .16s var(--ease)}
+.sw::after{content:"";width:20px;height:20px;border-radius:50%;background:var(--surf);transition:transform .16s var(--ease)}
+.sw[aria-checked=true]{background:var(--orange)}
+.sw[aria-checked=true]::after{transform:translateX(18px);background:#16130F}
+.mini .seg{background:var(--surf2)}
+.mini .seg button{color:var(--fg);font-size:13px;min-height:28px}
+.mini .seg button[aria-checked=true]{background:var(--surf);box-shadow:inset 0 0 0 1px var(--line)}
+
+/* comparativa */
+main[data-view=all]{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+main[data-view=all] .dir{display:flex;flex-direction:column}
+main[data-view=all] .mini,main[data-view=all] .sizes,main[data-view=all] .badge{display:none}
+main[data-view=all] .stage{min-height:300px;order:1}
+main[data-view=all] .brand{order:2}
+main[data-view=all] .lockup svg{width:48px;height:48px}
+main[data-view=all] .word{font-size:30px}
+@media (max-width:1100px){main[data-view=all]{grid-template-columns:1fr}}
+@media (max-width:900px){.dir{grid-template-columns:1fr;grid-template-areas:"stage" "brand" "mini"}.stage{min-height:320px}}
+@media (max-width:480px){.top,main{padding-left:12px;padding-right:12px}.stage{padding:28px 10px}.ov-rego .big{width:130px;height:130px;right:-62px;top:-50px}.ov-rego .head{padding-right:64px}.sizes{flex-direction:column}.word{font-size:36px}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.ov-senal .wave svg{width:100%;height:44px}
+.ov-senal .wave path{fill:none;stroke:var(--fg);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:420px){.ov-senal .row{flex-wrap:wrap}.ov-senal .wave{min-width:95px}.ov-senal .time{margin-left:8px}.ov-senal .act{margin-left:auto}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="og" cx=".34" cy=".3" r=".95"><stop offset="0" stop-color="#FF7A3D"/><stop offset=".45" stop-color="#FF4F00"/><stop offset="1" stop-color="#8C2400"/></radialGradient>
+    <radialGradient id="omg" cx=".34" cy=".3" r=".9"><stop offset="0" stop-color="#222"/><stop offset=".55" stop-color="#888"/><stop offset="1" stop-color="#fff"/></radialGradient>
+    <radialGradient id="o32" cx=".34" cy=".3" r=".95"><stop offset="0" stop-color="#FF6A24"/><stop offset=".5" stop-color="#FF4F00"/><stop offset="1" stop-color="#A32C00"/></radialGradient>
+    <filter id="grain" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="2" seed="11"/><feColorMatrix values="0 0 0 0 .29  0 0 0 0 .075  0 0 0 0 0  1.2 0 0 0 -.52"/></filter>
+    <mask id="om" maskUnits="userSpaceOnUse" x="0" y="0" width="40" height="40"><rect width="40" height="40" fill="url(#omg)"/></mask>
+  </defs>
+  <symbol id="orb" viewBox="0 0 40 40"><clipPath id="oc"><circle cx="20" cy="20" r="19"/></clipPath><circle cx="20" cy="20" r="19" fill="url(#og)"/><g clip-path="url(#oc)"><rect width="40" height="40" filter="url(#grain)" mask="url(#om)"/></g></symbol>
+  <symbol id="mk" viewBox="0 0 64 64"><use href="#orb" x="16" y="9" width="32" height="32"/><g fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"><path d="M12.5 26.5a19.5 19.5 0 0 0 39 0"/><path d="M32 46v9M24.5 56h15"/></g></symbol>
+  <symbol id="mk32" viewBox="0 0 32 32"><circle cx="16" cy="12.5" r="8.2" fill="url(#o32)"/><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5.6 13.3a10.4 10.4 0 0 0 20.8 0"/><path d="M16 24v3.6M11.8 28.2h8.4"/></g></symbol>
+  <symbol id="mk16" viewBox="0 0 16 16"><circle cx="8" cy="6.2" r="4.4" fill="#FF4F00"/><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.4 6.8a5.6 5.6 0 0 0 11.2 0"/><path d="M8 12.6v1.9M5.6 14.6h4.8"/></g></symbol>
+  <symbol id="mic" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8.5" y="3" width="7" height="12" rx="3.5" fill="currentColor"/><path d="M5 11.5a7 7 0 0 0 14 0M12 18.5V21"/></g></symbol>
+</svg>
+
+<header class="top">
+  <div>
+    <h1>Dicta, ronda 2 de marca</h1>
+    <p>Tres direcciones con verde pálido, naranja Mars, grano fino y la onda del micrófono. Es una maqueta: no graba, no copia y no se conecta a nada.</p>
+  </div>
+  <div class="controls">
+    <div class="seg" role="tablist" aria-label="Dirección">
+      <button role="tab" id="t-senal" aria-selected="true" aria-controls="board" data-v="senal">Señal <small>recomendada</small></button>
+      <button role="tab" id="t-regolito" aria-selected="false" aria-controls="board" data-v="regolito" tabindex="-1">Regolito</button>
+      <button role="tab" id="t-noche" aria-selected="false" aria-controls="board" data-v="noche" tabindex="-1">Noche</button>
+      <button role="tab" id="t-all" aria-selected="false" aria-controls="board" data-v="all" tabindex="-1">Comparar</button>
+    </div>
+    <div><span class="ctl-label" id="st-l">Simular</span>
+      <div class="seg" role="radiogroup" aria-labelledby="st-l" id="states">
+        <button role="radio" aria-checked="true" data-s="listening">Escuchando</button>
+        <button role="radio" aria-checked="false" data-s="processing" tabindex="-1">Procesando</button>
+        <button role="radio" aria-checked="false" data-s="done" tabindex="-1">Listo</button>
+        <button role="radio" aria-checked="false" data-s="error" tabindex="-1">Sin audio</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="board" data-view="senal" role="tabpanel" aria-labelledby="t-senal"></main>
+<p class="sr" aria-live="polite" id="live"></p>
+
+<script>
+const DIRS = {
+  senal:{name:'Señal', idea:'La onda ocupa el centro y el planeta hace de botón del micrófono. Verde pálido en casi todo; el naranja queda para el planeta y Terminar.', rec:true},
+  regolito:{name:'Regolito', idea:'El planeta asoma grande por el borde, con grano grueso y sombra. La voz se dibuja con puntos, como polvo que se levanta del suelo.'},
+  noche:{name:'Noche', idea:'Panel carbón con grano claro. El micrófono es un control verde pálido, la voz es una línea continua y el naranja marca que estás grabando.'}
+};
+const use = (id, w, h = w, cls = '') => `<svg class="${cls}" width="${w}" height="${h}" aria-hidden="true"><use href="#${id}"/></svg>`;
+const text = `<p class="partial" aria-hidden="true"></p>`;
+const OV = {
+  senal: `<div class="ov ov-senal"><div class="row">
+      <span class="orb-btn">${use('mk',44)}</span>
+      <div class="wave" data-kind="line"><svg viewBox="0 0 300 40" preserveAspectRatio="none"><path/></svg></div><span class="time"></span><button class="act"></button></div>
+    <div class="text">${text}<p class="status"></p></div></div>`,
+  regolito: `<div class="ov ov-rego">${use('orb',170,170,'big')}
+    <div class="head">${use('mic',16,16,'mic-ic')}<p class="status"></p></div>
+    <div class="wave" data-kind="dots"></div>${text}
+    <div class="foot"><span class="time"></span><button class="act"></button></div></div>`,
+  noche: `<div class="ov ov-noche"><span class="ctrl">${use('mic',22)}</span>
+    <div class="wave" data-kind="line"><svg viewBox="0 0 300 40" preserveAspectRatio="none"><path/></svg></div>${text}
+    <div class="meta"><div class="rec">${use('orb',14)}<p class="status"></p></div><span class="time"></span><button class="act"></button></div></div>`
+};
+const mini = d => `<section class="panel mini" aria-labelledby="m-${d}"><h2 id="m-${d}">Ajustes</h2>
+  <div class="set"><span>Atajo</span><span><kbd>Super</kbd> <kbd>Shift</kbd> <kbd>D</kbd></span></div>
+  <div class="set"><span>Idioma</span><button class="pick">Español, detectar</button></div>
+  <div class="set"><span id="p-${d}">Copiar al terminar</span><button class="sw" role="switch" aria-checked="true" aria-labelledby="p-${d}"></button></div>
+  <div class="set"><span id="o-${d}">Posición del overlay</span><div class="seg" role="radiogroup" aria-labelledby="o-${d}">
+    <button role="radio" aria-checked="true">Arriba</button><button role="radio" aria-checked="false" tabindex="-1">Abajo</button></div></div></section>`;
+const board = document.getElementById('board');
+board.innerHTML = Object.entries(DIRS).map(([d, v]) => `<section class="dir" data-dir="${d}" aria-label="${v.name}">
+  <div class="stage">${OV[d]}</div>
+  <div class="panel brand"><div class="lockup">${use('mk',72)}<span class="word">dicta</span></div>
+    <p class="idea">${v.idea}</p>${v.rec ? '<span class="badge">Recomendada</span>' : ''}
+    <div class="sizes"><div class="tile">${use('mk32',32)}${use('mk16',16)}<span>32 y 16 px</span></div>
+      <div class="tile dk">${use('mk32',32)}${use('mk16',16)}<span>sobre noche</span></div></div></div>
+  ${mini(d)}</section>`).join('');
+
+// ondas
+board.querySelectorAll('.wave[data-kind=bars]').forEach(w => w.innerHTML = '<i></i>'.repeat(30));
+board.querySelectorAll('.wave[data-kind=dots]').forEach(w => w.innerHTML = ('<span>' + '<b></b>'.repeat(6) + '</span>').repeat(24));
+const RM = matchMedia('(prefers-reduced-motion: reduce)');
+const amp = (x, t, g) => {
+  const env = Math.pow(Math.sin(Math.PI * x), .8);
+  const v = .55 * Math.sin(t * 5.1 + x * 9) + .3 * Math.sin(t * 8.3 - x * 17) + .15 * Math.sin(t * 13 + x * 31);
+  return env * (.3 + .7 * Math.abs(v)) * g;
+};
+function draw(t) {
+  const s = S.state;
+  const g = s === 'listening' ? .55 + .45 * Math.pow(Math.sin(t * 2.2), 2) : s === 'processing' ? .22 : s === 'done' ? .06 : 0;
+  board.querySelectorAll('.wave').forEach(w => {
+    if (!w.offsetParent) return;
+    const k = w.dataset.kind;
+    if (k === 'bars') { const b = w.children; for (let i = 0; i < b.length; i++) b[i].style.transform = `scaleY(${Math.max(.08, amp(i / (b.length - 1), t, g))})`; }
+    else if (k === 'dots') { const c = w.children; for (let i = 0; i < c.length; i++) { const n = Math.round(amp(i / (c.length - 1), t, g) * 6); [...c[i].children].forEach((d, j) => d.classList.toggle('on', j < Math.max(1, n))); } }
+    else { let p = ''; for (let i = 0; i <= 120; i++) { const x = i / 120; const y = 20 + Math.sin(x * 46 + t * 9) * amp(x, t, g) * 18; p += (i ? 'L' : 'M') + (x * 300).toFixed(1) + ' ' + y.toFixed(1); } w.querySelector('path').setAttribute('d', p); }
+  });
+}
+let waveFrame = 0;
+function loop(ts) { draw(ts / 1000); if (S.state === 'listening' && !RM.matches) waveFrame = requestAnimationFrame(loop); }
+
+// estado simulado
+const WORDS = 'Mañana a las diez reviso el informe con Lucía y le paso los cambios antes del almuerzo'.split(' ');
+const S = { state: 'listening', words: 4, sec: 4 };
+const LABEL = { listening: 'Escuchando', processing: 'Puliendo el texto', done: 'Texto listo para pegar', error: 'No llega audio del micrófono' };
+const ACT = { listening: 'Terminar', processing: 'Terminar', done: 'Dictar otra vez', error: 'Reintentar' };
+let timer;
+function render() {
+  const s = S.state, mm = `${Math.floor(S.sec / 60)}:${String(S.sec % 60).padStart(2, '0')}`;
+  let html;
+  if (s === 'error') html = 'Revisá que el micrófono no esté silenciado en el sistema.';
+  else if (s === 'done') html = WORDS.join(' ') + '.';
+  else { const n = RM.matches ? WORDS.length : S.words, fixed = WORDS.slice(0, Math.max(0, n - 2)).join(' '), tent = WORDS.slice(Math.max(0, n - 2), n).join(' ');
+    html = `${fixed} <span class="t">${tent}</span>${s === 'listening' ? '<span class="caret"></span>' : ''}`; }
+  board.querySelectorAll('.ov').forEach(o => {
+    o.dataset.state = s;
+    o.querySelector('.partial').innerHTML = html;
+    o.querySelector('.status').textContent = LABEL[s];
+    o.querySelector('.time').textContent = s === 'error' ? '' : mm;
+    const a = o.querySelector('.act'); a.textContent = ACT[s]; a.disabled = s === 'processing';
+  });
+  document.querySelectorAll('#states button').forEach(b => { const on = b.dataset.s === s; b.setAttribute('aria-checked', on); b.tabIndex = on ? 0 : -1; });
+}
+function setState(s) {
+  S.state = s; clearInterval(timer); clearTimeout(S.to); cancelAnimationFrame(waveFrame);
+  if (s === 'listening') { S.words = RM.matches ? WORDS.length : 4; S.sec = 4; S.started = performance.now();
+    timer = setInterval(() => { S.words = Math.min(WORDS.length, S.words + 1); S.sec = 4 + Math.floor((performance.now() - S.started) / 1000); render(); }, 380);
+    waveFrame = requestAnimationFrame(loop); }
+  else draw(1.3);
+  render();
+  document.getElementById('live').textContent = LABEL[s];
+}
+board.addEventListener('click', e => {
+  const mic = e.target.closest('.orb-btn,.ctrl'), pick = e.target.closest('.pick');
+  if (mic) setState(S.state === 'listening' ? 'done' : 'listening');
+  if (pick) { const labels=['Español, detectar','Español rioplatense','Inglés'];pick.textContent=labels[(labels.indexOf(pick.textContent)+1)%labels.length]; }
+  const a = e.target.closest('.act'), sw = e.target.closest('.sw'), r = e.target.closest('.mini [role=radio]');
+  if (a) { if (S.state === 'listening') { setState('processing'); S.to = setTimeout(() => setState('done'), 1400); } else setState('listening'); }
+  if (sw) sw.setAttribute('aria-checked', sw.getAttribute('aria-checked') !== 'true');
+  if (r) selectIn(r.parentElement, r);
+});
+
+// tabs y radios con flechas
+function selectIn(group, btn) {
+  const attr = btn.getAttribute('role') === 'tab' ? 'aria-selected' : 'aria-checked';
+  group.querySelectorAll('[role=tab],[role=radio]').forEach(b => { b.setAttribute(attr, b === btn); b.tabIndex = b === btn ? 0 : -1; });
+}
+function view(btn) {
+  selectIn(btn.parentElement, btn);
+  board.dataset.view = btn.dataset.v; board.setAttribute('aria-labelledby', btn.id);
+  if (S.state !== 'listening' || RM.matches) draw(1.3);
+}
+document.querySelector('[role=tablist]').addEventListener('click', e => { const b = e.target.closest('[role=tab]'); if (b) view(b); });
+document.getElementById('states').addEventListener('click', e => { const b = e.target.closest('[role=radio]'); if (b) setState(b.dataset.s); });
+document.addEventListener('keydown', e => {
+  const b = e.target.closest?.('[role=tab],[role=radio]'); if (!b || !['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+  const all = [...b.parentElement.querySelectorAll('[role=tab],[role=radio]')], i = all.indexOf(b);
+  const n = all[(i + (e.key === 'ArrowRight' ? 1 : all.length - 1)) % all.length]; n.focus(); e.preventDefault();
+  if (n.dataset.v) view(n); else if (n.dataset.s) setState(n.dataset.s); else selectIn(n.parentElement, n);
+});
+RM.addEventListener('change', () => setState(S.state));
+setState('listening');
+</script>
+</body>
+</html>

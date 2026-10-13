@@ -1,0 +1,16 @@
+# LEGACY: solamente Hyprland 0.54 / configuración hyprlang.
+# Para Hyprland 0.55+ Lua usá packaging/hyprland.lua.example.
+# Este archivo NO corresponde a la configuración activa de esta PC (0.56.2).
+# Este ejemplo legacy usa solo alternar. Para mantener presionado, usá el portal
+# GlobalShortcuts o la integración Lua actual con press/release.
+# Fragmento opcional. Revisalo y añadilo manualmente a tu configuración.
+# Requiere ejecutar primero scripts/install-user.sh.
+# Usá este método O el portal GlobalShortcuts para evitar activaciones dobles.
+bind = CTRL, SPACE, exec, ~/.local/bin/dicta --toggle
+bind = SUPER SHIFT, V, exec, ~/.local/bin/dicta ctl paste
+
+# Inicio automático opcional. Usá esta línea O systemd user, no ambos.
+# exec-once = ~/.local/bin/dicta --background
+
+# Reglas de ventana/overlay dependen de tu versión de Hyprland y de la
+# implementación GPUI. No se instalan reglas universales de foco automáticamente.

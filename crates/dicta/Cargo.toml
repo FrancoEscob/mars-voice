@@ -1,0 +1,36 @@
+[package]
+name = "dicta"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+[features]
+default = ["gui", "pipewire-native"]
+gui = ["dep:dicta-ui"]
+# Audio PipeWire nativo en Linux. Sin él (p. ej. Ubuntu 22.04, PipeWire 0.3.48)
+# se usa cpal con PulseAudio/ALSA: cargo build --no-default-features --features gui
+pipewire-native = ["dicta-platform/pipewire-native"]
+[dependencies]
+anyhow.workspace = true
+dicta-core.workspace = true
+dicta-provider = { path = "../dicta-provider" }
+dicta-platform = { path = "../dicta-platform", default-features = false }
+dicta-ui = { path = "../dicta-ui", optional = true }
+tokio.workspace = true
+serde_json.workspace = true
+serde.workspace = true
+
+[target.'cfg(unix)'.dependencies]
+# Socket peer credentials and O_NOFOLLOW/O_DIRECTORY for the IPC runtime folder.
+libc = "0.2"
+
+[target.'cfg(windows)'.dependencies]
+# Per-user named pipe for IPC (src/ipc/windows.rs).
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_Security_Authorization",
+    "Win32_Storage_FileSystem",
+    "Win32_System_IO",
+    "Win32_System_Pipes",
+    "Win32_System_Threading",
+] }

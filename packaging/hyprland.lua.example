@@ -1,0 +1,96 @@
+-- Dicta: ejemplo para Hyprland 0.55+ con configuración Lua.
+-- Validado contra las APIs de Hyprland 0.56.2 en esta PC.
+-- Revisá los atajos existentes antes de añadir estas líneas manualmente.
+-- Requiere scripts/install-user.sh ejecutado previamente; no se instala solo.
+-- Elegí estos binds O el portal GlobalShortcuts para evitar disparos dobles.
+
+-- Se lee el reloj monotónico nativo UNA VEZ al cargar, nunca al pulsar.
+-- Así cada recarga supera los tokens anteriores incluso en el mismo segundo.
+local dicta_seed_pipe = assert(io.popen("timeout 0.3s ~/.local/bin/dicta --shortcut-seed", "r"))
+local dicta_seed = tonumber(dicta_seed_pipe:read("*l"))
+dicta_seed_pipe:close()
+assert(dicta_seed and dicta_seed > 0, "Dicta: actualizá el binario antes de cargar los atajos")
+_G.dicta_shortcut_token = math.max(dicta_seed, (_G.dicta_shortcut_token or 0) + 1)
+local function dicta_next_token()
+    _G.dicta_shortcut_token = _G.dicta_shortcut_token + 1
+    return _G.dicta_shortcut_token
+end
+local dicta_held_token = nil
+local function dicta_shortcut_event(argument, token)
+    hl.dispatch(hl.dsp.exec_cmd("~/.local/bin/dicta " .. argument .. " --shortcut-token " .. tostring(token)))
+end
+-- El controlador decide entre alternar y mantener. El token preserva el orden
+-- físico aunque el SO ejecute primero el proceso de liberación.
+hl.bind("CTRL + SPACE", function()
+    if not dicta_held_token then
+        dicta_held_token = dicta_next_token()
+        dicta_shortcut_event("--shortcut-press", dicta_held_token)
+    end
+end, { description = "Dicta: pulsar para dictar" })
+local function dicta_shortcut_release()
+    if dicta_held_token then
+        local token = dicta_held_token
+        dicta_held_token = nil
+        dicta_shortcut_event("--shortcut-release", token)
+    end
+end
+for _, key in ipairs({"SPACE", "Control_L", "Control_R"}) do
+    hl.bind(key, dicta_shortcut_release, {
+        release = true,
+        ignore_mods = true,
+        non_consuming = true,
+        description = "Dicta: soltar para terminar",
+    })
+end
+-- Termina un hold anterior al recargar; nunca abre una app cerrada.
+dicta_shortcut_event("--shortcut-release", _G.dicta_shortcut_token)
+hl.bind("SUPER + SHIFT + V", hl.dsp.exec_cmd("~/.local/bin/dicta ctl paste"), {
+    description = "Dicta: pegar último dictado",
+})
+
+-- Lectura en voz alta: lee la selección actual (o el portapapeles, según
+-- Ajustes → Lectura). El texto nunca pasa por la línea de comandos.
+hl.bind("CTRL + ALT + SPACE", hl.dsp.exec_cmd("~/.local/bin/dicta --read-selection"), {
+    description = "Mars voice: leer la selección en voz alta",
+})
+
+-- Para la demo, sustituí "dicta ctl" por "dicta --demo ctl".
+-- --shortcut-press abre Dicta si está cerrado; ctl paste necesita un dictado en memoria.
+-- El inicio automático opcional se entrega en packaging/dicta.service.
+-- No uses la sintaxis legacy "bind = ..." dentro de hyprland.lua.
+
+-- Overlay nativo flotante. La posición central se aplica al abrir; arrastrarlo
+-- después no vuelve a centrarlo. No toma foco al aparecer.
+hl.window_rule({
+    name = "dicta-floating-overlay",
+    match = { class = "^dicta-overlay$" },
+    float = true,
+    center = true,
+    pin = true,
+    no_initial_focus = true,
+    no_blur = true,
+    no_shadow = true,
+    no_anim = true,
+    border_size = 0,
+    rounding = 0,
+    opacity = "1.0 override 1.0 override 1.0 override",
+    tag = "+hyprglass_disabled",
+})
+
+-- Ventana de lectura en voz alta: flotante, centrada al abrir, sin robar el
+-- foco. Un clic la enfoca para usar Espacio, flechas y Esc.
+hl.window_rule({
+    name = "dicta-reader-window",
+    match = { class = "^dicta-reader$" },
+    float = true,
+    center = true,
+    pin = true,
+    no_initial_focus = true,
+    no_blur = true,
+    no_shadow = true,
+    no_anim = true,
+    border_size = 0,
+    rounding = 0,
+    opacity = "1.0 override 1.0 override 1.0 override",
+    tag = "+hyprglass_disabled",
+})

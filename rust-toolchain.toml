@@ -1,0 +1,6 @@
+# La revisión fijada de GPUI (Zed) compila con esta versión. Cargo sin rustup
+# (por ejemplo el paquete de Arch) ignora este archivo.
+[toolchain]
+channel = "1.98.1"
+components = ["rustfmt", "clippy"]
+profile = "minimal"

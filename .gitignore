@@ -1,0 +1,33 @@
+/target/
+/.local/
+*.log
+.env
+# Datos locales que nunca deben publicarse.
+*.sqlite3
+*.wav
+*.pid
+config.toml.bak
+.env.*
+
+# Notas internas de desarrollo: se quedan en esta máquina, no van al repo.
+/AGENTS.md
+/PLAN.md
+/docs/PLAN-original.md
+/docs/PLAN-TTS.md
+/docs/PLAN-MULTIPLATAFORMA.md
+/docs/TICKETS.md
+/docs/VALIDACION.md
+/docs/INVESTIGACION.md
+/docs/tickets/
+/docs/reviews/
+/docs/research/
+/docs/performance/
+/crates/dicta-provider/TICKET-oauth-native.md
+/scripts/benchmark-process.py
+
+# Capturas de galería (cientos de MB); se regeneran con el ejemplo `gallery`.
+/design/native/screens/
+/design/mars-voice/screens/
+/docs/screens/
+# Fuentes sin licencia incluida.
+/design/regolito-orbit/fonts/

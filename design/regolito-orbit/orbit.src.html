@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dicta · Regolito · órbita de voz (propuesta)</title>
+<style>
+@font-face{font-family:Archivo;font-weight:400;src:url(data:font/woff2;base64,@Archivo-Regular@) format("woff2")}
+@font-face{font-family:Archivo;font-weight:500;src:url(data:font/woff2;base64,@Archivo-Medium@) format("woff2")}
+@font-face{font-family:Archivo;font-weight:600;src:url(data:font/woff2;base64,@Archivo-SemiBold@) format("woff2")}
+@font-face{font-family:"Archivo SemiExpanded";font-weight:600;src:url(data:font/woff2;base64,@ArchivoSemiExpanded-SemiBold@) format("woff2")}
+@font-face{font-family:"Plex Mono";font-weight:400;src:url(data:font/woff2;base64,@IBMPlexMono-Regular@) format("woff2")}
+:root{
+  --ground:#CCDEBF;--surface:#EAF1E2;--raised:#F4F8EF;--selected:#D9E6CD;--line:#B9CCAE;--control:#7F9274;
+  --text:#24271E;--text2:#515D47;--tent:#5E685A;--orange:#FF4F00;--shade:#8C2400;
+  --display:"Archivo SemiExpanded",Archivo,system-ui,sans-serif;--mono:"Plex Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#E3EBDA;color:var(--text);font:15px/1.45 Archivo,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.page{max-width:728px;margin:0 auto;padding:18px 16px 28px}
+.eyebrow{font:12px/1 var(--mono);color:var(--text2);letter-spacing:.02em}
+h1{font:600 21px/1.2 var(--display);margin:6px 0 4px}
+h2{font:600 15px/1.3 var(--display);margin:0 0 8px}
+p{margin:0}
+.lede{color:var(--text2);font-size:14px;max-width:60ch}
+.demo{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:3px 9px;border-radius:99px;background:var(--shade);color:var(--raised);font:500 12px/1.4 Archivo}
+.demo i{width:6px;height:6px;border-radius:50%;background:var(--raised);opacity:.8}
+
+/* Stage: the overlay at 1:1 over Regolito ground */
+.stage{position:relative;margin-top:14px;border-radius:14px;background-color:var(--ground);padding:26px 12px;display:flex;justify-content:center;overflow:hidden;border:1px solid var(--line)}
+.stage .grain{border-radius:inherit}
+.grain{position:absolute;inset:0;background-size:256px 256px;pointer-events:none}
+
+.card{position:relative;width:404px;max-width:100%;border-radius:16px;background:var(--surface);border:1px solid var(--line);box-shadow:0 12px 30px hsla(100,20%,15%,.26);overflow:hidden}
+.card>*:not(.grain):not(.planet){position:relative}
+.planet{position:absolute;top:0;right:0;width:62px;height:62px;pointer-events:none}
+.hd{display:flex;align-items:center;gap:8px;padding:12px 60px 4px 14px;height:40px}
+.handle{width:8px;height:12px;color:var(--text2);flex:none}
+.rec{width:8px;height:8px;border-radius:50%;background:var(--orange);flex:none}
+.title{font:600 14px/1 var(--display)}
+.timer{margin-left:auto;font:13px/1 var(--mono);color:var(--text2);font-variant-numeric:tabular-nums}
+.voice{height:36px;margin:2px 14px 0;position:relative}
+.voice canvas{position:absolute;inset:0;width:100%;height:100%}
+.mars{position:absolute;top:8px;left:12px;width:20px;height:20px;pointer-events:none}
+.tx{margin:8px 8px 0;padding:6px 6px;min-height:86px;border-radius:10px;font-size:15px;line-height:1.45}
+.card.veil .tx{background:rgba(234,241,226,.58)}
+.tx .t{color:var(--tent)}
+.caret{display:inline-block;width:1.5px;height:1.05em;background:var(--orange);vertical-align:-2px;margin-left:1px}
+.ft{display:flex;align-items:center;gap:14px;padding:12px 14px 14px}
+.btn{font:600 14px/1 Archivo;border:0;border-radius:9px;padding:9px 14px;display:inline-flex;align-items:center;gap:8px;cursor:default}
+.btn.primary{background:var(--orange);color:#21170F}
+.btn.primary i{width:8px;height:8px;background:#21170F;border-radius:1.5px}
+.btn.ghost{background:none;color:var(--text);padding:9px 2px}
+.hint{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);white-space:nowrap}
+kbd{font:12px/1 var(--mono);color:var(--text);background:var(--raised);border:1px solid var(--control);border-radius:6px;padding:4px 6px}
+.badge-stage{position:absolute;top:8px;left:10px;font:500 11px/1 Archivo;color:var(--raised);background:var(--shade);border-radius:99px;padding:4px 8px}
+
+/* Controls */
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin-top:12px}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button,.tog{font:500 13px/1 Archivo;color:var(--text);background:none;border:0;border-radius:7px;padding:7px 10px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--raised);box-shadow:0 0 0 1px var(--control) inset;font-weight:600}
+.seg button:focus-visible,.tog:focus-visible{outline:2px solid var(--text);outline-offset:1px}
+.tog{border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;gap:7px}
+.tog[aria-pressed=true]{background:var(--raised);box-shadow:0 0 0 1px var(--control) inset;font-weight:600}
+.tog .box{width:12px;height:12px;border-radius:3px;border:1.5px solid var(--control)}
+.tog[aria-pressed=true] .box{background:var(--text);border-color:var(--text)}
+.readout{width:100%;font:12px/1.5 var(--mono);color:var(--text2);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:grid;grid-template-columns:auto 1fr;gap:2px 10px}
+.readout b{font-weight:400;color:var(--text)}
+.still{color:var(--text)}
+
+section{margin-top:22px}
+.row{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;margin-bottom:12px}
+.lbl{font-size:13px;color:var(--text2)}
+.lbl strong{color:var(--text);font-weight:600}
+.strip{position:relative;width:404px;max-width:100%;height:52px;border-radius:12px;background:var(--surface);border:1px solid var(--line);padding:8px 14px}
+.strip canvas{width:100%;height:36px;display:block}
+
+.grains{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.gpanel{position:relative;height:184px;border-radius:14px;overflow:hidden;background:var(--surface);border:1px solid var(--line)}
+.gpanel .hd{height:38px}
+.gpanel .tx{min-height:0;font-size:15px}
+.gpanel figcaption{position:absolute;left:10px;bottom:8px;font:11px/1 var(--mono);color:var(--text2);background:var(--raised);padding:4px 6px;border-radius:6px}
+figure{margin:0}
+
+.notes{display:grid;gap:10px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px}
+.note ul{margin:6px 0 0;padding-left:18px}
+.note li{margin:3px 0}
+code{font:12.5px var(--mono);background:var(--raised);border:1px solid var(--line);border-radius:4px;padding:0 4px}
+@media (max-width:420px){.hint span{display:none}.ft{gap:10px}}
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="eyebrow">Dicta · Regolito · propuesta, no implementada</div>
+  <h1>Órbita de voz</h1>
+  <p class="lede">La fila de puntos pasa a ser polvo de regolito que orbita el Marte del overlay. El nivel del audio separa el polvo de la órbita y lo hace avanzar. En silencio queda quieto.</p>
+  <div class="demo"><i></i>Demo · audio sintético generado en la página, sin micrófono ni red</div>
+
+  <div class="stage" id="stage">
+    <div class="grain" id="stageGrain"></div>
+    <span class="badge-stage">Demo</span>
+    <div class="card veil" id="card">
+      <div class="grain" id="cardGrain"></div>
+      <img class="planet" id="planet" alt="">
+      <div class="hd">
+        <svg class="handle" viewBox="0 0 8 12" fill="currentColor" aria-hidden="true"><circle cx="2" cy="2" r="1.2"/><circle cx="6" cy="2" r="1.2"/><circle cx="2" cy="6" r="1.2"/><circle cx="6" cy="6" r="1.2"/><circle cx="2" cy="10" r="1.2"/><circle cx="6" cy="10" r="1.2"/></svg>
+        <span class="rec"></span><span class="title">Grabando</span>
+        <span class="timer" id="timer">0:00</span>
+      </div>
+      <div class="voice" id="voice" role="img" aria-label="Nivel de voz en órbita">
+        <canvas id="orbit"></canvas>
+        <img class="mars" id="mars" alt="">
+      </div>
+      <div class="tx">Hola, esto es una prueba del dictado con la órbita nueva, <span class="t">a ver cómo se mueve</span><span class="caret"></span></div>
+      <div class="ft">
+        <button class="btn primary" tabindex="-1"><i></i>Terminar</button>
+        <button class="btn ghost" tabindex="-1">Cancelar</button>
+        <span class="hint"><kbd>Ctrl+Space</kbd><span>termina</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Señal sintética" id="modes">
+      <button data-m="silence">Silencio</button>
+      <button data-m="soft">Suave</button>
+      <button data-m="normal">Normal</button>
+      <button data-m="loud">Fuerte</button>
+      <button data-m="phrase" aria-pressed="true">Frase</button>
+    </div>
+    <button class="tog" id="reduce" aria-pressed="false"><span class="box"></span>Reducir movimiento</button>
+    <button class="tog" id="pause" aria-pressed="false"><span class="box"></span>Pausa</button>
+    <div class="readout" aria-live="off">
+      <span>señal</span><b id="rSig">–</b>
+      <span>v3</span><b id="rV3">–</b>
+      <span>órbita</span><b id="rOrb">–</b>
+      <span>repintado</span><b id="rFps">–</b>
+    </div>
+  </div>
+
+  <section>
+    <h2>Misma señal, v3 contra órbita</h2>
+    <div class="row">
+      <div class="lbl"><strong>v3 actual.</strong> Réplica de <code>paint_dots</code> y <code>LevelHistory</code>, con un push por snapshot de nivel y otro por cada parcial, como en <code>Hub::apply</code>.</div>
+      <div class="strip"><canvas id="v3"></canvas></div>
+    </div>
+    <p class="lbl">Con Normal las columnas con voz llegan a 4 o 5 filas, y con Fuerte a 5. Las dos alturas se pintan igual: la punta naranja y el resto negro, como en la captura. Por eso Normal y Fuerte se ven casi iguales, y solo Suave muestra variación. La órbita usa el mismo RMS con un mapeo que guarda margen arriba.</p>
+  </section>
+
+  <section>
+    <h2>Grano Regolito</h2>
+    <div class="seg" role="group" aria-label="Grano del overlay de arriba" id="grainSel" style="margin-bottom:10px">
+      <button data-g="now">Overlay con grano actual</button>
+      <button data-g="soft" aria-pressed="true">Overlay con grano suavizado</button>
+    </div>
+    <div class="grains">
+      <figure class="gpanel" id="gNow">
+        <div class="grain"></div><img class="planet" alt="">
+        <div class="hd"><span class="rec"></span><span class="title">Grabando</span><span class="timer">0:08</span></div>
+        <div class="tx">Che, mañana a las diez revisamos el kernel nuevo en Hyprland y anotamos todo.</div>
+        <figcaption>actual · fino 0,42 · grumos 0,42</figcaption>
+      </figure>
+      <figure class="gpanel veil" id="gSoft">
+        <div class="grain"></div><img class="planet" alt="">
+        <div class="hd"><span class="rec"></span><span class="title">Grabando</span><span class="timer">0:08</span></div>
+        <div class="tx">Che, mañana a las diez revisamos el kernel nuevo en Hyprland y anotamos todo.</div>
+        <figcaption>propuesta · fino 0,30 · grumos 0,36 · velo bajo el texto</figcaption>
+      </figure>
+    </div>
+    <p class="lbl" style="margin-top:8px">Baja más el moteado fino, que es lo que ensucia las letras, que los grumos, que son los que le dan el carácter de regolito. El planeta de la esquina no cambia. La transcripción lleva un velo de superficie al 58 %. Se renderiza con <code>feTurbulence</code> del navegador. GPUI usa resvg, así que el resultado allá es parecido pero no idéntico.</p>
+  </section>
+
+  <section class="notes">
+    <div class="note"><h2>Qué hace la órbita</h2>
+      <ul>
+        <li>Marte queda quieto, como pide la marca. Se mueve solo el polvo, y ningún punto se pinta sobre el disco.</li>
+        <li>La órbita es una elipse excéntrica vista de canto, con Marte en el foco. Los puntos de adelante son más grandes y oscuros que los de atrás.</li>
+        <li>Lo más reciente sale de Marte y viaja hacia la derecha en unos 2,4 s. El nivel de cada punto lo separa de la órbita, hacia arriba en la rama de atrás y hacia abajo en la de adelante. Solo los picos pasan a sombra naranja y a naranja.</li>
+        <li>El avance de la órbita es proporcional al nivel actual. Con 0 se detiene en menos de 1 s y se dejan de pedir cuadros, como muestra la fila "repintado".</li>
+        <li>Con reducir movimiento no hay desplazamiento ni avance. Los puntos de la rama de adelante se encienden desde Marte hasta el nivel actual y solo se repinta cuando llega un nivel.</li>
+      </ul>
+    </div>
+    <div class="note"><h2>Mapeo de nivel propuesto</h2>
+      <ul>
+        <li>v3: lineal en dB entre −54 y −12 dBFS, con 5 filas cuantizadas. Llena las 5 filas desde nivel 0,875, o sea RMS ≈ 0,137 (−17 dBFS).</li>
+        <li>Órbita: entre −54 y −6 dBFS con curva 1,3, sin cuantizar. −40 da 0,20, −30 da 0,41, −20 da 0,64 y −12 da 0,84. Queda margen para la voz fuerte.</li>
+        <li>El suavizado depende del tiempo (ataque 45 ms, caída 160 ms) y no de la cantidad de snapshots, así que los parciales no repiten niveles.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+"use strict";
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const dbToLin = db => Math.pow(10, db / 20);
+const linToDb = l => l > 0 ? 20 * Math.log10(l) : -Infinity;
+const fmt = (n, d = 2) => n.toFixed(d).replace(".", ",");
+
+/* ---------- Assets: the same SVG sources as crates/dicta-ui/assets ---------- */
+const svgUrl = s => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
+const svgSrc = s => `data:image/svg+xml,${encodeURIComponent(s)}`;
+// generate.py, grain-coarse tile, with the fine and clump strengths split.
+function grainTile(Af, Ac) {
+  const ink = [0x24 / 255, 0x27 / 255, 0x1E / 255], white = [1, 1, .97];
+  const m = (rgb, k, b, ch) => { const row = [0, 0, 0, 0]; row[ch] = k;
+    return `0 0 0 0 ${rgb[0].toFixed(3)}  0 0 0 0 ${rgb[1].toFixed(3)}  0 0 0 0 ${rgb[2].toFixed(3)}  ${row.map(v => v.toFixed(3)).join(" ")} ${b.toFixed(3)}`; };
+  return svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><filter id="n" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" seed="7" stitchTiles="stitch" result="t"/><feColorMatrix in="t" values="${m(ink, 1.9 * Af, -0.86 * Af, 0)}" result="dark"/><feColorMatrix in="t" values="${m(white, 1.6 * Af, -0.76 * Af, 1)}" result="light"/><feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="3" stitchTiles="stitch" result="t2"/><feColorMatrix in="t2" values="${m(ink, 0.55 * Ac, -0.24 * Ac, 0)}" result="clumps"/><feMerge><feMergeNode in="clumps"/><feMergeNode in="light"/><feMergeNode in="dark"/></feMerge></filter><rect width="256" height="256" filter="url(#n)"/></svg>`);
+}
+const GRAIN_NOW = grainTile(0.42, 0.42);
+const GRAIN_SOFT = grainTile(0.30, 0.36);
+// marks/planet-corner.svg, unchanged.
+const PLANET = svgSrc(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><defs><radialGradient id="g" cx=".3" cy=".62" r=".95"><stop offset="0" stop-color="#FF7A3D"/><stop offset=".45" stop-color="#FF4F00"/><stop offset="1" stop-color="#8C2400"/></radialGradient><radialGradient id="mg" cx=".3" cy=".62" r=".9"><stop offset="0" stop-color="#222"/><stop offset=".5" stop-color="#999"/><stop offset="1" stop-color="#fff"/></radialGradient><clipPath id="c"><circle cx="120" cy="0" r="104"/></clipPath><mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="120" height="120"><rect width="120" height="120" fill="url(#mg)"/></mask><filter id="n" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" seed="7" result="f"/><feColorMatrix in="f" values="0 0 0 0 .2  0 0 0 0 .05  0 0 0 0 0  2.1 0 0 0 -.74" result="d"/><feColorMatrix in="f" values="0 0 0 0 1  0 0 0 0 .62  0 0 0 0 .4  0 1.6 0 0 -.78" result="l"/><feTurbulence type="fractalNoise" baseFrequency=".11" numOctaves="2" seed="3" result="c"/><feColorMatrix in="c" values="0 0 0 0 .3  0 0 0 0 .08  0 0 0 0 0  1.5 0 0 0 -.62" result="cl"/><feMerge><feMergeNode in="cl"/><feMergeNode in="l"/><feMergeNode in="d"/></feMerge></filter></defs><circle cx="120" cy="0" r="104" fill="url(#g)"/><g clip-path="url(#c)" mask="url(#m)"><rect width="120" height="120" filter="url(#n)"/></g></svg>`);
+// marks/voice-planet.svg without the drawn wave: the orbit replaces it.
+const MARS = svgSrc(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="1 7 26 26"><defs><radialGradient id="g" cx=".34" cy=".3" r=".95"><stop offset="0" stop-color="#FF7A3D"/><stop offset=".45" stop-color="#FF4F00"/><stop offset="1" stop-color="#8C2400"/></radialGradient><radialGradient id="mg" cx=".34" cy=".3" r=".9"><stop offset="0" stop-color="#444"/><stop offset=".5" stop-color="#aaa"/><stop offset="1" stop-color="#fff"/></radialGradient><clipPath id="c"><circle cx="14" cy="20" r="13"/></clipPath><mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="44" height="40"><rect width="44" height="40" fill="url(#mg)"/></mask><filter id="n" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="1.5" numOctaves="2" seed="5"/><feColorMatrix values="0 0 0 0 .22  0 0 0 0 .05  0 0 0 0 0  1.9 0 0 0 -.62"/></filter></defs><circle cx="14" cy="20" r="13" fill="url(#g)"/><g clip-path="url(#c)" mask="url(#m)"><rect width="44" height="40" filter="url(#n)"/></g></svg>`);
+
+$("#stageGrain").style.backgroundImage = GRAIN_SOFT;
+$$(".planet").forEach(i => i.src = PLANET);
+$("#mars").src = MARS;
+$("#gNow .grain").style.backgroundImage = GRAIN_NOW;
+$("#gSoft .grain").style.backgroundImage = GRAIN_SOFT;
+function setGrain(g) {
+  $("#cardGrain").style.backgroundImage = g === "now" ? GRAIN_NOW : GRAIN_SOFT;
+  $("#stageGrain").style.backgroundImage = g === "now" ? GRAIN_NOW : GRAIN_SOFT;
+  $("#card").classList.toggle("veil", g !== "now");
+  $$("#grainSel button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.g === g)));
+}
+setGrain("soft");
+$$("#grainSel button").forEach(b => b.onclick = () => setGrain(b.dataset.g));
+
+/* ---------- Synthetic audio: linear RMS per 100 ms buffer, like PipeWire (1600/16000) ---------- */
+const RANGES = { silence: null, soft: [-41, -33], normal: [-27, -18], loud: [-15, -8] };
+const PHRASE = [["normal", 2.8], ["silence", 1.0], ["soft", 2.2], ["silence", 0.8], ["loud", 1.8], ["silence", 2.6]];
+let mode = "phrase", paused = false, reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const gen = { t: 0, phraseT: 0, sylStart: 0, sylEnd: -1, nextStart: 0, peak: -30, wordLeft: 3 };
+function currentRange() {
+  if (mode !== "phrase") return RANGES[mode];
+  let t = gen.phraseT % PHRASE.reduce((s, p) => s + p[1], 0);
+  for (const [m, d] of PHRASE) { if (t < d) return RANGES[m]; t -= d; }
+  return null;
+}
+function speechAmp(t, range) {
+  if (!range) { gen.sylEnd = -1; gen.nextStart = t; return 0; }
+  if (t >= gen.sylEnd && t >= gen.nextStart) {
+    gen.sylStart = t; gen.sylEnd = t + 0.11 + Math.random() * 0.17;
+    gen.peak = range[0] + Math.random() * (range[1] - range[0]);
+    const wordGap = --gen.wordLeft <= 0;
+    if (wordGap) gen.wordLeft = 2 + (Math.random() * 4 | 0);
+    gen.nextStart = gen.sylEnd + (wordGap ? 0.16 + Math.random() * 0.22 : 0.03 + Math.random() * 0.08);
+  }
+  if (t < gen.sylEnd) {
+    const p = (t - gen.sylStart) / (gen.sylEnd - gen.sylStart);
+    return dbToLin(gen.peak) * Math.pow(Math.sin(Math.PI * p), 0.6);
+  }
+  return 0;
+}
+function nextBuffer() {
+  const range = currentRange();
+  let sum = 0;
+  for (let i = 0; i < 8; i++) { const a = speechAmp(gen.t + i * 0.0125, range); sum += a * a; }
+  gen.t += 0.1; gen.phraseT += 0.1;
+  const noise = dbToLin(-64 + Math.random() * 3);
+  return Math.sqrt(sum / 8 + noise * noise);
+}
+
+/* ---------- v3 replica (crates/dicta-ui/src/wave.rs) ---------- */
+const V3 = { levels: [], CAP: 48 };
+function v3Level(rms) {
+  if (!(rms > 0)) return 0;
+  return clamp((20 * Math.log10(Math.min(rms, 1)) + 54) / 42, 0, 1);
+}
+function v3Push(rms) {
+  const level = v3Level(rms), prev = V3.levels.length ? V3.levels[V3.levels.length - 1] : 0;
+  let s = level >= prev ? prev * 0.2 + level * 0.8 : prev * 0.55 + level * 0.45;
+  if (s < 0.01) s = 0;
+  if (V3.levels.length === V3.CAP) V3.levels.shift();
+  V3.levels.push(s);
+}
+function v3Sample(t) {
+  if (!V3.levels.length) return 0;
+  const pos = clamp(t, 0, 1) * (V3.CAP - 1), off = V3.CAP - V3.levels.length;
+  const at = i => { i -= off; return i < 0 ? 0 : (V3.levels[i] ?? 0); };
+  const lo = Math.floor(pos), f = pos - lo;
+  return at(lo) * (1 - f) + at(lo + 1) * f;
+}
+const v3cv = $("#v3");
+function fit(cv) {
+  const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+  return [ctx, w, h];
+}
+function paintV3() {
+  const [ctx, w, h] = fit(v3cv);
+  const pitch = 9, dot = 3.5, rows = Math.floor((h + 2) / 7), cols = Math.floor(w / pitch);
+  let full = 0;
+  for (let c = 0; c < cols; c++) {
+    const t = c / Math.max(1, cols - 1), level = v3Sample(t);
+    const lit = level > 0 ? 1 + Math.round(level * (rows - 1)) : 0;
+    if (lit >= rows) full++;
+    for (let r = 0; r < rows; r++) {
+      let col;
+      if (r >= lit && r === 0) col = "rgba(36,39,30,.35)";
+      else if (r >= lit) col = "rgba(36,39,30,.16)";
+      else if (r + 1 === lit && lit >= rows - 1 && rows > 2) col = "#FF4F00";
+      else if (r + 1 === lit && lit > 2) col = "#8C2400";
+      else col = "#24271E";
+      ctx.fillStyle = col; ctx.beginPath();
+      ctx.arc(c * pitch + pitch / 2, h - (r + 1) * 7 + dot / 2, dot / 2, 0, 7); ctx.fill();
+    }
+  }
+  return [full, cols];
+}
+
+/* ---------- Orbit ---------- */
+const FLOOR = -54, CEIL = -6, GAMMA = 1.3;
+function orbitLevel(rms) {
+  if (!(rms > 0)) return 0;
+  const x = (20 * Math.log10(Math.min(rms, 1)) - FLOOR) / (CEIL - FLOOR);
+  return x <= 0 ? 0 : Math.pow(Math.min(1, x), GAMMA);
+}
+const NF = 72, FIELD_HZ = 30;              // 2.4 s of history along the orbit
+const field = new Float32Array(NF);
+const O = { target: 0, env: 0, omega: 0, phi: 0, acc: 0 };
+const cv = $("#orbit");
+function fieldAt(u) { const p = clamp(u, 0, 1) * (NF - 1), lo = Math.floor(p), f = p - lo; return field[lo] * (1 - f) + field[Math.min(NF - 1, lo + 1)] * f; }
+const INK = [36, 39, 30], SHADE = [140, 36, 0], ORANGE = [255, 79, 0];
+const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+// Maps a fraction of the ellipse's perimeter to its eccentric anomaly.
+let arcKey = "", arcLen = null;
+function arcTable(a, b) {
+  const K = 512, key = `${a}|${b}`;
+  if (key !== arcKey) {
+    arcLen = new Float32Array(K + 1);
+    for (let k = 1; k <= K; k++) {
+      const E = (k - 0.5) / K * Math.PI * 2;
+      arcLen[k] = arcLen[k - 1] + Math.hypot(a * Math.sin(E), b * Math.cos(E));
+    }
+    for (let k = 1; k <= K; k++) arcLen[k] /= arcLen[K];
+    arcKey = key;
+  }
+  return f => {
+    let lo = 0, hi = K;
+    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (arcLen[m] <= f) lo = m; else hi = m; }
+    const t = (f - arcLen[lo]) / Math.max(1e-6, arcLen[hi] - arcLen[lo]);
+    return (lo + t) / K * Math.PI * 2;
+  };
+}
+function paintOrbit() {
+  const [ctx, W, H] = fit(cv);
+  const mx = 22, my = H / 2, R = 10;          // Mars, matches .mars (12 + 10)
+  const apo = W - 14, peri = 17;
+  const a = (apo - mx + peri) / 2, e = 1 - peri / a;
+  const bp = 8.5, LIFT = 7.5;
+  const N = Math.round(W / 4.6);
+  const arc = arcTable(a, bp);
+  const passes = [[], []];
+  for (let i = 0; i < N; i++) {
+    // Even spacing along the drawn ellipse, so the tips never clump.
+    const E = arc((i / N + O.phi / (Math.PI * 2)) % 1);
+    const x = mx - a * (Math.cos(E) - e), s = Math.sin(E);
+    const u = clamp((x - mx) / (apo - mx), 0, 1);
+    let lv, dy;
+    if (reduce) {
+      lv = s > 0 && u > 0.02 && u <= O.env ? 0.35 + 0.65 * O.env : 0;
+      dy = 0;
+    } else {
+      lv = fieldAt(u) * smooth(0, 0.07, u) * (1 - 0.3 * u);
+      dy = clamp(s * 3, -1, 1) * lv * LIFT;
+    }
+    const y = my + bp * s + dy;
+    if (Math.hypot(x - mx, y - my) < R + 2.4) continue;   // the disc stays clean
+    passes[s > 0 ? 1 : 0].push([x, y, s, lv]);
+  }
+  for (const pass of passes) for (const [x, y, s, lv] of pass) {
+    const d = (s + 1) / 2;
+    const base = 0.24 + 0.30 * d;
+    const alpha = base + (1 - base) * Math.min(1, lv * 1.6);
+    let c = mix(INK, SHADE, smooth(0.5, 0.74, lv));
+    c = mix(c, ORANGE, smooth(0.76, 0.94, lv));
+    ctx.fillStyle = `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${alpha.toFixed(3)})`;
+    ctx.beginPath(); ctx.arc(x, y, 0.85 + 0.65 * d + 1.05 * lv, 0, 7); ctx.fill();
+  }
+}
+
+/* ---------- Loop: frames only while something actually moves ---------- */
+let running = false, last = 0, frames = [];
+function step(dt) {
+  const tau = O.target > O.env ? 0.045 : 0.16;
+  O.env += (O.target - O.env) * (1 - Math.exp(-dt / tau));
+  if (O.target === 0 && O.env < 0.006) O.env = 0;
+  O.acc += dt;
+  while (O.acc >= 1 / FIELD_HZ) { O.acc -= 1 / FIELD_HZ; field.copyWithin(1, 0); field[0] = O.env; }
+  const wt = 1.15 * O.env;                    // rad/s, only from the real level
+  O.omega += (wt - O.omega) * (1 - Math.exp(-dt / 0.3));
+  if (wt === 0 && O.omega < 0.002) O.omega = 0;
+  O.phi += O.omega * dt;
+  let fmax = 0; for (let i = 0; i < NF; i++) fmax = Math.max(fmax, field[i]);
+  if (fmax < 0.004) field.fill(0), fmax = 0;
+  return O.env > 0 || O.omega > 0 || fmax > 0 || O.target > 0;
+}
+function frame(now) {
+  if (paused || reduce) { running = false; return; }
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  const busy = step(dt);
+  paintOrbit();
+  frames.push(now);
+  if (busy) requestAnimationFrame(frame); else running = false;
+}
+function wake() {
+  if (running || paused || reduce) return;
+  running = true; last = performance.now(); requestAnimationFrame(frame);
+}
+
+/* ---------- Snapshot simulation: 10 Hz level + transcript partials ---------- */
+let lastRms = 0, elapsed = 0;
+function deliver(rms) {
+  lastRms = rms;
+  O.target = orbitLevel(rms);
+  if (reduce) { O.env = O.target; paintOrbit(); } else if (O.target > 0) wake();
+  v3Push(rms); paintV3();
+}
+setInterval(() => {
+  if (paused) return;
+  deliver(nextBuffer());
+  // Partials re-push the last level in Hub::apply, a real source of duplicates.
+  if (currentRange() && Math.random() < 0.3) { v3Push(lastRms); }
+  elapsed += 0.1;
+  const s = Math.floor(elapsed);
+  $("#timer").textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  readout();
+}, 100);
+
+function readout() {
+  const db = linToDb(lastRms);
+  $("#rSig").textContent = `RMS ${lastRms.toFixed(4).replace(".", ",")} · ${isFinite(db) ? fmt(db, 1) : "−∞"} dBFS`;
+  const [full, cols] = paintV3();
+  const v = v3Level(lastRms), rows = v > 0 ? 1 + Math.round(v * 4) : 0;
+  $("#rV3").textContent = `nivel ${fmt(v)} → ${rows}/5 filas · ${full} de ${cols} columnas llenas`;
+  $("#rOrb").textContent = `nivel ${fmt(O.target)} · avance ${fmt(O.omega)} rad/s`;
+  const now = performance.now(); frames = frames.filter(t => now - t < 1000);
+  const fps = frames.length;
+  $("#rFps").innerHTML = paused ? "en pausa"
+    : reduce ? "solo al llegar un nivel (10/s), sin animación"
+    : fps ? `${fps} cuadros/s` : `<span class="still">quieto · 0 cuadros/s</span>`;
+}
+
+/* ---------- Controls ---------- */
+$$("#modes button").forEach(b => b.onclick = () => {
+  mode = b.dataset.m; gen.phraseT = 0; gen.sylEnd = -1; gen.nextStart = gen.t;
+  $$("#modes button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+});
+const rbtn = $("#reduce"), pbtn = $("#pause");
+function syncToggles() { rbtn.setAttribute("aria-pressed", String(reduce)); pbtn.setAttribute("aria-pressed", String(paused)); }
+rbtn.onclick = () => { reduce = !reduce; field.fill(0); O.omega = 0; syncToggles(); if (reduce) { O.env = O.target; paintOrbit(); } else wake(); };
+pbtn.onclick = () => { paused = !paused; syncToggles(); if (!paused) wake(); readout(); };
+syncToggles();
+addEventListener("resize", () => { paintOrbit(); paintV3(); });
+document.fonts.ready.then(() => { paintOrbit(); paintV3(); });
+paintOrbit(); paintV3();
+})();
+</script>
+</body>
+</html>

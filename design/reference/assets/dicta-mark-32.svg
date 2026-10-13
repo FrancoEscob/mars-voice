@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Dicta"><style>.ink{stroke:#16130F}</style>
+<defs><radialGradient id="g" cx=".34" cy=".3" r=".95"><stop offset="0" stop-color="#FF6A24"/><stop offset=".5" stop-color="#FF4F00"/><stop offset="1" stop-color="#A32C00"/></radialGradient></defs>
+<circle cx="16" cy="12.5" r="8.2" fill="url(#g)"/>
+<g class="ink" fill="none" stroke="#16130F" stroke-width="2.2" stroke-linecap="round"><path d="M5.6 13.3a10.4 10.4 0 0 0 20.8 0"/><path d="M16 24v3.6M11.8 28.2h8.4"/></g>
+</svg>

@@ -1,0 +1,1547 @@
+<!doctype html>
+<html lang="es-AR" data-theme="system">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:;">
+<title>Dicta × Mars · preview de branding</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%20role%3D%22img%22%20aria-label%3D%22Dicta%22%3E%3Cstyle%3E.ink%7Bstroke%3A%2316130F%7D%3C/style%3E%0A%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%22.34%22%20cy%3D%22.3%22%20r%3D%22.95%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23FF6A24%22/%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23FF4F00%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23A32C00%22/%3E%3C/radialGradient%3E%3C/defs%3E%0A%3Ccircle%20cx%3D%2216%22%20cy%3D%2212.5%22%20r%3D%228.2%22%20fill%3D%22url%28%23g%29%22/%3E%0A%3Cg%20class%3D%22ink%22%20fill%3D%22none%22%20stroke%3D%22%2316130F%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M5.6%2013.3a10.4%2010.4%200%200%200%2020.8%200%22/%3E%3Cpath%20d%3D%22M16%2024v3.6M11.8%2028.2h8.4%22/%3E%3C/g%3E%0A%3C/svg%3E%0A">
+<style>
+/* ===== Tokens ===== */
+:root{
+  --ui: "IBM Plex Sans", "Noto Sans", "Cantarell", "Segoe UI", system-ui, sans-serif;
+  --serif: "Charter", "Bitstream Charter", "Source Serif 4", "Noto Serif", "DejaVu Serif", Georgia, serif;
+
+  --page:#E3E8E0;
+  --paper:#F4F7F0;
+  --paper-2:#E6ECE1;
+  --paper-3:#D5DED2;
+  --rule:#C6D2C7;
+  --line:#B3C1B5;
+  --ink:#1B2A3B;
+  --ink-2:#465767;
+  --ink-3:#5B6B75;
+  --accent:#24508F;
+  --accent-hover:#1C4277;
+  --on-accent:#F4F7F0;
+  --accent-soft:#DCE6F3;
+  --rec:#B3322A;
+  --ok:#2E6B3F;
+  --err:#A3271F;
+  --err-soft:#F5DFDB;
+  --warn-bg:#F3E3B5;
+  --warn-ink:#6B4A00;
+  --desk:#263445;
+  --desk-2:#1E2A39;
+  --desk-ink:#DCE5DD;
+  --shadow-float:0 12px 32px rgba(10,18,30,.34), 0 2px 6px rgba(10,18,30,.22);
+  --shadow-drag:0 22px 48px rgba(10,18,30,.42), 0 4px 10px rgba(10,18,30,.26);
+  --ease-out:cubic-bezier(.23,1,.32,1);
+  color-scheme: light;
+}
+:root[data-theme="dark"]{
+  --page:#131918; --paper:#1C2321; --paper-2:#242D2A; --paper-3:#2E3935; --rule:#34413C; --line:#45544E;
+  --ink:#E4EBE3; --ink-2:#B0BDB5; --ink-3:#97A59D;
+  --accent:#9CBDF0; --accent-hover:#B6CFF5; --on-accent:#10213A; --accent-soft:#25344B;
+  --rec:#F07A6E; --ok:#8FD0A0; --err:#F59A90; --err-soft:#3E211E; --warn-bg:#3D3214; --warn-ink:#F0D27A;
+  --desk:#0F1724; --desk-2:#0A111B; --desk-ink:#D3DCD5;
+  --shadow-float:0 0 0 1px #3A4843, 0 14px 34px rgba(0,0,0,.55);
+  --shadow-drag:0 0 0 1px #4A5953, 0 24px 50px rgba(0,0,0,.65);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark){
+  :root[data-theme="system"]{
+    --page:#131918; --paper:#1C2321; --paper-2:#242D2A; --paper-3:#2E3935; --rule:#34413C; --line:#45544E;
+    --ink:#E4EBE3; --ink-2:#B0BDB5; --ink-3:#97A59D;
+    --accent:#9CBDF0; --accent-hover:#B6CFF5; --on-accent:#10213A; --accent-soft:#25344B;
+    --rec:#F07A6E; --ok:#8FD0A0; --err:#F59A90; --err-soft:#3E211E; --warn-bg:#3D3214; --warn-ink:#F0D27A;
+    --desk:#0F1724; --desk-2:#0A111B; --desk-ink:#D3DCD5;
+    --shadow-float:0 0 0 1px #3A4843, 0 14px 34px rgba(0,0,0,.55);
+    --shadow-drag:0 0 0 1px #4A5953, 0 24px 50px rgba(0,0,0,.65);
+    color-scheme: dark;
+  }
+}
+
+/* ===== Base ===== */
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--page);color:var(--ink);font:14px/1.45 var(--ui);min-width:320px}
+h1,h2,h3,p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.ic{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.ic-lg{width:20px;height:20px}
+kbd{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;font:600 12px/1 var(--ui);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;white-space:nowrap}
+.combo{display:inline-flex;align-items:center;gap:3px;flex-wrap:wrap}
+.combo .plus{color:var(--ink-3);font-size:12px}
+
+/* ===== Buttons ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:0 14px;border-radius:9px;border:1px solid transparent;font-weight:600;font-size:14px;line-height:1;white-space:nowrap;transition:background-color .14s,border-color .14s,color .14s,transform .12s;user-select:none}
+.btn:active:not([disabled]){transform:scale(.97)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--accent);color:var(--on-accent)}
+.btn-secondary{background:var(--paper-2);border-color:var(--line);color:var(--ink)}
+.btn-ghost{background:transparent;color:var(--ink-2)}
+.btn-sm{min-height:30px;padding:0 10px;font-size:13px;border-radius:8px}
+.btn-icon{width:32px;min-height:32px;padding:0;border-radius:8px}
+@media (hover:hover){
+  .btn-primary:hover:not([disabled]){background:var(--accent-hover)}
+  .btn-secondary:hover:not([disabled]){background:var(--paper-3)}
+  .btn-ghost:hover:not([disabled]){background:var(--paper-2);color:var(--ink)}
+}
+@media (pointer:coarse){
+  .btn,.btn-sm,.btn-icon{min-height:44px}
+  .btn-icon{width:44px}
+}
+
+/* ===== Top bar ===== */
+.topbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 20px;padding:12px clamp(12px,3vw,28px);border-bottom:1px solid var(--line);background:var(--paper)}
+.brand{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:650;letter-spacing:-.01em}
+.brand svg{width:26px;height:26px}
+.proto-note{font-size:12.5px;color:var(--ink-2)}
+.viewswitch{margin-left:auto;display:inline-flex;gap:2px;padding:3px;background:var(--paper-2);border:1px solid var(--line);border-radius:10px}
+.viewswitch button{min-height:30px;padding:0 12px;border:0;border-radius:7px;background:transparent;color:var(--ink-2);font-weight:600;font-size:13.5px;transition:background-color .14s,color .14s}
+.viewswitch button[aria-pressed="true"]{background:var(--paper);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+@media (hover:hover){.viewswitch button:hover{color:var(--ink)}}
+@media (pointer:coarse){.viewswitch button{min-height:44px}}
+@media (max-width:560px){.viewswitch{margin-left:0;width:100%}.viewswitch button{flex:1}}
+
+/* ===== Stage ===== */
+.stage{display:grid;grid-template-columns:minmax(0,1fr);gap:28px;padding:20px clamp(12px,3vw,28px) 48px;max-width:1500px;margin:0 auto}
+@media (min-width:1120px){.stage[data-view="both"]{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:start}}
+.stage[data-view="overlay"] .col-settings,.stage[data-view="settings"] .col-scene{display:none}
+.stage[data-view="overlay"] .col-scene,.stage[data-view="settings"] .col-settings{width:100%;max-width:980px;justify-self:center}
+.col-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px}
+.col-head h2{font-size:15px;font-weight:650}
+
+/* ===== Scene ===== */
+.scene{position:relative;height:clamp(480px,64vh,640px);background:var(--desk);color:var(--desk-ink);border-radius:14px;overflow:hidden;container-type:inline-size}
+.sysbar{position:absolute;inset:0 0 auto 0;height:34px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 6px 0 12px;background:var(--desk-2);font-size:12.5px;z-index:8}
+.sysbar-left{color:var(--desk-ink);opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tray{position:relative;display:flex;align-items:center}
+.tray-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:30px;height:28px;border:0;border-radius:7px;background:transparent;color:var(--desk-ink)}
+.tray-btn svg{width:18px;height:18px}
+.tray-btn[aria-expanded="true"],.tray-btn:hover{background:rgba(255,255,255,.1)}
+.tray-btn .tray-rec{position:absolute;right:3px;top:4px;width:7px;height:7px;border-radius:50%;background:#F07A6E;box-shadow:0 0 0 1.5px var(--desk-2);display:none}
+.tray-btn[data-state="grabando"] .tray-rec{display:block}
+.tray-btn[data-state="transcribiendo"] .tray-rec{display:block;background:#9CBDF0}
+.tray-btn[data-state="error"] .tray-rec{display:block;background:#F0C060}
+@media (pointer:coarse){.tray-btn{width:44px;height:34px}}
+.menu{position:absolute;right:0;top:calc(100% + 6px);min-width:236px;margin:0;padding:6px;list-style:none;background:var(--paper);color:var(--ink);border-radius:10px;box-shadow:var(--shadow-float);z-index:20;transform-origin:top right;animation:menuIn .18s var(--ease-out)}
+.menu li[role="separator"]{height:1px;margin:5px 4px;background:var(--rule)}
+.menu button{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:32px;padding:0 10px;border:0;border-radius:7px;background:transparent;text-align:left;font-size:13.5px}
+.menu button:hover:not([disabled]),.menu button:focus-visible{background:var(--paper-2);outline:none}
+.menu button[disabled]{color:var(--ink-3);cursor:not-allowed}
+.menu .mi-hint{color:var(--ink-3);font-size:12px}
+.menu [aria-checked="true"] .mi-check{visibility:visible}
+.mi-check{visibility:hidden;color:var(--accent)}
+@media (pointer:coarse){.menu button{min-height:44px}}
+@keyframes menuIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+
+.notes{position:absolute;left:16px;top:52px;width:min(440px,calc(100% - 32px));background:var(--paper);color:var(--ink);border-radius:10px;box-shadow:var(--shadow-float);overflow:hidden}
+.notes-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:8px 12px;background:var(--paper-2);border-bottom:1px solid var(--rule);font-size:12.5px}
+.notes-head strong{font-weight:650;font-size:13px}
+.notes-head span{color:var(--ink-2)}
+.notes-body{padding:10px 14px 12px;max-height:190px;overflow:auto;font:14px/1.55 var(--serif);overflow-wrap:anywhere}
+.notes-body p{margin:0 0 6px;white-space:pre-wrap}
+.notes-body .pasted{background:var(--accent-soft);border-radius:4px;transition:background-color 1.4s ease}
+.notes-body .pasted.settled{background:transparent}
+
+.idle-hint,.quit-msg{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);width:min(380px,calc(100% - 32px));padding:10px 14px;border-radius:10px;background:rgba(0,0,0,.28);color:var(--desk-ink);font-size:13px;text-align:center}
+.quit-msg{display:grid;gap:10px;justify-items:center;bottom:auto;top:50%;transform:translate(-50%,-50%);padding:16px}
+
+/* ===== Overlay ===== */
+.overlay{position:absolute;left:0;top:0;transform:translate3d(var(--x,0px),var(--y,0px),0);width:min(360px,calc(100% - 16px));background:var(--paper);color:var(--ink);border-radius:14px;box-shadow:var(--shadow-float);z-index:6;transition:box-shadow .16s var(--ease-out)}
+.overlay[data-state="reposo"]{width:min(300px,calc(100% - 16px))}
+.overlay.dragging{box-shadow:var(--shadow-drag)}
+.overlay.dragging .ov-head{cursor:grabbing}
+.ov-head{display:flex;align-items:center;gap:6px;min-height:40px;padding:4px 12px 4px 4px;border-bottom:1px solid var(--rule);cursor:grab;touch-action:none;user-select:none}
+.grip{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:0;border-radius:8px;background:transparent;color:var(--ink-3);cursor:grab;touch-action:none}
+.grip:hover{background:var(--paper-2);color:var(--ink-2)}
+@media (pointer:coarse){.grip{width:44px;height:44px}}
+.ov-status{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:650;min-width:0}
+.st-mark{width:10px;height:10px;border-radius:50%;flex:none;border:1.75px solid var(--ink-3)}
+.overlay[data-state="grabando"] .st-mark{background:var(--rec);border-color:var(--rec)}
+.overlay[data-state="transcribiendo"] .st-mark{border-color:var(--accent);border-right-color:transparent;animation:spin .9s linear infinite}
+.overlay[data-state="listo"] .st-mark{background:var(--ok);border-color:var(--ok)}
+.overlay[data-state="error"] .st-mark{background:var(--err);border-color:var(--err);border-radius:2px}
+.ov-meta{margin-left:auto;font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.overlay[data-state="grabando"] .ov-meta{color:var(--ink);font-weight:600;font-size:13.5px}
+.ov-pane{padding:12px;animation:paneIn .2s var(--ease-out)}
+@keyframes paneIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ov-idle{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ov-idle .hint{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-2)}
+.ov-sub{margin-top:8px;font-size:12px;color:var(--ink-2)}
+.ov-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.ov-actions .btn-ghost kbd{margin-left:2px}
+.trace{display:block;width:100%;height:64px}
+.trace .base{stroke:var(--rule);stroke-width:1;vector-effect:non-scaling-stroke}
+.trace .ink{vector-effect:non-scaling-stroke;fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.trace-label{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2);margin-top:2px}
+
+.ruled{font:16px/26px var(--serif);color:var(--ink);background-image:linear-gradient(to bottom,transparent 25px,var(--rule) 25px,var(--rule) 26px,transparent 26px);background-size:100% 26px;background-attachment:local}
+.live{min-height:78px;white-space:pre-wrap;overflow-wrap:anywhere}
+.live .pending{color:var(--ink-3);font-family:var(--ui);font-size:13px}
+.caret{display:inline-block;width:2px;height:18px;margin-left:1px;vertical-align:-3px;background:var(--accent);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.progress{height:3px;margin-top:10px;border-radius:2px;background:var(--paper-3);overflow:hidden}
+.progress span{display:block;height:100%;width:0;background:var(--accent);transition:width .12s linear}
+.final{display:block;width:100%;min-height:104px;max-height:182px;padding:0 2px;border:0;border-radius:2px;resize:none;background-color:transparent;overflow-wrap:anywhere}
+.final:focus{outline:2px solid var(--accent);outline-offset:4px}
+.ov-note{display:flex;gap:6px;align-items:flex-start;margin-top:10px;font-size:12.5px;color:var(--ink-2)}
+.ov-note .ic{margin-top:1px}
+.learn{margin-top:10px;padding:10px;border-radius:10px;background:var(--accent-soft);color:var(--ink)}
+.learn p{font-size:13px}
+.learn .pair{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:4px;font:15px/1.4 var(--serif)}
+.learn .pair del{color:var(--ink-2);text-decoration-thickness:1px}
+.learn .ov-actions{margin-top:8px}
+.err-title{font-weight:650;font-size:15px;display:flex;gap:8px;align-items:center;color:var(--err)}
+.err-body{margin-top:6px;font-size:13.5px;color:var(--ink)}
+.err-body + .err-body{color:var(--ink-2)}
+
+/* ===== Demo controls ===== */
+.demo{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-top:12px;padding:10px 12px;border:1px dashed var(--line);border-radius:12px}
+.demo-label{font-size:12.5px;color:var(--ink-2);font-weight:600}
+.seg{display:flex;flex-wrap:wrap;gap:4px}
+.seg button{min-height:30px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink-2);font-size:13px;font-weight:600}
+.seg button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+@media (pointer:coarse){.seg button{min-height:44px}}
+.check{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);min-height:30px;cursor:pointer}
+.check input{width:16px;height:16px;margin:0;accent-color:var(--accent)}
+.demo .btn{margin-left:auto}
+
+/* ===== Settings window ===== */
+.settings{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden;container-type:inline-size}
+.set-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 8px 8px 16px;border-bottom:1px solid var(--line)}
+.set-head h2{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:650}
+.set-head h2 svg{width:20px;height:20px}
+.set-body{display:grid;grid-template-columns:196px minmax(0,1fr);min-height:600px}
+.set-nav{background:var(--paper-2);border-right:1px solid var(--line);padding:10px 8px}
+.set-nav ul{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.set-nav button{display:flex;align-items:center;gap:10px;width:100%;min-height:36px;padding:6px 10px;line-height:1.2;border:0;border-radius:8px;background:transparent;color:var(--ink-2);text-align:left;font-size:14px;transition:background-color .14s,color .14s}
+.set-nav button[aria-current="page"]{background:var(--paper);color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1px var(--line)}
+@media (hover:hover){.set-nav button:hover:not([aria-current="page"]){background:var(--paper-3);color:var(--ink)}}
+@media (pointer:coarse){.set-nav button{min-height:44px}}
+.nav-flag{margin-left:auto;font-size:12px;font-weight:600;color:var(--warn-ink);background:var(--warn-bg);padding:2px 6px;border-radius:5px}
+.nav-count{margin-left:auto;font-size:12px;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+@container (max-width:640px){
+  .set-body{grid-template-columns:minmax(0,1fr)}
+  .set-nav{border-right:0;border-bottom:1px solid var(--line)}
+  .set-nav ul{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+}
+@container (max-width:420px){.nav-flag,.nav-count{display:none}}
+.pane{padding:22px 24px 28px;min-width:0}
+@container (max-width:640px){.pane{padding:18px 16px 24px}}
+.pane > h2{font-size:20px;font-weight:650;letter-spacing:-.01em;line-height:1.2;margin-bottom:6px;outline:none}
+.pane h3{font-size:14px;font-weight:650;margin:22px 0 4px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px 20px;flex-wrap:wrap;padding:14px 0;border-top:1px solid var(--rule)}
+.pane > h2 + .row, .pane h3 + .row{border-top:0}
+.row-text{flex:1 1 240px;min-width:0}
+.row-label{font-weight:600;font-size:14px}
+.row-desc{font-size:13px;color:var(--ink-2);margin-top:2px;max-width:56ch}
+.row-ctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+.field{min-height:36px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);font-size:14px;min-width:0}
+.field:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+select.field{appearance:none;padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%23778899' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;background-size:14px}
+@media (pointer:coarse){.field{min-height:44px}}
+
+.switch{position:relative;display:inline-flex;flex:none;width:42px;height:24px}
+.switch input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:1}
+.switch span{position:absolute;inset:0;border-radius:12px;background:var(--paper-3);border:1px solid var(--line);transition:background-color .16s,border-color .16s}
+.switch span::before{content:"";position:absolute;left:2px;top:2px;width:18px;height:18px;border-radius:50%;background:var(--paper);box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .18s var(--ease-out)}
+.switch input:checked + span{background:var(--accent);border-color:var(--accent)}
+.switch input:checked + span::before{transform:translateX(18px);background:var(--on-accent)}
+.switch input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+.switch input:disabled{cursor:not-allowed}
+.switch input:disabled + span{opacity:.55}
+@media (pointer:coarse){.switch{width:48px;height:28px}.switch span::before{width:22px;height:22px}.switch input:checked + span::before{transform:translateX(20px)}}
+
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{padding:0}
+.radios{display:grid;gap:6px;margin-top:8px}
+.radio{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:9px;cursor:pointer}
+.radio:hover{background:var(--paper-2)}
+.radio input{width:16px;height:16px;margin:2px 0 0;flex:none;accent-color:var(--accent)}
+.radio .row-desc{margin-top:0}
+.segctl{display:inline-flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:9px;background:var(--paper-2)}
+.segctl label{position:relative;display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border-radius:6px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer}
+.segctl input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.segctl label:has(input:checked){background:var(--paper);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.segctl label:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:1px}
+@media (pointer:coarse){.segctl label{min-height:40px}}
+
+/* Provider */
+.choice{display:block;margin-top:10px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--paper);transition:border-color .14s,background-color .14s}
+.choice:has(> .choice-top input:checked){border-color:var(--accent);background:color-mix(in oklab,var(--accent-soft) 45%,var(--paper))}
+.choice-top{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.choice-top input{width:16px;height:16px;margin:3px 0 0;flex:none;accent-color:var(--accent)}
+.choice-title{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-weight:650;font-size:15px}
+.tag{display:inline-flex;align-items:center;height:22px;padding:0 7px;border-radius:6px;font-size:12px;font-weight:600;line-height:1}
+.tag-warn{background:var(--warn-bg);color:var(--warn-ink)}
+.tag-plain{color:var(--ink-2);box-shadow:inset 0 0 0 1px var(--line)}
+.choice-desc{margin-top:4px;font-size:13.5px;color:var(--ink-2);max-width:60ch}
+.choice-extra{margin:12px 0 0 26px;display:grid;gap:10px}
+@container (max-width:480px){.choice-extra{margin-left:0}}
+.statusline{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-size:13px}
+.statusline .k{color:var(--ink-2)}
+.statusline .v{font-weight:600}
+.grid-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr));gap:10px}
+.lbl{display:grid;gap:4px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.confirm{margin-top:12px;padding:12px;border-radius:10px;background:var(--warn-bg);color:var(--warn-ink)}
+.confirm p{font-size:13.5px;color:var(--ink)}
+.confirm .ov-actions{margin-top:10px}
+.guarantee{display:flex;gap:8px;align-items:flex-start;margin-top:14px;font-size:13.5px;font-weight:600}
+.guarantee .ic{margin-top:2px;color:var(--ok)}
+
+/* Writing example */
+.example{display:grid;gap:12px;margin-top:6px;padding:14px;border-radius:12px;background:var(--paper-2)}
+.example .ex-k{font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.example .ex-raw{font:14px/1.5 var(--serif);color:var(--ink-2);margin-top:2px}
+.example .ex-out{white-space:pre-wrap;margin-top:2px;overflow-wrap:anywhere}
+
+/* Lists */
+.list{list-style:none;margin:8px 0 0;padding:0}
+.list li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--rule)}
+.list li:first-child{border-top:0}
+.list .li-main{min-width:0;flex:1 1 auto}
+.list .li-word{font:15px/1.35 var(--serif);overflow-wrap:anywhere}
+.list .li-sub{font-size:12.5px;color:var(--ink-2)}
+.list .li-actions{display:flex;gap:6px;flex:none}
+.empty{padding:12px 0;font-size:13.5px;color:var(--ink-2)}
+.addform{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto;gap:8px;align-items:end;margin-top:10px}
+@container (max-width:520px){.addform{grid-template-columns:minmax(0,1fr)}}
+.form-err{font-size:12.5px;color:var(--err);margin-top:6px}
+.arrow{color:var(--ink-3);font-family:var(--ui)}
+
+/* Shortcuts */
+.sclist{list-style:none;margin:12px 0 0;padding:0}
+.sc-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px 14px;padding:12px 0;border-top:1px solid var(--rule)}
+.sc-row:first-child{border-top:0}
+@container (max-width:520px){.sc-row{grid-template-columns:minmax(0,1fr) auto}.sc-row .combo-cell{grid-column:1}}
+.sc-warn{font-size:12.5px;color:var(--warn-ink);margin-top:2px}
+.sc-row.capturing .combo{opacity:.4}
+.sc-none{font-size:13px;color:var(--ink-3)}
+
+/* Mic */
+.meter{display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:3px;height:14px;width:min(320px,100%);margin-top:4px}
+.meter i{border-radius:2px;background:var(--paper-3)}
+.meter i.on{background:var(--ok)}
+.meter i.on.hot{background:var(--warn-ink)}
+input[type="range"]{accent-color:var(--accent);width:160px;max-width:100%}
+output{font-variant-numeric:tabular-nums;font-weight:600;min-width:40px;display:inline-block}
+
+.set-closed{display:grid;gap:12px;justify-items:start;padding:28px 24px;background:var(--paper);border:1px dashed var(--line);border-radius:14px}
+.set-closed p{color:var(--ink-2);max-width:48ch}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+  .ov-pane{animation:none}
+  .caret{animation:none}
+  .overlay[data-state="transcribiendo"] .st-mark{animation:none;border-right-color:var(--accent);background:var(--accent-soft)}
+  .notes-body .pasted{transition:none}
+}
+
+/* Dicta × Mars: light-green instruments, orange planetary signal. */
+:root,:root[data-theme="light"],:root[data-theme="system"]{
+ --ui:"Archivo","IBM Plex Sans","Noto Sans",system-ui,sans-serif;
+ --serif:var(--ui);
+ --page:#DDE6D7;--paper:#EEF4E6;--paper-2:#E0E9D7;--paper-3:#CAD7BF;
+ --ink:#24271E;--ink-2:#515D47;--ink-3:#5F6C54;--line:#B8C5AC;--rule:#CFD9C4;
+ --accent:#FF4F00;--accent-hover:#E64800;--on-accent:#21170F;--accent-soft:#F4DBC7;
+ --rec:#C63D08;--ok:#3E6C3F;--desk:#20251E;--desk-2:#171C16;--desk-ink:#E2EACF;
+ --shadow-float:0 14px 36px #10160D33,0 2px 4px #10160D15;
+ color-scheme:light;
+}
+:root[data-theme="dark"]{
+ --page:#171C16;--paper:#242B21;--paper-2:#2D3527;--paper-3:#3A4532;
+ --ink:#E5EEDA;--ink-2:#BAC8AF;--ink-3:#A5B597;--line:#4B5B3F;--rule:#3E4B35;
+ --accent:#FF6E2C;--accent-hover:#FF854D;--on-accent:#22180F;--accent-soft:#4D2E20;
+ --rec:#FF884C;--ok:#ADD092;--desk:#181D17;--desk-2:#11170F;--desk-ink:#E2EACF;color-scheme:dark;
+}
+html{background:var(--page)}
+.brand{font-size:23px;font-weight:750;letter-spacing:-.055em;gap:9px}
+.brand h1{text-transform:lowercase}.brand svg{width:30px;height:30px}
+.topbar{background:var(--paper);padding-top:16px;padding-bottom:16px}
+.proto-note{font-size:12px}.brand-link{font-size:13px;color:var(--ink);text-underline-offset:4px;min-height:30px;display:inline-flex;align-items:center}
+.brand-link:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.viewswitch{border-radius:7px}.viewswitch button{border-radius:4px}
+.stage{gap:30px}
+.scene{background-color:var(--desk);background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22192%22%20height%3D%22192%22%3E%3Cfilter%20id%3D%22g%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.82%22%20numOctaves%3D%223%22%20seed%3D%2211%22%20stitchTiles%3D%22stitch%22/%3E%3CfeColorMatrix%20type%3D%22saturate%22%20values%3D%220%22/%3E%3C/filter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23g%29%22%20opacity%3D%22.3%22/%3E%3C/svg%3E");border-radius:14px;min-height:540px}
+.scene::after{content:"";width:300px;height:300px;border-radius:50%;position:absolute;right:-135px;top:48px;background:#FF4F00;opacity:.15;pointer-events:none;box-shadow:inset -55px -30px 30px #14110E}
+.sysbar{background:var(--desk-2);z-index:8}
+.notes{border-radius:8px;opacity:.94}.notes-body{font:14px/1.7 var(--ui)}
+.overlay{border-radius:18px;isolation:isolate}
+.overlay::before{content:"";position:absolute;inset:0;border-radius:inherit;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22192%22%20height%3D%22192%22%3E%3Cfilter%20id%3D%22g%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.82%22%20numOctaves%3D%223%22%20seed%3D%2211%22%20stitchTiles%3D%22stitch%22/%3E%3CfeColorMatrix%20type%3D%22saturate%22%20values%3D%220%22/%3E%3C/filter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23g%29%22%20opacity%3D%22.3%22/%3E%3C/svg%3E");opacity:.38;pointer-events:none;z-index:0}
+.ov-head,.ov-pane{position:relative;z-index:1}
+.ov-head{border-color:var(--rule);padding-top:7px;padding-bottom:7px}
+.ov-meta,.trace-label,kbd{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px}
+.ov-pane{padding:16px}
+.ov-head .st-mark{width:8px;height:8px}
+.trace{height:56px}.trace .ink{stroke:var(--ink);stroke-width:2.15}.trace .base{stroke:var(--line)}.live{min-height:54px}
+.ruled{font:16px/1.65 var(--ui);font-weight:480;background:none;letter-spacing:-.015em}
+.signal-intro{display:flex;gap:10px;align-items:center;margin-bottom:4px}.signal-intro svg{width:38px;height:38px;flex-shrink:0}.signal-intro b{display:block;font-size:15px;letter-spacing:-.025em}.signal-intro span{font-size:12px;color:var(--ink-2)}
+.ov-actions{gap:8px;margin-top:15px}.btn{border-radius:7px;font-weight:650;min-height:38px}.btn-primary{border-color:transparent}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline-color:var(--ink)}
+.btn-secondary,.field{border-radius:7px}.btn-ghost{color:var(--ink-2)}
+.demo{border:0;border-radius:0;padding:12px 0;background:transparent}
+.seg button{border-radius:6px}.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.set-head{background:var(--paper-2);position:relative;overflow:hidden}
+.set-head h2{font-size:15px;letter-spacing:-.025em}.set-head h2 svg{width:28px;height:28px}
+.settings{border-radius:12px}.set-nav{background:var(--paper-2)}
+.set-nav button{border-radius:6px}.set-nav button[aria-current="page"]{background:var(--paper);box-shadow:none}
+.pane > h2{font-size:22px;letter-spacing:-.04em}.choice{border-radius:9px}.example{border-radius:9px}
+.choice.selected{border-color:var(--ink);background:var(--paper-2)}
+@media(max-width:560px){.proto-note{width:calc(100% - 95px)}.brand-link{order:3}.viewswitch{order:4}.scene{min-height:570px}.stage{gap:22px}}
+
+
+@media(prefers-color-scheme:dark){:root[data-theme="system"]{
+ --page:#171C16;--paper:#242B21;--paper-2:#2D3527;--paper-3:#3A4532;
+ --ink:#E5EEDA;--ink-2:#BAC8AF;--ink-3:#A5B597;--line:#4B5B3F;--rule:#3E4B35;
+ --accent:#FF6E2C;--accent-hover:#FF854D;--on-accent:#22180F;--accent-soft:#4D2E20;
+ --rec:#FF884C;--ok:#ADD092;--desk:#181D17;--desk-2:#11170F;--desk-ink:#E2EACF;color-scheme:dark;
+}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="mark" viewBox="0 0 64 64">
+<defs><radialGradient id="pm-g" cx=".34" cy=".3" r=".95"><stop offset="0" stop-color="#FF7A3D"/><stop offset=".45" stop-color="#FF4F00"/><stop offset="1" stop-color="#8C2400"/></radialGradient>
+<radialGradient id="pm-mg" cx=".34" cy=".3" r=".9"><stop offset="0" stop-color="#222"/><stop offset=".55" stop-color="#888"/><stop offset="1" stop-color="#fff"/></radialGradient>
+<clipPath id="pm-c"><circle cx="32" cy="25" r="16"/></clipPath><mask id="pm-m" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="url(#pm-mg)"/></mask>
+<filter id="pm-n" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="2" seed="11"/><feColorMatrix values="0 0 0 0 .29  0 0 0 0 .075  0 0 0 0 0  1.2 0 0 0 -.52"/></filter></defs>
+<circle cx="32" cy="25" r="16" fill="url(#pm-g)"/><g clip-path="url(#pm-c)" mask="url(#pm-m)"><rect width="64" height="64" filter="url(#pm-n)"/></g>
+<g class="planet-ink" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"><path d="M12.5 26.5a19.5 19.5 0 0 0 39 0"/><path d="M32 46v9M24.5 56h15"/></g>
+</symbol>
+    <symbol id="i-mic" viewBox="0 0 16 16"><rect x="5.75" y="1.75" width="4.5" height="7.5" rx="2.25"/><path d="M3.25 7.5a4.75 4.75 0 0 0 9.5 0M8 12.25v2"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 16 16"><rect x="4" y="4" width="8" height="8" rx="1.5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></symbol>
+    <symbol id="i-check" viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 16 16"><rect x="5.25" y="5.25" width="8.5" height="8.5" rx="1.5"/><path d="M10.75 3.25A1.5 1.5 0 0 0 9.25 1.75h-6a1.5 1.5 0 0 0-1.5 1.5v6a1.5 1.5 0 0 0 1.5 1.5"/></symbol>
+    <symbol id="i-paste" viewBox="0 0 16 16"><path d="M8 1.75v7.5M5 6.5l3 3 3-3"/><path d="M2.25 10.75v1.5a1.5 1.5 0 0 0 1.5 1.5h8.5a1.5 1.5 0 0 0 1.5-1.5v-1.5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 16 16"><path d="M8 2.25l6 10.75H2z"/><path d="M8 6.5v3M8 11.25v.01"/></symbol>
+    <symbol id="i-retry" viewBox="0 0 16 16"><path d="M13 8a5 5 0 1 1-1.46-3.54"/><path d="M13 2.5V5h-2.5"/></symbol>
+    <symbol id="i-grip" viewBox="0 0 16 16"><g fill="currentColor" stroke="none"><circle cx="5.5" cy="3.5" r="1.15"/><circle cx="10.5" cy="3.5" r="1.15"/><circle cx="5.5" cy="8" r="1.15"/><circle cx="10.5" cy="8" r="1.15"/><circle cx="5.5" cy="12.5" r="1.15"/><circle cx="10.5" cy="12.5" r="1.15"/></g></symbol>
+    <symbol id="i-lock" viewBox="0 0 16 16"><rect x="3.25" y="7" width="9.5" height="6.75" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></symbol>
+    <symbol id="i-info" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.25"/><path d="M8 7.25v4M8 4.75v.01"/></symbol>
+    <symbol id="i-general" viewBox="0 0 16 16"><path d="M2.5 4.5h6.5M12.5 4.5h1M2.5 11.5h1M7 11.5h6.5"/><circle cx="10.75" cy="4.5" r="1.75"/><circle cx="5.25" cy="11.5" r="1.75"/></symbol>
+    <symbol id="i-provider" viewBox="0 0 16 16"><path d="M6 1.75v3M10 1.75v3M4 4.75h8v2.5a4 4 0 0 1-8 0zM8 11.25v3"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 16 16"><path d="M10.5 2.25l3.25 3.25-8 8H2.5v-3.25z"/><path d="M8.75 4l3.25 3.25"/></symbol>
+    <symbol id="i-book" viewBox="0 0 16 16"><path d="M3 12.25V3.5a1.75 1.75 0 0 1 1.75-1.75h8.25v10.5H4.75A1.75 1.75 0 0 0 3 14a1.75 1.75 0 0 0 1.75 1.25H13"/></symbol>
+    <symbol id="i-learn" viewBox="0 0 16 16"><path d="M2.5 3.5h8M2.5 7.5h6M2.5 11.5h3.5"/><path d="M8.5 11.25l2 2 3.5-4.5"/></symbol>
+    <symbol id="i-keys" viewBox="0 0 16 16"><rect x="1.5" y="3.75" width="13" height="8.5" rx="1.5"/><path d="M4.25 6.75h.01M6.75 6.75h.01M9.25 6.75h.01M11.75 6.75h.01M5 9.5h6"/></symbol>
+    <symbol id="i-tray" viewBox="0 0 16 16"><path d="M1.75 9.25h3l1 2h4.5l1-2h3"/><path d="M1.75 9.25l1.5-4.6a1.5 1.5 0 0 1 1.43-1.03h6.64a1.5 1.5 0 0 1 1.43 1.03l1.5 4.6v3a1.5 1.5 0 0 1-1.5 1.5H3.25a1.5 1.5 0 0 1-1.5-1.5z"/></symbol>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <div class="brand"><svg aria-hidden="true"><use href="#mark"/></svg><h1 style="font-size:inherit">Dicta</h1></div>
+  <p class="proto-note">Dicta × Mars · exploración 02 · datos simulados</p>
+  <a class="brand-link" href="concepts.html">Comparar direcciones</a>
+  <div class="viewswitch" role="group" aria-label="Vista del prototipo">
+    <button type="button" data-view="overlay" aria-pressed="false">Overlay</button>
+    <button type="button" data-view="settings" aria-pressed="false">Ajustes</button>
+    <button type="button" data-view="both" aria-pressed="true">Ambos</button>
+  </div>
+</header>
+
+<noscript><p style="padding:16px">Este prototipo necesita JavaScript para cambiar de estado.</p></noscript>
+
+<main class="stage" id="stage" data-view="both">
+
+  <!-- ===================== Escena + overlay ===================== -->
+  <section class="col-scene" aria-labelledby="sceneTitle">
+    <div class="col-head"><h2 id="sceneTitle">Overlay sobre el escritorio</h2></div>
+
+    <div class="scene" id="scene">
+      <div class="sysbar">
+        <span class="sysbar-left">Escritorio simulado</span>
+        <div class="tray">
+          <button type="button" class="tray-btn" id="trayBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="trayMenu" aria-label="Dicta en la bandeja: en espera" data-state="reposo">
+            <svg aria-hidden="true"><use href="#mark"/></svg><span class="tray-rec"></span>
+          </button>
+          <ul class="menu" id="trayMenu" role="menu" aria-label="Menú de Dicta" hidden>
+            <li role="none"><button type="button" role="menuitem" data-menu="toggle"><span id="miToggle">Empezar dictado</span><span class="mi-hint" id="miToggleHint"></span></button></li>
+            <li role="none"><button type="button" role="menuitem" data-menu="paste-last">Pegar último dictado</button></li>
+            <li role="none"><button type="button" role="menuitem" data-menu="copy-last">Copiar último dictado</button></li>
+            <li role="separator"></li>
+            <li role="none"><button type="button" role="menuitemcheckbox" aria-checked="false" data-menu="pause">Pausar atajos<svg class="ic mi-check" aria-hidden="true"><use href="#i-check"/></svg></button></li>
+            <li role="none"><button type="button" role="menuitem" data-menu="settings">Abrir ajustes</button></li>
+            <li role="separator"></li>
+            <li role="none"><button type="button" role="menuitem" data-menu="quit">Salir de Dicta</button></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="notes" role="region" aria-labelledby="notesTitle">
+        <div class="notes-head"><strong id="notesTitle">borrador.md</strong><span>Ventana activa simulada</span></div>
+        <div class="notes-body" id="notesBody" aria-live="polite">
+          <p># Pendientes de la semana</p>
+          <p>- Actualizar el sistema y revisar el kernel nuevo.</p>
+          <p>- Mandarle a Juli el presupuesto del lunes.</p>
+        </div>
+      </div>
+
+      <p class="idle-hint" id="idleHint" hidden>Overlay oculto en reposo. Dictá con <span class="combo" data-combo-of="toggle"></span> o desde la bandeja.</p>
+      <div class="quit-msg" id="quitMsg" hidden>
+        <p>Dicta no está corriendo.</p>
+        <button type="button" class="btn btn-secondary btn-sm" id="reopenApp">Abrir Dicta</button>
+      </div>
+
+      <!-- Overlay -->
+      <div class="overlay" id="overlay" data-state="reposo" role="region" aria-label="Overlay de dictado">
+        <div class="ov-head" id="ovHead">
+          <button type="button" class="grip" id="grip" aria-label="Mover overlay. Flechas para mover, Inicio para recentrar" title="Arrastrar"><svg class="ic" aria-hidden="true"><use href="#i-grip"/></svg></button>
+          <p class="ov-status"><span class="st-mark" aria-hidden="true"></span><span id="ovLabel">En espera</span></p>
+          <span class="ov-meta" id="ovMeta"></span>
+        </div>
+
+        <div class="ov-pane" data-pane="reposo">
+          <div class="ov-idle">
+            <button type="button" class="btn btn-primary" id="btnStart" data-autofocus><svg class="ic" aria-hidden="true"><use href="#i-mic"/></svg>Dictar</button>
+            <span class="hint">o <span class="combo" data-combo-of="toggle"></span></span>
+          </div>
+          <p class="ov-sub" id="idleProvider"></p>
+        </div>
+
+        <div class="ov-pane" data-pane="grabando" hidden>
+          <div class="signal-intro"><svg aria-hidden="true"><use href="#mark"/></svg><div><b>Te escucho</b><span>Dictado en vivo</span></div></div>
+          <svg class="trace" id="trace" viewBox="0 0 320 64" preserveAspectRatio="none" role="img" aria-label="Nivel de voz simulado">
+            <line class="base" x1="0" y1="32" x2="320" y2="32"/>
+            <path class="ink" id="tracePath" d="M0 32 L320 32"/>
+          </svg>
+          <div class="trace-label"><span id="micName">Micrófono interno (simulado)</span></div>
+          <p class="ruled live" style="max-height:104px;overflow:auto;margin-top:10px" aria-label="Transcripción en vivo simulada"><span id="recordingWords"></span><span class="caret" aria-hidden="true"></span></p>
+          <div class="ov-actions">
+            <button type="button" class="btn btn-primary" id="btnStop" data-autofocus><svg class="ic" aria-hidden="true"><use href="#i-stop"/></svg>Terminar</button>
+            <button type="button" class="btn btn-ghost" id="btnCancelRec">Cancelar <kbd>Esc</kbd></button>
+          </div>
+        </div>
+
+        <div class="ov-pane" data-pane="transcribiendo" hidden>
+          <p class="ruled live" id="live"><span id="liveWords"></span><span class="caret" aria-hidden="true"></span></p>
+          <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+          <div class="ov-actions">
+            <button type="button" class="btn btn-ghost" id="btnCancelTx" data-autofocus>Cancelar <kbd>Esc</kbd></button>
+          </div>
+        </div>
+
+        <div class="ov-pane" data-pane="listo" hidden>
+          <label class="sr-only" for="finalText">Texto final, editable</label>
+          <textarea class="ruled final" id="finalText" rows="4" spellcheck="true" lang="es-AR"></textarea>
+          <p class="ov-note" id="copyNote"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><span id="copyNoteText"></span></p>
+          <div class="learn" id="learnBox" hidden>
+            <p>¿Aprender esta corrección para los próximos dictados?</p>
+            <p class="pair"><del id="learnFrom"></del><span class="arrow" aria-hidden="true">→</span><span class="sr-only">se corrige como</span><ins id="learnTo" style="text-decoration:none"></ins></p>
+            <div class="ov-actions">
+              <button type="button" class="btn btn-primary btn-sm" id="learnYes">Aprender</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="learnLater">Decidir después</button>
+            </div>
+          </div>
+          <div class="ov-actions">
+            <button type="button" class="btn btn-primary" id="btnCopy" data-autofocus><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg><span>Copiar</span></button>
+            <button type="button" class="btn btn-secondary" id="btnPaste"><svg class="ic" aria-hidden="true"><use href="#i-paste"/></svg>Pegar en Notas</button>
+            <button type="button" class="btn btn-ghost" id="btnClose">Cerrar</button>
+          </div>
+        </div>
+
+        <div class="ov-pane" data-pane="error" hidden>
+          <p class="err-title"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>No se pudo transcribir</p>
+          <p class="err-body" id="errBody1"></p>
+          <p class="err-body" id="errBody2"></p>
+          <div class="ov-actions">
+            <button type="button" class="btn btn-primary" id="btnRetry" data-autofocus><svg class="ic" aria-hidden="true"><use href="#i-retry"/></svg>Reintentar</button>
+            <button type="button" class="btn btn-secondary" id="btnReviewProv">Revisar proveedor</button>
+            <button type="button" class="btn btn-ghost" id="btnDiscard">Descartar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo" role="group" aria-labelledby="demoLabel">
+      <span class="demo-label" id="demoLabel">Saltar a un estado</span>
+      <div class="seg" id="stateJump">
+        <button type="button" data-goto="reposo" aria-pressed="true">Reposo</button>
+        <button type="button" data-goto="grabando" aria-pressed="false">Grabando</button>
+        <button type="button" data-goto="transcribiendo" aria-pressed="false">Transcribiendo</button>
+        <button type="button" data-goto="listo" aria-pressed="false">Listo</button>
+        <button type="button" data-goto="error" aria-pressed="false">Error</button>
+      </div>
+      <label class="check"><input type="checkbox" id="failNext">Que falle el próximo dictado</label>
+      <button type="button" class="btn btn-ghost btn-sm" id="recenter">Recentrar overlay</button>
+    </div>
+  </section>
+
+  <!-- ===================== Ajustes ===================== -->
+  <section class="col-settings" aria-labelledby="setColTitle" id="settingsCol">
+    <div class="col-head"><h2 id="setColTitle">Ventana de ajustes</h2></div>
+
+    <div class="set-closed" id="setClosed" hidden>
+      <p id="setClosedText">Cerraste Ajustes. Dicta sigue en la bandeja del sistema.</p>
+      <button type="button" class="btn btn-secondary" id="reopenSettings">Abrir ajustes</button>
+    </div>
+
+    <div class="settings" id="settingsWin">
+      <div class="set-head">
+        <h2><svg aria-hidden="true"><use href="#mark"/></svg>Ajustes de Dicta</h2>
+        <button type="button" class="btn btn-ghost btn-icon" id="closeSettings" aria-label="Cerrar ajustes"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+      </div>
+      <div class="set-body">
+        <nav class="set-nav" aria-label="Secciones de ajustes">
+          <ul>
+            <li><button type="button" data-pane="general" aria-current="page"><svg class="ic" aria-hidden="true"><use href="#i-general"/></svg>General</button></li>
+            <li><button type="button" data-pane="provider"><svg class="ic" aria-hidden="true"><use href="#i-provider"/></svg>Proveedor<span class="nav-flag" id="navProvFlag">Exp.</span></button></li>
+            <li><button type="button" data-pane="writing"><svg class="ic" aria-hidden="true"><use href="#i-pen"/></svg>Escritura</button></li>
+            <li><button type="button" data-pane="vocab"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg>Vocabulario<span class="nav-count" id="navVocabCount"></span></button></li>
+            <li><button type="button" data-pane="learn"><svg class="ic" aria-hidden="true"><use href="#i-learn"/></svg>Correcciones<span class="nav-count" id="navLearnCount"></span></button></li>
+            <li><button type="button" data-pane="keys"><svg class="ic" aria-hidden="true"><use href="#i-keys"/></svg>Atajos</button></li>
+            <li><button type="button" data-pane="mic"><svg class="ic" aria-hidden="true"><use href="#i-mic"/></svg>Micrófono</button></li>
+            <li><button type="button" data-pane="background"><svg class="ic" aria-hidden="true"><use href="#i-tray"/></svg>Segundo plano</button></li>
+          </ul>
+        </nav>
+
+        <!-- General -->
+        <section class="pane" data-setpane="general" aria-labelledby="h-general">
+          <h2 id="h-general" tabindex="-1">General</h2>
+          <div class="row">
+            <div class="row-text"><label class="row-label" for="lang">Idioma del dictado</label></div>
+            <div class="row-ctl">
+              <select class="field" id="lang">
+                <option value="es-AR" selected>Español rioplatense</option>
+                <option value="es">Español neutro</option>
+                <option value="en">Inglés</option>
+                <option value="auto">Detectar en cada dictado</option>
+              </select>
+            </div>
+          </div>
+          <div class="row" role="radiogroup" aria-labelledby="afterLbl">
+            <div class="row-text" style="flex-basis:100%">
+              <p class="row-label" id="afterLbl">Al terminar de transcribir</p>
+              <div class="radios">
+                <label class="radio"><input type="radio" name="after" value="copy" checked><span><span class="row-label">Copiar al portapapeles</span><span class="row-desc" style="display:block">Predeterminado. En este prototipo la copia automática es simulada.</span></span></label>
+                <p class="row-desc">Para pegar, enfocá el campo de destino y usá Super+Shift+V. En la demo se pega en Notas.</p>
+                <label class="radio"><input type="radio" name="after" value="show"><span><span class="row-label">Solo mostrar el texto</span><span class="row-desc" style="display:block">Copiás o pegás vos desde el overlay.</span></span></label>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-text"><p class="row-label" id="themeLbl">Tema</p></div>
+            <div class="row-ctl">
+              <div class="segctl" role="radiogroup" aria-labelledby="themeLbl">
+                <label><input type="radio" name="theme" value="system" checked>Sistema</label>
+                <label><input type="radio" name="theme" value="light">Claro</label>
+                <label><input type="radio" name="theme" value="dark">Oscuro</label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Proveedor -->
+        <section class="pane" data-setpane="provider" aria-labelledby="h-provider" hidden>
+          <h2 id="h-provider" tabindex="-1">Proveedor de transcripción</h2>
+          <fieldset>
+            <legend class="sr-only">Proveedor</legend>
+
+            <div class="choice" id="choiceGrok">
+              <label class="choice-top">
+                <input type="radio" name="provider" value="grok" checked>
+                <span>
+                  <span class="choice-title">Suscripción Grok <span class="tag tag-warn">Experimental</span><span class="tag tag-plain">Predeterminado</span></span>
+                  <span class="choice-desc" style="display:block">Usaría el cupo de tu suscripción. Falta confirmar acceso, límites y cómo se contabiliza el dictado desde esta app.</span>
+                </span>
+              </label>
+              <div class="choice-extra">
+                <div class="statusline"><span class="k">Acceso a transcripción</span><span class="v" id="grokStatus">Sin verificar</span></div>
+                <div class="statusline"><span class="k">Cuenta</span><span class="v">No conectada en este prototipo</span></div>
+                <div><button type="button" class="btn btn-secondary btn-sm" id="testGrok">Probar acceso</button></div>
+              </div>
+            </div>
+
+            <div class="choice" id="choiceApi">
+              <label class="choice-top">
+                <input type="radio" name="provider" value="api">
+                <span>
+                  <span class="choice-title">API con costo por uso</span>
+                  <span class="choice-desc" style="display:block">xAI streaming: USD 0,20 por hora de audio. Solo se usa si la elegís acá. Tarifa consultada el 09/10/2026.</span>
+                </span>
+              </label>
+              <div class="choice-extra">
+                <div class="grid-fields">
+                  <label class="lbl">Servicio
+                    <select class="field" id="apiService">
+                      <option>xAI API</option>
+                      
+                    </select>
+                  </label>
+                  <label class="lbl">Clave de API
+                    <input class="field" id="apiKey" type="password" autocomplete="off" placeholder="Demo: no ingreses una clave real" readonly spellcheck="false">
+                  </label>
+                  <label class="lbl">Avisarme al pasar de (USD por mes)
+                    <input class="field" id="apiBudget" type="number" min="0" step="1" value="5" inputmode="numeric">
+                  </label>
+                </div>
+              </div>
+              <div class="confirm" id="apiConfirm" role="group" aria-labelledby="apiConfirmText" hidden>
+                <p id="apiConfirmText">Esta opción cobra por el audio procesado. ¿Usarla para los próximos dictados?</p>
+                <div class="ov-actions">
+                  <button type="button" class="btn btn-primary btn-sm" id="apiConfirmYes">Usar API con costo</button>
+                  <button type="button" class="btn btn-secondary btn-sm" id="apiConfirmNo">Seguir con Suscripción Grok</button>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+          <h3>Si el proveedor falla</h3>
+          <fieldset>
+            <legend class="sr-only">Si el proveedor falla</legend>
+            <div class="radios">
+              <label class="radio"><input type="radio" name="onfail" value="keep" checked><span><span class="row-label">Avisarme y guardar el audio para reintentar</span><span class="row-desc" style="display:block">El audio queda en memoria hasta que lo descartes.</span></span></label>
+              <label class="radio"><input type="radio" name="onfail" value="drop"><span><span class="row-label">Avisarme y descartar el audio</span></span></label>
+            </div>
+          </fieldset>
+          <p class="guarantee"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg>Dicta nunca cambia sola a un proveedor con costo.</p>
+        </section>
+
+        <!-- Escritura -->
+        <section class="pane" data-setpane="writing" aria-labelledby="h-writing" hidden>
+          <h2 id="h-writing" tabindex="-1">Reglas de escritura</h2>
+          <div class="row"><div class="row-text"><label class="row-label" for="r-punct">Puntuación automática</label></div><label class="switch"><input type="checkbox" role="switch" id="r-punct" data-rule="punct" checked><span></span></label></div>
+          <div class="row"><div class="row-text"><label class="row-label" for="r-caps">Mayúscula al empezar cada oración</label></div><label class="switch"><input type="checkbox" role="switch" id="r-caps" data-rule="caps" checked><span></span></label></div>
+          <div class="row"><div class="row-text"><label class="row-label" for="r-voseo">Respetar el voseo</label><p class="row-desc">Deja "acordate", "tenés" y "podés" como los decís, sin pasarlos a tú.</p></div><label class="switch"><input type="checkbox" role="switch" id="r-voseo" data-rule="voseo" checked><span></span></label></div>
+          <div class="row"><div class="row-text"><label class="row-label" for="r-fillers">Quitar muletillas</label><p class="row-desc">"eh", "este", "o sea" cuando no aportan nada.</p></div><label class="switch"><input type="checkbox" role="switch" id="r-fillers" data-rule="fillers" checked><span></span></label></div>
+          <div class="row"><div class="row-text"><label class="row-label" for="r-numbers">Números en cifras</label><p class="row-desc">"a las diez" pasa a "a las 10".</p></div><label class="switch"><input type="checkbox" role="switch" id="r-numbers" data-rule="numbers"><span></span></label></div>
+          <div class="row"><div class="row-text"><label class="row-label" for="r-commands">Comandos dictados</label><p class="row-desc">Decir "nueva línea" corta el renglón.</p></div><label class="switch"><input type="checkbox" role="switch" id="r-commands" data-rule="commands" checked><span></span></label></div>
+          <div class="row"><div class="row-text"><label class="row-label" for="postMode">Al corregir el texto</label><p class="row-desc">Una sola pasada al terminar. Conservá siempre el original.</p></div><div class="row-ctl"><select class="field" id="postMode"><option value="local">Solo reglas locales</option><option value="grok">Pulir con Grok, opcional</option></select></div></div>
+          <label class="lbl" for="personalRules">Instrucciones personales</label>
+          <textarea class="field" id="personalRules" rows="4" style="width:100%;padding:10px;resize:vertical;line-height:1.5">Mantené el voseo. No cambies cifras ni nombres. Conservá los términos técnicos. No agregues información.</textarea>
+          <p class="row-desc" id="rulesNotice" aria-live="polite">El ejemplo usa las reglas de arriba. Las instrucciones quedan solo en esta maqueta.</p>
+          <h3>Ejemplo</h3>
+          <div class="example" aria-live="polite">
+            <div><p class="ex-k">Lo que se escuchó</p><p class="ex-raw" id="exRaw"></p></div>
+            <div><p class="ex-k">Cómo queda con tus reglas</p><p class="ruled ex-out" id="exOut"></p></div>
+          </div>
+        </section>
+
+        <!-- Vocabulario -->
+        <section class="pane" data-setpane="vocab" aria-labelledby="h-vocab" hidden>
+          <h2 id="h-vocab" tabindex="-1">Vocabulario</h2>
+          <p class="row-desc">Nombres propios, siglas y términos técnicos que Dicta tiene que escribir tal cual.</p>
+          <form class="addform" id="vocabForm" novalidate>
+            <label class="lbl">Palabra o nombre<input class="field" id="vocabWord" autocomplete="off" placeholder="Hyprland"></label>
+            <label class="lbl">Suena como (opcional)<input class="field" id="vocabSounds" autocomplete="off" placeholder="hiper land"></label>
+            <button type="submit" class="btn btn-secondary"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg>Agregar</button>
+          </form>
+          <p class="form-err" id="vocabErr" role="alert" hidden></p>
+          <h3 id="vocabListTitle">Palabras</h3>
+          <ul class="list" id="vocabList" aria-labelledby="vocabListTitle"></ul>
+        </section>
+
+        <!-- Correcciones -->
+        <section class="pane" data-setpane="learn" aria-labelledby="h-learn" hidden>
+          <h2 id="h-learn" tabindex="-1">Correcciones aprendidas</h2>
+          <div class="row">
+            <div class="row-text"><label class="row-label" for="learnPropose">Proponer correcciones cuando edito un dictado</label><p class="row-desc">Ninguna corrección se aplica sin tu aprobación.</p></div>
+            <label class="switch"><input type="checkbox" role="switch" id="learnPropose" checked><span></span></label>
+          </div>
+          <h3 id="pendTitle">Para revisar</h3>
+          <ul class="list" id="pendList" aria-labelledby="pendTitle"></ul>
+          <h3 id="apprTitle">Aprobadas</h3>
+          <ul class="list" id="apprList" aria-labelledby="apprTitle"></ul>
+        </section>
+
+        <!-- Atajos -->
+        <section class="pane" data-setpane="keys" aria-labelledby="h-keys" hidden>
+          <h2 id="h-keys" tabindex="-1">Atajos de teclado</h2>
+          <p class="row-desc">Propuestos y editables. En Wayland el registro depende del compositor: portal de atajos globales o un bind en la configuración de Hyprland.</p>
+          <ul class="sclist" id="scList"></ul>
+          <p class="sr-only" id="scLive" aria-live="assertive"></p>
+          <div class="ov-actions"><button type="button" class="btn btn-ghost btn-sm" id="scReset">Volver a los propuestos</button></div>
+        </section>
+
+        <!-- Micrófono -->
+        <section class="pane" data-setpane="mic" aria-labelledby="h-mic" hidden>
+          <h2 id="h-mic" tabindex="-1">Micrófono</h2>
+          <div class="row">
+            <div class="row-text"><label class="row-label" for="micSel">Entrada</label></div>
+            <div class="row-ctl">
+              <select class="field" id="micSel">
+                <option>Micrófono interno (simulado)</option>
+                <option>Auriculares USB (simulado)</option>
+                <option>Predeterminado de PipeWire (simulado)</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-text"><p class="row-label" id="meterLbl">Nivel de entrada</p><div class="meter" id="meter" role="meter" aria-labelledby="meterLbl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div></div>
+            <div class="row-ctl"><button type="button" class="btn btn-secondary btn-sm" id="micTest">Probar 5 segundos</button></div>
+          </div>
+          <div class="row">
+            <div class="row-text"><label class="row-label" for="silence">Terminar solo tras un silencio de</label><p class="row-desc">No aplica cuando usás "mantener para dictar".</p></div>
+            <div class="row-ctl"><input type="range" id="silence" min="1" max="5" step="0.5" value="2"><output for="silence" id="silenceOut">2 s</output></div>
+          </div>
+          <div class="row"><div class="row-text"><label class="row-label" for="noise">Reducir ruido de fondo</label></div><label class="switch"><input type="checkbox" role="switch" id="noise" checked><span></span></label></div>
+          <div class="row"><div class="row-text"><label class="row-label" for="sounds">Sonido al empezar y al terminar</label></div><label class="switch"><input type="checkbox" role="switch" id="sounds"><span></span></label></div>
+        </section>
+
+        <!-- Segundo plano -->
+        <section class="pane" data-setpane="background" aria-labelledby="h-bg" hidden>
+          <h2 id="h-bg" tabindex="-1">Segundo plano</h2>
+          <div class="row"><div class="row-text"><label class="row-label" for="showIdle">Mostrar el overlay en reposo</label><p class="row-desc">Apagado, el overlay aparece solo mientras dictás.</p></div><label class="switch"><input type="checkbox" role="switch" id="showIdle" checked><span></span></label></div>
+          <div class="row"><div class="row-text"><label class="row-label" for="trayOnClose">Seguir en la bandeja al cerrar Ajustes</label></div><label class="switch"><input type="checkbox" role="switch" id="trayOnClose" checked><span></span></label></div>
+          <div class="row"><div class="row-text"><label class="row-label" for="autostart">Iniciar con la sesión</label><p class="row-desc">Concepto: servicio de usuario de systemd o entrada de autostart XDG.</p></div><label class="switch"><input type="checkbox" role="switch" id="autostart"><span></span></label></div>
+          <h3>Privacidad</h3>
+          <div class="row"><div class="row-text"><label class="row-label" for="history">Guardar historial de texto</label><p class="row-desc">Los últimos 20 dictados, solo en este equipo.</p></div><label class="switch"><input type="checkbox" role="switch" id="history" checked><span></span></label></div>
+          <div class="row"><div class="row-text"><label class="row-label" for="keepAudio">Guardar el audio</label><p class="row-desc">Apagado, el audio se borra al terminar la transcripción.</p></div><label class="switch"><input type="checkbox" role="switch" id="keepAudio"><span></span></label></div>
+        </section>
+      </div>
+    </div>
+  </section>
+</main>
+
+<p class="sr-only" id="sr" aria-live="polite"></p>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const reduceMQ = matchMedia('(prefers-reduced-motion: reduce)');
+const reduced = () => reduceMQ.matches;
+
+/* ---------------- Estado ---------------- */
+const SC_DEFAULT = {
+  toggle:   { label: 'Empezar o terminar dictado', combo: ['Super', 'Shift', 'D'] },
+  hold:     { label: 'Mantener para dictar',       combo: ['F9'] },
+  paste:    { label: 'Pegar el último dictado',    combo: ['Super', 'Shift', 'V'] },
+  settings: { label: 'Abrir ajustes',              combo: ['Super', 'Alt', 'D'] },
+  cancel:   { label: 'Cancelar dictado',           combo: ['Esc'], fixed: true }
+};
+const clone = o => JSON.parse(JSON.stringify(o));
+
+const S = {
+  state: 'reposo', view: 'both', pane: 'general',
+  provider: 'grok', onfail: 'keep', after: 'copy',
+  failNext: false, elapsed: 0,
+  rules: { punct: true, caps: true, voseo: true, fillers: true, numbers: false, commands: true },
+  vocab: [
+    { w: 'Arch Linux', s: '' }, { w: 'pacman', s: 'pac man' }, { w: 'Wayland', s: 'güeiland' },
+    { w: 'Neovim', s: '' }, { w: 'cargo', s: '' }, { w: 'Juli', s: '' }
+  ],
+  pending: [{ from: 'paip wair', to: 'PipeWire', seen: 3 }],
+  learned: [{ from: 'neo vim', to: 'Neovim' }],
+  learnPropose: true,
+  sc: clone(SC_DEFAULT), capturing: null,
+  showIdle: true, trayOnClose: true, paused: false, quit: false, settingsOpen: true,
+  original: '', lastText: '', holding: false
+};
+
+/* ---------------- Texto simulado ---------------- */
+const SEG = [
+  { w: 'che' }, { p: ',' }, { w: 'eh', filler: true }, { w: 'mañana a las' }, { num: ['diez', '10'] },
+  { w: 'revisamos la config de hiper land y' }, { w: 'o sea', filler: true },
+  { w: 'después vemos lo del atajo para dictar' }, { p: '.' }, { cmd: 'nueva línea' },
+  { vos: ['acordate', 'acuérdate'] }, { w: 'de pasarme el link del repo' }, { p: '.' }
+];
+function compose(r) {
+  let out = '', start = true;
+  const add = w => {
+    if (r.caps && start) w = w.charAt(0).toUpperCase() + w.slice(1);
+    out += (out && !out.endsWith('\n') ? ' ' : '') + w;
+    start = false;
+  };
+  for (const s of SEG) {
+    if (s.p) { if (r.punct) { out += s.p; if (s.p === '.') start = true; } continue; }
+    if (s.cmd) { if (r.commands) { out = out.trimEnd() + '\n'; start = true; } else add(s.cmd); continue; }
+    if (s.filler) { if (!r.fillers) add(s.w); continue; }
+    if (s.num) { add(r.numbers ? s.num[1] : s.num[0]); continue; }
+    if (s.vos) { add(r.voseo ? s.vos[0] : s.vos[1]); continue; }
+    add(s.w);
+  }
+  return out;
+}
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function applyCorrections(text) {
+  const pairs = S.learned.map(p => [p.from, p.to]).concat(S.vocab.filter(v => v.s).map(v => [v.s, v.w]));
+  for (const [from, to] of pairs) {
+    if (!from.trim()) continue;
+    const re = new RegExp('(^|[^\\p{L}\\p{N}])(' + escRe(from) + ')(?=$|[^\\p{L}\\p{N}])', 'giu');
+    text = text.replace(re, (m, pre) => pre + to);
+  }
+  return text;
+}
+const rawText = () => compose({ punct: false, caps: false, voseo: true, fillers: false, numbers: false, commands: false });
+const finalText = () => applyCorrections(compose(S.rules));
+
+/* ---------------- Utilidades ---------------- */
+const sr = $('#sr');
+function announce(msg) { sr.textContent = ''; setTimeout(() => { sr.textContent = msg; }, 30); }
+const fmtTime = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+const providerName = () => S.provider === 'grok' ? 'Suscripción Grok' : 'API con costo';
+const providerShort = () => S.provider === 'grok' ? 'Grok, experimental' : 'API con costo';
+function comboHTML(parts) {
+  if (!parts) return '<span class="sc-none">Sin atajo</span>';
+  return parts.map(p => '<kbd>' + p.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</kbd>').join('<span class="plus" aria-hidden="true">+</span>');
+}
+function comboLabel(parts) { return parts ? parts.join(' + ') : 'sin atajo'; }
+function wordCount(t) { return (t.trim().match(/\S+/g) || []).length; }
+
+/* ---------------- Vista ---------------- */
+const stage = $('#stage');
+function setView(v) {
+  S.view = v; stage.dataset.view = v;
+  $$('.viewswitch button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === v)));
+  requestAnimationFrame(placeOverlay);
+}
+$$('.viewswitch button').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+
+/* ---------------- Overlay: estados ---------------- */
+const overlay = $('#overlay'), scene = $('#scene');
+const LABELS = { reposo: 'En espera', grabando: 'Grabando', transcribiendo: 'Transcribiendo', listo: 'Listo', error: 'Error' };
+let timerInt = 0, traceRAF = 0, txTimer = 0, partialInt = 0;
+
+function stopWork() {
+  clearInterval(timerInt); clearInterval(partialInt); cancelAnimationFrame(traceRAF); clearTimeout(txTimer);
+  timerInt = traceRAF = txTimer = 0;
+}
+
+function setState(next, opts = {}) {
+  const hadFocus = overlay.contains(document.activeElement) || document.activeElement === document.body;
+  stopWork();
+  S.state = next;
+  overlay.dataset.state = next;
+  $$('.ov-pane', overlay).forEach(p => { p.hidden = p.dataset.pane !== next; });
+  $('#ovLabel').textContent = LABELS[next];
+  $$('#stateJump button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.goto === next)));
+  const meta = $('#ovMeta');
+  meta.textContent = '';
+
+  if (next === 'reposo') {
+    $('#idleProvider').textContent = 'Proveedor: ' + providerName() + (S.provider === 'grok' ? ' (experimental)' : '');
+  }
+  if (next === 'grabando') {
+    S.elapsed = 0; meta.textContent = fmtTime(0);
+    $('#micName').textContent = $('#micSel').value;
+    timerInt = setInterval(() => { S.elapsed++; meta.textContent = fmtTime(S.elapsed); }, 1000);
+    const partialWords = finalText().split(/\s+/); let partialCount = 3;
+    $('#recordingWords').textContent = partialWords.slice(0, partialCount).join(' ');
+    partialInt = setInterval(() => {
+      partialCount = Math.min(partialWords.length, partialCount + 2);
+      $('#recordingWords').textContent = partialWords.slice(0, partialCount).join(' ');
+      const para = $('#recordingWords').parentElement; para.scrollTop = para.scrollHeight;
+    }, 500);
+    startTrace();
+  }
+  if (next === 'transcribiendo') { meta.textContent = providerShort(); startTranscribe(); }
+  if (next === 'listo') enterReady(opts);
+  if (next === 'error') enterError();
+
+  updateTray(); updateOverlayVisibility();
+  if (hadFocus && !overlay.hidden && !opts.keepFocus) {
+    const pane = $('.ov-pane[data-pane="' + next + '"]', overlay);
+    const f = pane && $('[data-autofocus]', pane);
+    if (f) f.focus({ preventScroll: true });
+  }
+  requestAnimationFrame(placeOverlay);
+  if (opts.say) announce(opts.say);
+}
+
+/* Trazo de tinta */
+const N = 56; let amps = new Array(N).fill(0), shift = 0, lastStep = 0;
+const tracePath = $('#tracePath');
+function envelope(t) {
+  const syl = Math.max(0, Math.sin(t * 9.1)) * (0.55 + 0.45 * Math.sin(t * 1.6));
+  const word = (Math.sin(t * 2.2) + Math.sin(t * 3.7 + 1)) > -0.5 ? 1 : 0.12;
+  return syl * word;
+}
+function drawTrace() {
+  const W = 320, mid = 32, pts = [];
+  for (let i = 0; i < N; i++) {
+    const sign = ((i + shift) % 2) ? 1 : -1;
+    pts.push([i * W / (N - 1), mid + sign * amps[i] * 27]);
+  }
+  let d = 'M' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1);
+  for (let i = 1; i < N - 1; i++) {
+    const mx = (pts[i][0] + pts[i + 1][0]) / 2, my = (pts[i][1] + pts[i + 1][1]) / 2;
+    d += ' Q' + pts[i][0].toFixed(1) + ' ' + pts[i][1].toFixed(1) + ' ' + mx.toFixed(1) + ' ' + my.toFixed(1);
+  }
+  d += ' L' + pts[N - 1][0].toFixed(1) + ' ' + pts[N - 1][1].toFixed(1);
+  tracePath.setAttribute('d', d);
+}
+function startTrace() {
+  if (reduced()) {
+    amps = amps.map((_, i) => (0.2 + 0.8 * Math.abs(Math.sin(i * 0.55))) * (0.45 + 0.55 * Math.abs(Math.sin(i * 0.16 + 0.6))));
+    shift = 0;
+    drawTrace(); return;
+  }
+  amps = amps.map((_, i) => (0.18 + 0.82 * Math.abs(Math.sin(i * .33))) * (.6 + .25 * Math.sin(i * .79))); lastStep = 0;
+  const tick = now => {
+    if (now - lastStep > 45) {
+      amps.shift(); amps.push(Math.min(1, envelope(now / 1000) * (0.6 + Math.random() * 0.5)));
+      shift++; lastStep = now; drawTrace();
+    }
+    traceRAF = requestAnimationFrame(tick);
+  };
+  traceRAF = requestAnimationFrame(tick);
+}
+
+/* Transcripción progresiva */
+function startTranscribe() {
+  const words = $('#liveWords'), bar = $('#progressBar');
+  words.textContent = finalText();
+  bar.style.width = '85%';
+  if (S.failNext) {
+    S.failNext = false; $('#failNext').checked = false;
+    txTimer = setTimeout(() => setState('error', { say: 'No se pudo finalizar la transcripción.' }), 1200);
+    return;
+  }
+  txTimer = setTimeout(() => setState('listo', { say: 'Transcripción lista.' }), 900);
+}
+
+/* Listo */
+const finalTA = $('#finalText');
+function setNote(text) { $('#copyNoteText').textContent = text; }
+function enterReady() {
+  const text = finalText();
+  finalTA.value = text; S.original = text; S.lastText = text;
+  autoGrow();
+  $('#learnBox').hidden = true; learnPair = null;
+  $('#ovMeta').textContent = wordCount(text) + ' palabras';
+  if (S.after === 'copy') setNote('Copia automática simulada. Tu portapapeles no se tocó.');
+  
+  else setNote('Texto listo. Copialo o pegalo cuando quieras.');
+  updateTray();
+}
+function autoGrow() { finalTA.style.height = 'auto'; finalTA.style.height = Math.min(182, Math.max(104, finalTA.scrollHeight)) + 'px'; }
+
+/* Error */
+function enterError() {
+  const secs = S.elapsed || 7;
+  $('#errBody1').textContent = S.provider === 'grok'
+    ? 'Suscripción Grok no respondió. No se usó ningún proveedor con costo.'
+    : 'La API con costo devolvió un error. Dicta no reintenta por su cuenta.';
+  if (S.onfail === 'keep') {
+    $('#errBody2').textContent = 'El audio (' + fmtTime(secs) + ') queda en memoria para reintentar. Se borra al descartarlo.';
+    $('#btnRetry').hidden = false;
+  } else {
+    $('#errBody2').textContent = 'El audio se descartó, como pediste en Ajustes.';
+    $('#btnRetry').hidden = true;
+  }
+  const pane = $('.ov-pane[data-pane="error"]');
+  const first = S.onfail === 'keep' ? $('#btnRetry') : $('#btnReviewProv');
+  $$('[data-autofocus]', pane).forEach(b => b.removeAttribute('data-autofocus'));
+  first.setAttribute('data-autofocus', '');
+}
+
+/* Botones del overlay */
+$('#btnStart').addEventListener('click', () => setState('grabando', { say: 'Grabando.' }));
+$('#btnStop').addEventListener('click', () => setState('transcribiendo'));
+$('#btnCancelRec').addEventListener('click', () => setState('reposo', { say: 'Dictado cancelado. No se envió audio.' }));
+$('#btnCancelTx').addEventListener('click', () => setState('reposo', { say: 'Transcripción cancelada.' }));
+$('#btnClose').addEventListener('click', () => setState('reposo'));
+$('#btnRetry').addEventListener('click', () => setState('transcribiendo'));
+$('#btnDiscard').addEventListener('click', () => setState('reposo', { say: 'Audio descartado.' }));
+$('#btnReviewProv').addEventListener('click', () => openSettings('provider'));
+
+const copyBtn = $('#btnCopy');
+let copyReset = 0;
+async function copyText(text) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); return true; }
+  } catch (e) { /* sigue con el método alternativo */ }
+  try {
+    const active = document.activeElement;
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0'; ta.style.top = '0';
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove(); if (active) active.focus({ preventScroll: true });
+    return ok;
+  } catch (e) { return false; }
+}
+copyBtn.addEventListener('click', async () => {
+  const ok = await copyText(finalTA.value);
+  clearTimeout(copyReset);
+  if (ok) {
+    copyBtn.querySelector('span').textContent = 'Copiado';
+    copyBtn.querySelector('use').setAttribute('href', '#i-check');
+    setNote('Copiado al portapapeles.');
+    announce('Copiado al portapapeles.');
+    copyReset = setTimeout(() => {
+      copyBtn.querySelector('span').textContent = 'Copiar';
+      copyBtn.querySelector('use').setAttribute('href', '#i-copy');
+    }, 1800);
+  } else {
+    setNote('No se pudo copiar. Seleccioná el texto y usá Ctrl+C.');
+    announce('No se pudo copiar.');
+  }
+});
+
+const notesBody = $('#notesBody');
+function pasteToNotes(text, silent) {
+  if (!text) return;
+  const nodes = text.split('\n').map(line => { const p = document.createElement('p'); p.textContent = line; p.className = 'pasted'; return p; });
+  nodes.forEach(n => notesBody.appendChild(n));
+  notesBody.scrollTop = notesBody.scrollHeight;
+  setTimeout(() => nodes.forEach(n => n.classList.add('settled')), reduced() ? 900 : 60);
+  if (!silent) announce('Pegado en borrador.md, simulado.');
+}
+$('#btnPaste').addEventListener('click', () => {
+  S.lastText = finalTA.value;
+  pasteToNotes(finalTA.value);
+  setNote('Pegado en borrador.md (simulado).');
+});
+
+/* Aprender correcciones */
+let learnPair = null, learnDeb = 0;
+const clean = w => w.replace(/^[¿¡"'(]+|[.,;:!?"')]+$/g, '');
+function diffWords(a, b) {
+  const A = a.split(/\s+/).map(clean).filter(Boolean), B = b.split(/\s+/).map(clean).filter(Boolean);
+  let i = 0; while (i < A.length && i < B.length && A[i] === B[i]) i++;
+  let j = 0; while (j < A.length - i && j < B.length - i && A[A.length - 1 - j] === B[B.length - 1 - j]) j++;
+  return { from: A.slice(i, A.length - j).join(' '), to: B.slice(i, B.length - j).join(' '), nf: A.length - j - i, nt: B.length - j - i };
+}
+const known = (from, to) => S.learned.concat(S.pending).some(p => p.from.toLowerCase() === from.toLowerCase() && p.to === to);
+finalTA.addEventListener('input', () => {
+  autoGrow();
+  S.lastText = finalTA.value;
+  $('#ovMeta').textContent = wordCount(finalTA.value) + ' palabras';
+  clearTimeout(learnDeb);
+  learnDeb = setTimeout(() => {
+    const box = $('#learnBox');
+    if (!S.learnPropose) { box.hidden = true; return; }
+    const d = diffWords(S.original, finalTA.value);
+    if (d.from && d.to && d.nf <= 4 && d.nt <= 4 && d.from !== d.to && !known(d.from, d.to)) {
+      learnPair = { from: d.from, to: d.to };
+      $('#learnFrom').textContent = d.from; $('#learnTo').textContent = d.to;
+      if (box.hidden) { box.hidden = false; announce('Dicta propone aprender una corrección.'); }
+    } else { box.hidden = true; learnPair = null; }
+  }, 650);
+});
+$('#learnYes').addEventListener('click', () => {
+  if (!learnPair) return;
+  S.learned.push(learnPair);
+  S.pending = S.pending.filter(p => !(p.from === learnPair.from && p.to === learnPair.to));
+  renderLearn(); renderExample();
+  $('#learnBox').hidden = true; learnPair = null;
+  setNote('Corrección guardada. Se aplica desde el próximo dictado.');
+  announce('Corrección guardada.');
+  copyBtn.focus({ preventScroll: true });
+});
+$('#learnLater').addEventListener('click', () => {
+  if (!learnPair) return;
+  S.pending.push(Object.assign({ seen: 1 }, learnPair));
+  renderLearn();
+  $('#learnBox').hidden = true; learnPair = null;
+  setNote('Quedó en Ajustes, Correcciones, para revisarla después.');
+  copyBtn.focus({ preventScroll: true });
+});
+
+/* Saltos de estado (controles del prototipo) */
+$$('#stateJump button').forEach(b => b.addEventListener('click', () => {
+  if (S.quit) reopenApp();
+  setState(b.dataset.goto, { keepFocus: true });
+}));
+$('#failNext').addEventListener('change', e => { S.failNext = e.target.checked; });
+
+/* ---------------- Overlay: arrastre ---------------- */
+const pos = { cx: null, by: null };
+const TOP_MIN = 42, PAD = 8;
+function placeOverlay() {
+  if (overlay.hidden || !scene.offsetParent) return;
+  const w = scene.clientWidth, h = scene.clientHeight, ow = overlay.offsetWidth, oh = overlay.offsetHeight;
+  if (pos.cx === null) { pos.cx = w / 2; pos.by = h - 22; }
+  let x = pos.cx - ow / 2;
+  x = Math.min(Math.max(PAD, x), Math.max(PAD, w - ow - PAD));
+  let top = pos.by - oh;
+  top = Math.min(Math.max(TOP_MIN, top), Math.max(TOP_MIN, h - oh - PAD));
+  if (!drag) { pos.cx = x + ow / 2; pos.by = top + oh; }
+  overlay.style.setProperty('--x', Math.round(x) + 'px');
+  overlay.style.setProperty('--y', Math.round(top) + 'px');
+}
+let drag = null;
+const head = $('#ovHead');
+head.addEventListener('pointerdown', e => {
+  if (e.button !== 0) return;
+  const btn = e.target.closest('button');
+  if (btn && btn.id !== 'grip') return;
+  e.preventDefault();
+  drag = { id: e.pointerId, sx: e.clientX, sy: e.clientY, cx: pos.cx, by: pos.by };
+  head.setPointerCapture(e.pointerId);
+  overlay.classList.add('dragging');
+});
+head.addEventListener('pointermove', e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  pos.cx = drag.cx + (e.clientX - drag.sx);
+  pos.by = drag.by + (e.clientY - drag.sy);
+  placeOverlay();
+});
+const endDrag = e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  drag = null; overlay.classList.remove('dragging'); placeOverlay();
+};
+head.addEventListener('pointerup', endDrag);
+head.addEventListener('pointercancel', endDrag);
+$('#grip').addEventListener('keydown', e => {
+  const step = e.shiftKey ? 40 : 10;
+  const moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+  if (moves[e.key]) { e.preventDefault(); pos.cx += moves[e.key][0]; pos.by += moves[e.key][1]; placeOverlay(); }
+  else if (e.key === 'Home') { e.preventDefault(); recenter(); }
+});
+function recenter() { pos.cx = null; pos.by = null; placeOverlay(); }
+$('#recenter').addEventListener('click', () => { if (S.quit) reopenApp(); recenter(); announce('Overlay recentrado.'); });
+if ('ResizeObserver' in window) { const ro = new ResizeObserver(() => placeOverlay()); ro.observe(scene); ro.observe(overlay); }
+window.addEventListener('resize', placeOverlay);
+
+function updateOverlayVisibility() {
+  const hideIdle = S.state === 'reposo' && !S.showIdle;
+  overlay.hidden = S.quit || hideIdle;
+  $('#idleHint').hidden = S.quit || !hideIdle;
+  $('#quitMsg').hidden = !S.quit;
+  $('#trayBtn').hidden = S.quit;
+  if (!overlay.hidden) requestAnimationFrame(placeOverlay);
+}
+
+/* ---------------- Bandeja ---------------- */
+const trayBtn = $('#trayBtn'), menu = $('#trayMenu');
+const menuItems = () => $$('button', menu).filter(b => !b.disabled);
+function updateTray() {
+  trayBtn.dataset.state = S.state;
+  trayBtn.setAttribute('aria-label', 'Dicta en la bandeja: ' + LABELS[S.state].toLowerCase());
+  const recording = S.state === 'grabando';
+  $('#miToggle').textContent = recording ? 'Terminar dictado' : 'Empezar dictado';
+  $('#miToggleHint').textContent = S.sc.toggle.combo ? S.sc.toggle.combo.join('+') : '';
+  $('[data-menu="toggle"]').disabled = S.state === 'transcribiendo';
+  $('[data-menu="paste-last"]').disabled = !S.lastText;
+  $('[data-menu="copy-last"]').disabled = !S.lastText;
+  $('[data-menu="pause"]').setAttribute('aria-checked', String(S.paused));
+}
+function openMenu() {
+  updateTray(); menu.hidden = false; trayBtn.setAttribute('aria-expanded', 'true');
+  const items = menuItems(); if (items[0]) items[0].focus();
+}
+function closeMenu(focusBtn) {
+  if (menu.hidden) return;
+  menu.hidden = true; trayBtn.setAttribute('aria-expanded', 'false');
+  if (focusBtn) trayBtn.focus();
+}
+trayBtn.addEventListener('click', () => menu.hidden ? openMenu() : closeMenu(false));
+trayBtn.addEventListener('keydown', e => { if (e.key === 'ArrowDown') { e.preventDefault(); openMenu(); } });
+menu.addEventListener('keydown', e => {
+  const items = menuItems(), i = items.indexOf(document.activeElement);
+  if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+  else if (e.key === 'Home') { e.preventDefault(); items[0].focus(); }
+  else if (e.key === 'End') { e.preventDefault(); items[items.length - 1].focus(); }
+  else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeMenu(true); }
+  else if (e.key === 'Tab') closeMenu(false);
+});
+document.addEventListener('pointerdown', e => { if (!menu.hidden && !e.target.closest('.tray')) closeMenu(false); });
+menu.addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b || b.disabled) return;
+  const a = b.dataset.menu;
+  if (a === 'pause') { S.paused = !S.paused; updateTray(); announce(S.paused ? 'Atajos pausados.' : 'Atajos activos.'); return; }
+  closeMenu(true);
+  if (a === 'toggle') toggleDictation();
+  if (a === 'paste-last') pasteToNotes(S.lastText);
+  if (a === 'copy-last') { const ok = await copyText(S.lastText); announce(ok ? 'Último dictado copiado.' : 'No se pudo copiar.'); }
+  if (a === 'settings') openSettings();
+  if (a === 'quit') quitApp();
+});
+function toggleDictation() {
+  if (S.quit) return;
+  if (S.state === 'grabando') setState('transcribiendo');
+  else if (S.state !== 'transcribiendo') setState('grabando', { say: 'Grabando.' });
+}
+function quitApp() {
+  stopWork(); S.quit = true; S.state = 'reposo'; overlay.dataset.state = 'reposo';
+  setSettingsOpen(false, 'Dicta está cerrado. Al abrirlo de nuevo vuelve a la bandeja.');
+  updateOverlayVisibility(); announce('Dicta se cerró, simulado.');
+  $('#reopenApp').focus({ preventScroll: true });
+}
+function reopenApp() {
+  S.quit = false; setState('reposo'); updateOverlayVisibility();
+  $('#setClosedText').textContent = 'Cerraste Ajustes. Dicta sigue en la bandeja del sistema.';
+}
+$('#reopenApp').addEventListener('click', () => { reopenApp(); trayBtn.focus(); });
+
+/* ---------------- Ajustes ---------------- */
+const settingsWin = $('#settingsWin'), setClosed = $('#setClosed');
+function setSettingsOpen(open, msg) {
+  S.settingsOpen = open; settingsWin.hidden = !open; setClosed.hidden = open;
+  if (msg) $('#setClosedText').textContent = msg;
+}
+$('#closeSettings').addEventListener('click', () => {
+  if (S.trayOnClose) { setSettingsOpen(false, 'Cerraste Ajustes. Dicta sigue en la bandeja del sistema.'); $('#reopenSettings').focus(); }
+  else quitApp();
+});
+$('#reopenSettings').addEventListener('click', () => {
+  if (S.quit) reopenApp();
+  setSettingsOpen(true); $('.set-nav button[aria-current="page"]').focus();
+});
+function setPane(p, focusHeading) {
+  S.pane = p;
+  $$('.set-nav button').forEach(b => { if (b.dataset.pane === p) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+  $$('.pane').forEach(s => { s.hidden = s.dataset.setpane !== p; });
+  if (focusHeading) { const h = $('.pane[data-setpane="' + p + '"] > h2'); if (h) h.focus({ preventScroll: true }); }
+}
+$$('.set-nav button').forEach(b => b.addEventListener('click', () => setPane(b.dataset.pane)));
+function openSettings(pane) {
+  if (S.quit) reopenApp();
+  setSettingsOpen(true);
+  if (S.view === 'overlay') setView(window.innerWidth >= 1120 ? 'both' : 'settings');
+  if (pane) setPane(pane);
+  requestAnimationFrame(() => {
+    $('#settingsCol').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' });
+    setPane(S.pane, true);
+  });
+}
+
+/* General */
+$$('input[name="after"]').forEach(r => r.addEventListener('change', () => { S.after = r.value; }));
+$$('input[name="theme"]').forEach(r => r.addEventListener('change', () => { document.documentElement.dataset.theme = r.value; }));
+
+/* Proveedor */
+const apiConfirm = $('#apiConfirm');
+$$('input[name="provider"]').forEach(r => r.addEventListener('change', () => {
+  if (r.value === 'api' && S.provider !== 'api') { apiConfirm.hidden = false; $('#apiConfirmYes').focus(); }
+  if (r.value === 'grok') { apiConfirm.hidden = true; setProvider('grok'); }
+}));
+function setProvider(p) {
+  S.provider = p;
+  $('input[name="provider"][value="' + p + '"]').checked = true;
+  $('#navProvFlag').hidden = p !== 'grok';
+  if (S.state === 'reposo') setState('reposo', { keepFocus: true });
+  announce('Proveedor: ' + providerName() + '.');
+}
+$('#apiConfirmYes').addEventListener('click', () => { apiConfirm.hidden = true; setProvider('api'); $('input[name="provider"][value="api"]').focus(); });
+$('#apiConfirmNo').addEventListener('click', () => { apiConfirm.hidden = true; setProvider('grok'); $('input[name="provider"][value="grok"]').focus(); });
+$$('input[name="onfail"]').forEach(r => r.addEventListener('change', () => { S.onfail = r.value; if (S.state === 'error') enterError(); }));
+const testBtn = $('#testGrok');
+testBtn.addEventListener('click', () => {
+  const st = $('#grokStatus');
+  testBtn.disabled = true; st.textContent = 'Probando…';
+  setTimeout(() => {
+    st.textContent = 'Sin verificar: este prototipo no se conecta a Grok';
+    testBtn.disabled = false; announce(st.textContent);
+  }, 1200);
+});
+
+/* Escritura */
+function renderExample() {
+  $('#exRaw').textContent = rawText();
+  $('#exOut').textContent = finalText();
+}
+$$('[data-rule]').forEach(inp => inp.addEventListener('change', () => { S.rules[inp.dataset.rule] = inp.checked; renderExample(); }));
+
+/* Vocabulario */
+function renderVocab() {
+  const ul = $('#vocabList'); ul.innerHTML = '';
+  $('#navVocabCount').textContent = S.vocab.length || '';
+  $('#vocabListTitle').textContent = 'Palabras (' + S.vocab.length + ')';
+  if (!S.vocab.length) { ul.innerHTML = '<li class="empty">Sin palabras todavía. Agregá nombres o términos que Dicta escribe mal.</li>'; return; }
+  S.vocab.forEach((v, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = '<div class="li-main"><div class="li-word"></div>' + (v.s ? '<div class="li-sub"></div>' : '') + '</div>' +
+      '<div class="li-actions"><button type="button" class="btn btn-ghost btn-icon"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button></div>';
+    $('.li-word', li).textContent = v.w;
+    if (v.s) $('.li-sub', li).textContent = 'Suena como "' + v.s + '"';
+    const b = $('button', li); b.setAttribute('aria-label', 'Quitar ' + v.w);
+    b.addEventListener('click', () => {
+      S.vocab.splice(i, 1); renderVocab(); renderExample(); announce(v.w + ' quitada del vocabulario.');
+      const btns = $$('#vocabList button'); (btns[Math.min(i, btns.length - 1)] || $('#vocabWord')).focus();
+    });
+    ul.appendChild(li);
+  });
+}
+$('#vocabForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const w = $('#vocabWord').value.trim(), s = $('#vocabSounds').value.trim(), err = $('#vocabErr');
+  if (!w) { err.textContent = 'Escribí la palabra que querés agregar.'; err.hidden = false; $('#vocabWord').focus(); return; }
+  if (S.vocab.some(v => v.w.toLowerCase() === w.toLowerCase())) { err.textContent = '"' + w + '" ya está en la lista.'; err.hidden = false; $('#vocabWord').focus(); return; }
+  err.hidden = true;
+  S.vocab.unshift({ w, s }); renderVocab(); renderExample();
+  $('#vocabWord').value = ''; $('#vocabSounds').value = ''; $('#vocabWord').focus();
+  announce(w + ' agregada al vocabulario.');
+});
+
+/* Correcciones */
+function pairHTML(p) { return '<div class="li-word"><span class="from"></span> <span class="arrow" aria-hidden="true">→</span><span class="sr-only"> se corrige como </span> <span class="to"></span></div>'; }
+function fillPair(li, p) { $('.from', li).textContent = p.from; $('.to', li).textContent = p.to; }
+function renderLearn() {
+  $('#navLearnCount').textContent = S.pending.length || '';
+  $('#navLearnCount').setAttribute('aria-label', S.pending.length ? S.pending.length + ' para revisar' : '');
+  const pend = $('#pendList'); pend.innerHTML = '';
+  if (!S.pending.length) pend.innerHTML = '<li class="empty">Nada para revisar. Cuando corrijas un dictado, Dicta te propone recordarlo.</li>';
+  S.pending.forEach((p, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = '<div class="li-main">' + pairHTML(p) + '<div class="li-sub"></div></div><div class="li-actions"><button type="button" class="btn btn-primary btn-sm" data-a="ok">Aprobar</button><button type="button" class="btn btn-ghost btn-sm" data-a="no">Descartar</button></div>';
+    fillPair(li, p);
+    $('.li-sub', li).textContent = p.seen > 1 ? 'La corregiste ' + p.seen + ' veces' : 'La corregiste 1 vez';
+    $('[data-a="ok"]', li).setAttribute('aria-label', 'Aprobar ' + p.from + ' como ' + p.to);
+    $('[data-a="no"]', li).setAttribute('aria-label', 'Descartar ' + p.from + ' como ' + p.to);
+    $('[data-a="ok"]', li).addEventListener('click', () => { S.pending.splice(i, 1); S.learned.push({ from: p.from, to: p.to }); renderLearn(); renderExample(); announce('Corrección aprobada.'); focusAfter('#pendList'); });
+    $('[data-a="no"]', li).addEventListener('click', () => { S.pending.splice(i, 1); renderLearn(); announce('Corrección descartada.'); focusAfter('#pendList'); });
+    pend.appendChild(li);
+  });
+  const appr = $('#apprList'); appr.innerHTML = '';
+  if (!S.learned.length) appr.innerHTML = '<li class="empty">Todavía no aprobaste ninguna.</li>';
+  S.learned.forEach((p, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = '<div class="li-main">' + pairHTML(p) + '</div><div class="li-actions"><button type="button" class="btn btn-ghost btn-sm">Olvidar</button></div>';
+    fillPair(li, p);
+    const b = $('button', li); b.setAttribute('aria-label', 'Olvidar ' + p.from + ' como ' + p.to);
+    b.addEventListener('click', () => { S.learned.splice(i, 1); renderLearn(); renderExample(); announce('Corrección olvidada.'); focusAfter('#apprList'); });
+    appr.appendChild(li);
+  });
+}
+function focusAfter(sel) { const b = $(sel + ' button'); (b || $('#learnPropose')).focus(); }
+$('#learnPropose').addEventListener('change', e => { S.learnPropose = e.target.checked; if (!S.learnPropose) $('#learnBox').hidden = true; });
+
+/* Atajos */
+function renderShortcuts() {
+  const ul = $('#scList'); ul.innerHTML = '';
+  const used = {};
+  Object.entries(S.sc).forEach(([id, d]) => { if (d.combo) { const k = d.combo.join('+'); (used[k] = used[k] || []).push(id); } });
+  Object.entries(S.sc).forEach(([id, d]) => {
+    const li = document.createElement('li'); li.className = 'sc-row' + (S.capturing === id ? ' capturing' : '');
+    let warn = '';
+    if (d.combo) {
+      const k = d.combo.join('+');
+      const others = used[k].filter(x => x !== id);
+      if (others.length) warn = 'Choca con "' + S.sc[others[0]].label + '".';
+      else if (!d.fixed && d.combo.length === 1 && !/^F\d+$/.test(d.combo[0])) warn = 'Sin modificador, esa tecla deja de escribir en otras apps.';
+    }
+    if (d.fixed) warn = warn || 'Fijo. Solo funciona con el overlay activo.';
+    li.innerHTML = '<div><p class="row-label"></p><p class="sc-warn"' + (warn ? '' : ' hidden') + '></p></div>' +
+      '<span class="combo combo-cell">' + comboHTML(d.combo) + '</span>' +
+      (d.fixed ? '<span></span>' : '<button type="button" class="btn btn-secondary btn-sm"></button>');
+    $('.row-label', li).textContent = d.label;
+    const w = $('.sc-warn', li); w.textContent = warn;
+    if (d.fixed) w.style.color = 'var(--ink-2)';
+    const b = $('button', li);
+    if (b) {
+      b.textContent = S.capturing === id ? 'Presioná la combinación' : 'Cambiar';
+      b.setAttribute('aria-label', S.capturing === id ? 'Esperando combinación para ' + d.label : 'Cambiar atajo de ' + d.label + ', ahora ' + comboLabel(d.combo));
+      b.addEventListener('click', () => {
+        S.capturing = S.capturing === id ? null : id; renderShortcuts();
+        if (S.capturing) $('#scLive').textContent = 'Presioná la nueva combinación. Esc cancela, Retroceso quita el atajo.';
+        const nb = $$('#scList button')[Object.keys(S.sc).filter(k => !S.sc[k].fixed).indexOf(id)]; if (nb) nb.focus();
+      });
+    }
+    ul.appendChild(li);
+  });
+  $$('[data-combo-of="toggle"]').forEach(el => { el.innerHTML = comboHTML(S.sc.toggle.combo); });
+  updateTray();
+}
+$('#scReset').addEventListener('click', () => { S.sc = clone(SC_DEFAULT); S.capturing = null; renderShortcuts(); announce('Atajos restablecidos.'); });
+
+const MODKEYS = ['Control', 'Shift', 'Alt', 'Meta', 'OS', 'AltGraph', 'Super', 'Hyper'];
+function keyName(e) {
+  const c = e.code || '';
+  if (/^Key[A-Z]$/.test(c)) return c.slice(3);
+  if (/^Digit\d$/.test(c)) return c.slice(5);
+  if (/^F\d{1,2}$/.test(c)) return c;
+  const map = { Space: 'Espacio', Escape: 'Esc', Enter: 'Enter', Backspace: 'Retroceso', Tab: 'Tab', Comma: ',', Period: '.', Slash: '/', Minus: '-', Equal: '=',
+    ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→', Insert: 'Insert', Delete: 'Supr', Home: 'Inicio', End: 'Fin', PageUp: 'RePág', PageDown: 'AvPág' };
+  if (map[c]) return map[c];
+  return e.key && e.key.length === 1 ? e.key.toUpperCase() : (e.key || c);
+}
+function comboFrom(e) {
+  const p = [];
+  if (e.metaKey) p.push('Super');
+  if (e.ctrlKey) p.push('Ctrl');
+  if (e.altKey) p.push('Alt');
+  if (e.shiftKey) p.push('Shift');
+  p.push(keyName(e));
+  return p;
+}
+const same = (a, b) => !!a && !!b && a.join('+') === b.join('+');
+const typingIn = el => el && (el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || (el.tagName === 'INPUT' && !['checkbox', 'radio', 'range', 'button'].includes(el.type)));
+
+window.addEventListener('keydown', e => {
+  if (S.capturing) {
+    if (MODKEYS.includes(e.key)) return;
+    const id = S.capturing, noMods = !e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey;
+    if (e.key === 'Tab' && noMods) {
+      S.capturing = null; renderShortcuts();
+      const nb = $$('#scList button')[Object.keys(S.sc).filter(k => !S.sc[k].fixed).indexOf(id)]; if (nb) nb.focus();
+      return;
+    }
+    e.preventDefault(); e.stopPropagation();
+    if (e.key === 'Escape' && noMods) { S.capturing = null; $('#scLive').textContent = 'Cambio cancelado.'; }
+    else if (e.key === 'Backspace' && noMods) { S.sc[id].combo = null; S.capturing = null; $('#scLive').textContent = S.sc[id].label + ': sin atajo.'; }
+    else { S.sc[id].combo = comboFrom(e); S.capturing = null; $('#scLive').textContent = S.sc[id].label + ': ' + comboLabel(S.sc[id].combo) + '.'; }
+    renderShortcuts();
+    const idx = Object.keys(S.sc).filter(k => !S.sc[k].fixed).indexOf(id);
+    const nb = $$('#scList button')[idx]; if (nb) nb.focus();
+    return;
+  }
+  if (e.key === 'Escape') {
+    if (!menu.hidden) return;
+    if (S.state === 'grabando') { e.preventDefault(); setState('reposo', { say: 'Dictado cancelado. No se envió audio.' }); return; }
+    if (S.state === 'transcribiendo') { e.preventDefault(); setState('reposo', { say: 'Transcripción cancelada.' }); return; }
+    if (!apiConfirm.hidden && apiConfirm.contains(document.activeElement)) { $('#apiConfirmNo').click(); return; }
+    return;
+  }
+  if (S.paused || S.quit || e.repeat || typingIn(e.target) || MODKEYS.includes(e.key)) return;
+  const c = comboFrom(e);
+  if (same(c, S.sc.toggle.combo)) { e.preventDefault(); toggleDictation(); }
+  else if (same(c, S.sc.hold.combo)) { e.preventDefault(); if (S.state !== 'grabando' && S.state !== 'transcribiendo') { S.holding = true; setState('grabando', { say: 'Grabando mientras mantengas la tecla.' }); } }
+  else if (same(c, S.sc.paste.combo)) { e.preventDefault(); if (S.lastText) pasteToNotes(S.lastText); }
+  else if (same(c, S.sc.settings.combo)) { e.preventDefault(); openSettings(); }
+}, true);
+window.addEventListener('keyup', e => {
+  if (!S.holding || !S.sc.hold.combo) return;
+  if (keyName(e) === S.sc.hold.combo[S.sc.hold.combo.length - 1]) { S.holding = false; if (S.state === 'grabando') setState('transcribiendo'); }
+});
+
+/* Micrófono */
+const meter = $('#meter');
+for (let i = 0; i < 24; i++) meter.appendChild(document.createElement('i'));
+let meterInt = 0;
+function setMeter(v) {
+  const n = Math.round(v * 24);
+  $$('i', meter).forEach((el, i) => { el.classList.toggle('on', i < n); el.classList.toggle('hot', i < n && i >= 20); });
+  meter.setAttribute('aria-valuenow', String(Math.round(v * 100)));
+}
+$('#micTest').addEventListener('click', () => {
+  const b = $('#micTest'); clearInterval(meterInt);
+  const t0 = performance.now(); b.disabled = true; b.textContent = 'Escuchando…';
+  meterInt = setInterval(() => {
+    const t = (performance.now() - t0) / 1000;
+    setMeter(Math.min(1, envelope(t) * (0.55 + Math.random() * 0.45)));
+    if (t > 5) { clearInterval(meterInt); setMeter(0); b.disabled = false; b.textContent = 'Probar 5 segundos'; announce('Prueba terminada. Nivel de entrada correcto, simulado.'); }
+  }, 90);
+});
+$('#silence').addEventListener('input', e => { $('#silenceOut').textContent = String(e.target.value).replace('.', ',') + ' s'; });
+
+/* Segundo plano */
+$('#showIdle').addEventListener('change', e => { S.showIdle = e.target.checked; updateOverlayVisibility(); });
+$('#trayOnClose').addEventListener('change', e => { S.trayOnClose = e.target.checked; });
+
+$('#postMode').addEventListener('change', () => {
+  $('#rulesNotice').textContent = $('#postMode').value === 'grok'
+    ? 'Modo Pulir seleccionado. Acceso y costo se validarían por separado; esta demo no llama a Grok.'
+    : 'Solo reglas locales. Esta demo no ejecuta las instrucciones libres.';
+});
+$('#personalRules').addEventListener('input', () => { $('#rulesNotice').textContent = 'Instrucciones editadas para esta sesión de la maqueta. No se envían ni guardan.'; });
+/* ---------------- Inicio ---------------- */
+function init() {
+  if (window.innerWidth < 1120) setView('overlay'); else setView('both');
+  renderVocab(); renderLearn(); renderShortcuts(); renderExample();
+  setState('grabando', { keepFocus: true });
+  drawTrace();
+  reduceMQ.addEventListener && reduceMQ.addEventListener('change', () => { if (S.state === 'grabando') { cancelAnimationFrame(traceRAF); startTrace(); } });
+}
+init();
+})();
+</script>
+</body>
+</html>

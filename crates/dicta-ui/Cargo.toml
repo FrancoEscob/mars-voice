@@ -1,0 +1,34 @@
+[package]
+name = "dicta-ui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+# GPUI is pinned to a reviewed zed revision: crates.io only ships gpui 0.2.2
+# (Oct 2025), which lacks the Wayland LayerShell window kind used by the overlay.
+[dependencies]
+anyhow.workspace = true
+dicta-core.workspace = true
+gpui = { git = "https://github.com/zed-industries/zed", rev = "f16f9652ec57bf806e65b2a0d51bb92a63644914", default-features = false, features = ["font-kit", "wayland", "x11"] }
+gpui_platform = { git = "https://github.com/zed-industries/zed", rev = "f16f9652ec57bf806e65b2a0d51bb92a63644914", default-features = false, features = ["font-kit", "wayland", "x11"] }
+futures = "0.3"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+unicode-segmentation = "1"
+# Interface language for `ui_language = "auto"` (LANG/LC_* on Unix, the user
+# locale on Windows and macOS). Already in the workspace through dicta-core.
+sys-locale = "0.3"
+gpui_wgpu = { git = "https://github.com/zed-industries/zed", rev = "f16f9652ec57bf806e65b2a0d51bb92a63644914", optional = true }
+
+[features]
+# Offscreen PNG gallery of every overlay state and settings section, rendered
+# by the real GPUI wgpu renderer: `cargo run -p dicta-ui --example gallery --features screenshots`.
+screenshots = ["gpui/test-support", "gpui_platform/test-support", "gpui_wgpu/test-support", "dep:gpui_wgpu"]
+
+[[example]]
+name = "gallery"
+required-features = ["screenshots"]
+
+# Headless render benchmark: `cargo run -p dicta-ui --example perf --features screenshots`.
+[[example]]
+name = "perf"
+required-features = ["screenshots"]

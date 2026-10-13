@@ -1,0 +1,15 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Mars voice
+GenericName=Dictado y lectura por voz
+Comment=Dictado, notas y audio con Mars voice
+Exec=@EXEC@
+TryExec=@TRYEXEC@
+Icon=io.github.francoescob.Dicta
+Terminal=false
+Categories=Utility;AudioVideo;Audio;
+Keywords=mars;dicta;dictado;voz;transcripción;speech;STT;
+StartupNotify=false
+StartupWMClass=io.github.francoescob.Dicta
+DBusActivatable=false

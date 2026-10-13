@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Dicta"><style>.ink{stroke:#CFE3C4}</style>
+<defs><radialGradient id="g" cx=".34" cy=".3" r=".95"><stop offset="0" stop-color="#FF7A3D"/><stop offset=".45" stop-color="#FF4F00"/><stop offset="1" stop-color="#8C2400"/></radialGradient>
+<radialGradient id="mg" cx=".34" cy=".3" r=".9"><stop offset="0" stop-color="#222"/><stop offset=".55" stop-color="#888"/><stop offset="1" stop-color="#fff"/></radialGradient>
+<clipPath id="c"><circle cx="32" cy="25" r="16"/></clipPath><mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="url(#mg)"/></mask>
+<filter id="n" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="2" seed="11"/><feColorMatrix values="0 0 0 0 .29  0 0 0 0 .075  0 0 0 0 0  1.2 0 0 0 -.52"/></filter></defs>
+<circle cx="32" cy="25" r="16" fill="url(#g)"/><g clip-path="url(#c)" mask="url(#m)"><rect width="64" height="64" filter="url(#n)"/></g>
+<g class="ink" fill="none" stroke="#CFE3C4" stroke-width="3.4" stroke-linecap="round"><path d="M12.5 26.5a19.5 19.5 0 0 0 39 0"/><path d="M32 46v9M24.5 56h15"/></g>
+</svg>

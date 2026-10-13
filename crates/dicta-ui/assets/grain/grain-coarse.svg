@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><filter id="n" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+<feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" seed="7" stitchTiles="stitch" result="t"/>
+<feColorMatrix in="t" values="0 0 0 0 0.141  0 0 0 0 0.153  0 0 0 0 0.118  0.570 0.000 0.000 0.000 -0.258" result="dark"/>
+<feColorMatrix in="t" values="0 0 0 0 1.000  0 0 0 0 1.000  0 0 0 0 0.970  0.000 0.480 0.000 0.000 -0.228" result="light"/>
+<feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="3" stitchTiles="stitch" result="t2"/>
+<feColorMatrix in="t2" values="0 0 0 0 0.141  0 0 0 0 0.153  0 0 0 0 0.118  0.198 0.000 0.000 0.000 -0.086" result="clumps"/>
+<feMerge><feMergeNode in="clumps"/><feMergeNode in="light"/><feMergeNode in="dark"/></feMerge></filter><rect width="256" height="256" filter="url(#n)"/></svg>

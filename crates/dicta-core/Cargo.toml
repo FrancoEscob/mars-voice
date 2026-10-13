@@ -1,0 +1,18 @@
+[package]
+name = "dicta-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+[dependencies]
+anyhow.workspace = true
+serde = { workspace = true, features = ["rc"] }
+serde_json.workspace = true
+toml = "0.9"
+rusqlite = { version = "0.38", features = ["bundled"] }
+directories = "6"
+sys-locale = "0.3"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+
+[target.'cfg(unix)'.dependencies]
+# O_NOFOLLOW for fsx; confstr for the macOS runtime folder.
+libc = "0.2"
