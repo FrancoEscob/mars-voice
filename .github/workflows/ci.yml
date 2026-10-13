@@ -71,6 +71,8 @@ jobs:
         run: echo "LIBCLANG_PATH=C:\\Program Files\\LLVM\\bin" >> "$GITHUB_ENV"
       - uses: Swatinem/rust-cache@v2
       - run: cargo test -p dicta-core -p dicta-provider -p dicta-platform --locked
+      # Instancia única y named pipe (segundo lanzamiento, ctl); sin GPUI.
+      - run: cargo test -p dicta --lib --no-default-features --locked ipc
       - run: cargo build -p dicta --release --locked
       - name: Empaquetar
         shell: pwsh
