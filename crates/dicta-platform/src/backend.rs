@@ -6,7 +6,8 @@
 //! | System | Backend |
 //! |---|---|
 //! | Linux | today's code: wl-clipboard on Wayland, hyprctl + wtype on Hyprland. Each call keeps its own session check and error, so Hyprland runs exactly the previous code paths and other sessions get the previous messages |
-//! | Windows, macOS | `unsupported`: actionable Spanish errors; placement is a no-op |
+//! | Windows | `windows`: arboard, `GetForegroundWindow`, `SendInput` and the clipboard sequence number. The flows are in `win_flow` (tested on every system); placement is a no-op because GPUI positions the windows |
+//! | macOS | `unsupported`: actionable Spanish errors; placement is a no-op |
 //!
 //! Later phases replace individual services per session (for example
 //! arboard for the clipboard on X11) without touching the controller. What
@@ -19,10 +20,14 @@ use crate::desktop::{FloatingWindow, PastePlan, PasteTarget};
 use crate::selection::{CopyOptions, SelectionSource};
 use anyhow::Result;
 
-#[cfg(any(not(target_os = "linux"), test))]
+#[cfg(any(not(any(target_os = "linux", windows)), test))]
 mod unsupported;
 #[cfg(target_os = "linux")]
 mod wayland;
+#[cfg(any(windows, test))]
+mod win_flow;
+#[cfg(windows)]
+mod windows;
 
 /// Writes text to the system clipboard.
 pub trait Clipboard: Send + Sync {
@@ -75,7 +80,8 @@ pub trait WindowPlacer: Send + Sync {
 
 /// The services selected for this system.
 pub struct Backend {
-    /// Stable identifier for diagnostics: `"wayland-hyprland"` or `"unsupported"`.
+    /// Stable identifier for diagnostics: `"wayland-hyprland"`, `"windows"` or
+    /// `"unsupported"`.
     pub name: &'static str,
     pub clipboard: &'static dyn Clipboard,
     pub focus: &'static dyn FocusTracker,
@@ -94,7 +100,10 @@ static CURRENT: Backend = Backend {
     placement: &wayland::WaylandHyprland,
 };
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(windows)]
+static CURRENT: Backend = windows::BACKEND;
+
+#[cfg(not(any(target_os = "linux", windows)))]
 static CURRENT: Backend = unsupported::BACKEND;
 
 /// The backend for this system, chosen at compile time. Cheap; no I/O.

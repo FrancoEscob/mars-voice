@@ -47,6 +47,22 @@ pub struct PastePlan {
     target: PasteTarget,
     restore_from: Option<PasteTarget>,
 }
+/// For backends outside this module (Windows).
+#[cfg(any(windows, test))]
+impl PastePlan {
+    pub(crate) fn new(target: PasteTarget, restore_from: Option<PasteTarget>) -> Self {
+        Self {
+            target,
+            restore_from,
+        }
+    }
+    pub(crate) fn target(&self) -> &PasteTarget {
+        &self.target
+    }
+    pub(crate) fn restore_from(&self) -> Option<&PasteTarget> {
+        self.restore_from.as_ref()
+    }
+}
 
 /// Floating windows this process places itself.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]

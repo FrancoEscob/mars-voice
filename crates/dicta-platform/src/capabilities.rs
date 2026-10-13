@@ -13,7 +13,10 @@
 //!   placement; shortcuts only as a desktop custom shortcut running
 //!   `dicta --toggle`.
 //! - X11: tray and toggle only (no X11 clipboard yet).
-//! - Windows and macOS: nothing yet (see `docs/PLAN-MULTIPLATAFORMA.md`).
+//! - Windows: clipboard, paste, copying the selection, focus, placement (GPUI
+//!   opens the windows where the UI asks), hold-to-talk hotkeys and tray.
+//!   There is no primary selection.
+//! - macOS: nothing yet (see `docs/PLAN-MULTIPLATAFORMA.md`).
 //!
 //! Keep it in sync with [`crate::backend`] when a backend is added.
 use serde::{Deserialize, Serialize};
@@ -116,7 +119,7 @@ pub fn detect() -> Capabilities {
     }
     #[cfg(target_os = "windows")]
     {
-        Capabilities::none(Session::Windows)
+        windows()
     }
     #[cfg(target_os = "macos")]
     {
@@ -125,6 +128,25 @@ pub fn detect() -> Capabilities {
     #[cfg(not(any(target_os = "linux", target_os = "windows", target_os = "macos")))]
     {
         Capabilities::none(Session::Unknown)
+    }
+}
+
+/// Windows needs no helper programs: everything is Win32 (`backend/windows.rs`,
+/// `shell_windows.rs`). Pure, so it is tested everywhere.
+#[cfg_attr(not(windows), allow(dead_code))]
+fn windows() -> Capabilities {
+    Capabilities {
+        session: Session::Windows,
+        clipboard: true,
+        paste_injection: true,
+        copy_selection: true,
+        primary_selection: false,
+        focus_tracking: true,
+        window_placement: true,
+        global_hotkeys: HotkeySupport::Hold,
+        tray: true,
+        compositor_binds: false,
+        missing_programs: Vec::new(),
     }
 }
 
@@ -404,6 +426,19 @@ mod tests {
                 .missing_programs
                 .is_empty()
         );
+    }
+
+    #[test]
+    fn windows_has_everything_but_the_primary_selection_and_compositor_binds() {
+        let caps = windows();
+        assert!(caps.clipboard && caps.paste_injection && caps.copy_selection);
+        assert!(caps.focus_tracking && caps.window_placement && caps.tray);
+        assert!(!caps.primary_selection && !caps.compositor_binds);
+        assert_eq!(caps.global_hotkeys, HotkeySupport::Hold);
+        assert!(caps.missing_programs.is_empty());
+        assert_eq!(serde_json::to_value(&caps).unwrap()["session"], "windows");
+        #[cfg(windows)]
+        assert_eq!(detect(), caps);
     }
 
     #[test]

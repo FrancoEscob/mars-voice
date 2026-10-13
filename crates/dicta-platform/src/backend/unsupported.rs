@@ -1,4 +1,4 @@
-//! Systems without a desktop backend yet (Windows and macOS until phases 2–3).
+//! Systems without a desktop backend yet (macOS until phase 3).
 //! Every action fails with an actionable Spanish error before touching
 //! anything; placement is a no-op, so windows stay where the system put them.
 //! Also built for Linux tests, so this code is checked on every platform.
