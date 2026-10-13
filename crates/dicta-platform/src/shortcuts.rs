@@ -3,15 +3,22 @@
 //! On Linux, [`run`] drives the opt-in XDG GlobalShortcuts portal
 //! (`shortcuts/portal.rs`), which may display compositor authorization UI. If
 //! unsupported, offer [`HYPRLAND_BIND_EXAMPLE`] rather than writing user config.
-//! Other systems have no global-shortcut backend yet: [`run`] returns an
-//! actionable Spanish error. [`event_stamp`] works everywhere.
+//! On Windows the shortcuts are always on: `Hotkeys` registers them with
+//! `RegisterHotKey` (the `global-hotkey` crate) on the shell thread, parsed by
+//! [`keys`]; [`run`] is not used there. macOS has no global-shortcut backend
+//! yet: [`run`] returns an actionable Spanish error. [`event_stamp`] works
+//! everywhere.
 use anyhow::Result;
 use dicta_core::{AppConfig, Command};
 use std::sync::mpsc::Sender;
 use tokio::sync::watch;
 
+pub mod keys;
 #[cfg(target_os = "linux")]
 mod portal;
+
+#[cfg(windows)]
+pub use crate::shell_windows::Hotkeys;
 
 pub const HYPRLAND_BIND_EXAMPLE: &str = r#"-- Usá packaging/hyprland.lua.example completo.
 -- Define --shortcut-press al pulsar Ctrl+Space y --shortcut-release al soltar

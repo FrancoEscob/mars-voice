@@ -123,15 +123,30 @@ pub fn run(
         }) {
             Ok(Ok(handle)) => Some(handle),
             _ => {
-                snapshot.status =
-                    "Sin bandeja disponible; podés usar el launcher y dicta ctl".into();
+                snapshot.status = if cfg!(windows) {
+                    "Sin bandeja disponible; abrí Mars voice otra vez para ver los ajustes".into()
+                } else {
+                    "Sin bandeja disponible; podés usar el launcher y dicta ctl".into()
+                };
                 None
             }
         }
     } else {
         None
     };
-    if options.portal && !options.demo {
+    // Windows: native global shortcuts, always on (there is no portal or
+    // compositor bind). They follow shortcut changes in the settings.
+    #[cfg(windows)]
+    let mut hotkeys = if options.demo {
+        None
+    } else {
+        let (hotkeys, notice) = shortcuts::Hotkeys::start(&snapshot.config, command_tx.clone());
+        if notice.is_some() {
+            snapshot.error = notice;
+        }
+        Some(hotkeys)
+    };
+    if options.portal && !options.demo && !cfg!(windows) {
         let tx = events_tx.clone();
         let commands = command_tx.clone();
         let config = snapshot.config.clone();
@@ -494,6 +509,13 @@ pub fn run(
                                     snapshot.authenticated = false;
                                 }
                                 reader.on_config(&snapshot.config);
+                                #[cfg(windows)]
+                                if let Some(notice) = hotkeys
+                                    .as_mut()
+                                    .and_then(|hotkeys| hotkeys.update(&snapshot.config))
+                                {
+                                    snapshot.error = Some(notice);
+                                }
                                 if (changed_tts_mode || changed_auth) && !options.demo {
                                     let _ = auth_tx.send(CredentialWrite::Check(
                                         gen_ids.auth,
@@ -900,6 +922,8 @@ pub fn run(
     login_cancel.cancel();
     drop(auth_tx);
     let _ = shutdown_tx.send(true);
+    #[cfg(windows)]
+    drop(hotkeys);
     drop(tray_handle);
     // Give capture owners and sockets time to close, then shut down workers.
     runtime.block_on(async { tokio::time::sleep(Duration::from_millis(150)).await });
