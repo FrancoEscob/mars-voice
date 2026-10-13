@@ -1,3 +1,6 @@
+// Release builds on Windows are GUI programs: no console window opens with
+// them. Commands that print reattach to the terminal that launched them.
+#![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
 use anyhow::{Context, Result, bail};
 use dicta::{
     controller::{self, Options},
@@ -12,13 +15,87 @@ use std::{
 
 fn main() {
     if let Err(error) = run() {
-        eprintln!("Mars voice: {error:#}");
+        report(&format!("Mars voice: {error:#}"));
         std::process::exit(1);
     }
 }
+
+#[cfg(not(windows))]
+fn report(message: &str) {
+    eprintln!("{message}");
+}
+/// Opened from Explorer there is no console to print to: show a dialog.
+#[cfg(windows)]
+fn report(message: &str) {
+    if windows::attach_console() {
+        eprintln!("{message}");
+    } else {
+        windows::error_dialog(message);
+    }
+}
+
+/// Lets the resident instance bring its window to the front: Windows only
+/// allows that to the process the user is interacting with, which is this one.
+fn hand_off_foreground() {
+    #[cfg(windows)]
+    windows::allow_foreground();
+}
+
+#[cfg(windows)]
+mod windows {
+    use windows_sys::Win32::{
+        System::Console::{ATTACH_PARENT_PROCESS, AttachConsole, GetConsoleWindow},
+        UI::WindowsAndMessaging::{
+            ASFW_ANY, AllowSetForegroundWindow, MB_ICONERROR, MB_OK, MessageBoxW,
+        },
+    };
+
+    /// Attaches to the console of the parent terminal, if any. True when this
+    /// process has a console to print to (always in debug builds).
+    pub fn attach_console() -> bool {
+        // SAFETY: no pointers; fails harmlessly without a parent console or
+        // when a console is already attached.
+        unsafe { AttachConsole(ATTACH_PARENT_PROCESS) != 0 || !GetConsoleWindow().is_null() }
+    }
+
+    pub fn error_dialog(message: &str) {
+        let wide = |text: &str| -> Vec<u16> {
+            text.encode_utf16()
+                .filter(|&unit| unit != 0)
+                .chain(std::iter::once(0))
+                .collect()
+        };
+        let (text, caption) = (wide(message), wide("Mars voice"));
+        // SAFETY: both strings are NUL-terminated UTF-16 that outlive the call.
+        unsafe {
+            MessageBoxW(
+                std::ptr::null_mut(),
+                text.as_ptr(),
+                caption.as_ptr(),
+                MB_OK | MB_ICONERROR,
+            )
+        };
+    }
+
+    pub fn allow_foreground() {
+        // SAFETY: no pointers; only effective while this process may set the
+        // foreground window itself.
+        unsafe { AllowSetForegroundWindow(ASFW_ANY) };
+    }
+}
+
 fn run() -> Result<()> {
     let shortcut_at = dicta_platform::shortcuts::event_stamp();
     let args: Vec<String> = std::env::args().skip(1).collect();
+    #[cfg(windows)]
+    if args.iter().any(|arg| {
+        matches!(
+            arg.as_str(),
+            "ctl" | "--help" | "-h" | "--version" | "--shortcut-seed"
+        )
+    }) {
+        windows::attach_console();
+    }
     if args.len() == 1 && args[0] == "--shortcut-seed" {
         // Used once when loading compositor bindings, before any config, IPC,
         // keyring or graphical initialization. Same boot-wide clock as events.
@@ -27,7 +104,8 @@ fn run() -> Result<()> {
     }
     if args.iter().any(|s| s == "--help" || s == "-h") {
         println!(
-            "Mars voice — dictado nativo para Linux\n\n  dicta [--demo] [--theme signal|regolith|orbit] [--portal-shortcuts]\n  dicta --headless [--no-tray]\n  dicta --read-selection\n  dicta ctl toggle|start|stop|cancel|copy|paste|settings|show|hide|read|read-clipboard|tts-toggle|tts-stop|quit|status\n\nOpciones:\n  --demo                 Ejemplo sin micrófono, API, llavero ni portapapeles real\n  --background           Iniciar residente sin abrir ajustes\n  --toggle               Iniciar o detener dictado; abre Dicta si hace falta\n  --read-selection       Leer en voz alta la selección; abre Mars voice si hace falta\n  --shortcut-press       Pulsación del atajo; respeta modo alternar/mantener\n  --shortcut-release     Liberación del atajo; nunca inicia Dicta\n  --shortcut-token N     Identificador creciente compartido por pulsación/liberación\n  --shortcut-seed        Imprimir reloj monotónico para inicializar binds y salir\n  --headless             Ejecutar sin interfaz gráfica\n  --no-tray              No crear icono en la bandeja\n  --color-mode MODO      light o dark, independiente del estilo\n  --theme TEMA           Apariencia inicial (se guarda al editar ajustes)\n  --portal-shortcuts     Solicitar al portal los atajos globales\n  --allow-env-api-key    Permitir DICTA_XAI_API_KEY en modo API explícito\n  --quit-after SEGUNDOS  Salir tras el plazo (pruebas)\n\nPara controlar la demo: dicta --demo ctl COMANDO.\nLos binds manuales pueden usar dicta --toggle. Al abrir normalmente no se activa el micrófono."
+            "Mars voice — dictado nativo para {}\n\n  dicta [--demo] [--theme signal|regolith|orbit] [--portal-shortcuts]\n  dicta --headless [--no-tray]\n  dicta --read-selection\n  dicta ctl toggle|start|stop|cancel|copy|paste|settings|show|hide|read|read-clipboard|tts-toggle|tts-stop|quit|status\n\nOpciones:\n  --demo                 Ejemplo sin micrófono, API, llavero ni portapapeles real\n  --background           Iniciar residente sin abrir ajustes\n  --toggle               Iniciar o detener dictado; abre Dicta si hace falta\n  --read-selection       Leer en voz alta la selección; abre Mars voice si hace falta\n  --shortcut-press       Pulsación del atajo; respeta modo alternar/mantener\n  --shortcut-release     Liberación del atajo; nunca inicia Dicta\n  --shortcut-token N     Identificador creciente compartido por pulsación/liberación\n  --shortcut-seed        Imprimir reloj monotónico para inicializar binds y salir\n  --headless             Ejecutar sin interfaz gráfica\n  --no-tray              No crear icono en la bandeja\n  --color-mode MODO      light o dark, independiente del estilo\n  --theme TEMA           Apariencia inicial (se guarda al editar ajustes)\n  --portal-shortcuts     Solicitar al portal los atajos globales\n  --allow-env-api-key    Permitir DICTA_XAI_API_KEY en modo API explícito\n  --quit-after SEGUNDOS  Salir tras el plazo (pruebas)\n\nPara controlar la demo: dicta --demo ctl COMANDO.\nLos binds manuales pueden usar dicta --toggle. Al abrir normalmente no se activa el micrófono.",
+            if cfg!(windows) { "Windows" } else { "Linux" }
         );
         return Ok(());
     }
@@ -107,6 +185,7 @@ fn run() -> Result<()> {
         paths.runtime = paths.demo_runtime();
     }
     if let Some(command) = ctl {
+        hand_off_foreground();
         println!("{}", ipc::send(&paths.runtime, &command)?);
         return Ok(());
     }
@@ -146,6 +225,7 @@ fn run() -> Result<()> {
     if toggle {
         // A warm shortcut must not load settings, touch credentials or start a
         // second UI. Retry only failures that prove nothing was delivered.
+        hand_off_foreground();
         match ipc::send(&paths.runtime, "toggle") {
             Ok(_) => return Ok(()),
             Err(error) if server_absent(&error) => {}
@@ -157,6 +237,7 @@ fn run() -> Result<()> {
     }
     if read {
         // Igual que --toggle: el texto nunca viaja por el socket; lo lee el residente.
+        hand_off_foreground();
         match ipc::send(&paths.runtime, "read") {
             Ok(_) => return Ok(()),
             Err(error) if server_absent(&error) => {}
@@ -306,6 +387,7 @@ fn server_absent(error: &anyhow::Error) -> bool {
     })
 }
 fn forward_startup(runtime: &Path, command: &str) -> Result<()> {
+    hand_off_foreground();
     let deadline = Instant::now() + Duration::from_millis(750);
     loop {
         match ipc::send(runtime, command) {
