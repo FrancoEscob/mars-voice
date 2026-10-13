@@ -425,11 +425,12 @@ pub fn send(runtime: &Path, command: &str) -> Result<String> {
 mod tests {
     use super::*;
     use dicta_core::fsx;
+    #[cfg(unix)]
+    use std::sync::Arc;
     use std::{
         fs,
         path::PathBuf,
         sync::{
-            Arc,
             atomic::{AtomicU64, Ordering},
             mpsc,
         },

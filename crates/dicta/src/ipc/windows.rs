@@ -7,7 +7,9 @@
 //! - Overlapped I/O with deadlines, so a silent client cannot block shutdown.
 //!
 //! The single instance itself is the `instance.lock` file, as on Unix.
-use super::{LOCK, MAX_LINE, REQUEST_TIMEOUT, SHORTCUT_LOCK, parse, read_line_with, respond};
+#[cfg(test)]
+use super::MAX_LINE;
+use super::{LOCK, REQUEST_TIMEOUT, SHORTCUT_LOCK, parse, read_line_with, respond};
 use anyhow::{Context, Result, bail, ensure};
 use dicta_core::{Command, fsx};
 use std::{
