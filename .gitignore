@@ -31,3 +31,6 @@ config.toml.bak
 /docs/screens/
 # Fuentes sin licencia incluida.
 /design/regolito-orbit/fonts/
+
+# Worktrees temporales de agentes.
+/.claude/
