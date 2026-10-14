@@ -6,6 +6,7 @@ pub mod store;
 pub mod text;
 pub mod transcript;
 pub mod tts;
+pub mod writer;
 pub use config::{
     AppConfig, AppPaths, AudioRetention, ColorMode, ProviderMode, ShortcutMode, Theme,
 };
@@ -14,6 +15,7 @@ pub use readings::{HistoryKind, NewReading, Reading, ReadingMetrics};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 pub use tts::{TtsConfig, TtsPhase, TtsSnapshot};
+pub use writer::{WriterConfig, WriterMode, WriterPhase, WriterSnapshot};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "snake_case")]
@@ -110,6 +112,9 @@ pub struct AppSnapshot {
     pub selected_reading: Option<Reading>,
     #[serde(default)]
     pub reading_metrics: ReadingMetrics,
+    /// Escritura: estado de la ventana de arreglar/traducir.
+    #[serde(default)]
+    pub writer: WriterSnapshot,
 }
 impl AppSnapshot {
     pub fn new(config: AppConfig) -> Self {
@@ -149,6 +154,7 @@ impl AppSnapshot {
             active_reading_id: None,
             selected_reading: None,
             reading_metrics: ReadingMetrics::default(),
+            writer: WriterSnapshot::default(),
         }
     }
 }
@@ -243,4 +249,23 @@ pub enum Command {
     /// Escucha una lectura del historial: su audio guardado o, si no hay, la regenera.
     ReplayReading(i64),
     ClearReadings,
+    // --- Escritura ---------------------------------------------------------
+    /// Atajo o `ctl write`: copia la selección, abre la ventana y procesa con
+    /// el modo predeterminado. El IPC nunca transporta el texto.
+    WriterSelection,
+    /// Igual, desde el portapapeles.
+    WriterClipboard,
+    /// Texto escrito o pegado en la ventana. No llama a Grok por sí solo.
+    WriterSetInput(String),
+    /// Procesa `input` con este modo. Cancela el pedido anterior.
+    WriterRun(WriterMode),
+    /// Cambia el idioma destino y vuelve a procesar si hay texto.
+    WriterSetTarget(String),
+    WriterCopy,
+    /// Pega el resultado sobre la selección original y cierra la ventana.
+    WriterReplace,
+    /// Lee el resultado en voz alta con la lectura (equivale a `ReadText`).
+    WriterSpeak,
+    /// Cancela el pedido en curso y cierra la ventana.
+    WriterClose,
 }

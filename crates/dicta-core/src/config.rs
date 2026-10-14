@@ -99,6 +99,8 @@ pub struct AppConfig {
     /// Lectura en voz alta. Una sección propia para que su modo de cuenta y sus
     /// preferencias no cambien el dictado.
     pub tts: crate::tts::TtsConfig,
+    /// Escritura: arreglar y traducir la selección.
+    pub writer: crate::writer::WriterConfig,
 }
 impl Default for AppConfig {
     fn default() -> Self {
@@ -136,6 +138,7 @@ impl Default for AppConfig {
             ui_language: "auto".into(),
             subscription_acknowledged: false,
             tts: Default::default(),
+            writer: Default::default(),
         }
     }
 }
@@ -215,6 +218,7 @@ impl AppConfig {
             "Idioma de interfaz inválido; usá auto, es o en"
         );
         self.tts.validate()?;
+        self.writer.validate()?;
         Ok(())
     }
 }
