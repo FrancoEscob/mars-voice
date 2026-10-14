@@ -16,6 +16,7 @@ mod oauth_config;
 mod secret;
 mod stream;
 mod tts;
+mod writer;
 
 pub use auth::{Credentials, DeviceCode, KeyringStore, OAuthClient, SecretStore, TokenSet};
 pub use error::{ProviderError, Result};
@@ -24,3 +25,4 @@ pub use secret::Secret;
 pub use stream::{Endpoints, PolishResult, StreamEvent, Timeouts, XaiProvider};
 pub use tokio_util::sync::CancellationToken;
 pub use tts::{TtsAudio, TtsEvent, TtsRequest, TtsSessionEnd};
+pub use writer::WriterResult;
