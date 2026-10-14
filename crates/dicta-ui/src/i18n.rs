@@ -317,7 +317,7 @@ catalogue! {
     SecHistory { es: "Historial", en: "History" }
     SecGeneral { es: "General", en: "General" }
     SecProvider { es: "Proveedor", en: "Provider" }
-    SecWriting { es: "Escritura", en: "Writing" }
+    SecWriting { es: "Pulido", en: "Polish" }
     SecVocabulary { es: "Vocabulario", en: "Vocabulary" }
     SecCorrections { es: "Correcciones", en: "Corrections" }
     SecMicrophone { es: "Micrófono", en: "Microphone" }
@@ -1290,6 +1290,169 @@ catalogue! {
     }
     NotePosition { es: "Nota {i} de {n}", en: "Note {i} of {n}" }
     NoteOutsideSearch { es: "Nota abierta, fuera de la búsqueda", en: "Open note, outside the search" }
+
+    // --------------------------------------------------------- escritura
+    LangFrench { es: "Francés", en: "French" }
+    LangItalian { es: "Italiano", en: "Italian" }
+    LangGerman { es: "Alemán", en: "German" }
+    LangJapanese { es: "Japonés", en: "Japanese" }
+    LangChinese { es: "Chino", en: "Chinese" }
+    LangKorean { es: "Coreano", en: "Korean" }
+    LangRussian { es: "Ruso", en: "Russian" }
+    WriterModeAuto { es: "Auto", en: "Auto" }
+    WriterModeFix { es: "Arreglar", en: "Fix" }
+    WriterModeTranslate { es: "Traducir", en: "Translate" }
+    WriterTargetLanguages { es: "Traducir al", en: "Translate to" }
+    PhWriterInput { es: "Escribí o pegá un texto", en: "Type or paste some text" }
+    WriterTruncated {
+        es: "El texto era muy largo: se usan los primeros {n} caracteres.",
+        en: "The text was too long: only the first {n} characters are used.",
+    }
+    WriterCapturing { es: "Copiando la selección…", en: "Copying the selection…" }
+    WriterWorkingAuto { es: "Revisando con Grok…", en: "Checking with Grok…" }
+    WriterWorkingFix { es: "Arreglando con Grok…", en: "Fixing with Grok…" }
+    WriterWorkingTranslate { es: "Traduciendo con Grok…", en: "Translating with Grok…" }
+    WriterEmpty {
+        es: "Seleccioná texto en cualquier app y pulsá {key}, o escribilo arriba.",
+        en: "Select text in any app and press {key}, or type it above.",
+    }
+    WriterRunHint { es: "{key} para procesarlo.", en: "{key} to process it." }
+    WriterDoneFix { es: "Arreglado · {lang}", en: "Fixed · {lang}" }
+    WriterDoneTranslate { es: "Traducido del {from} al {to}", en: "Translated from {from} to {to}" }
+    WriterDoneTranslateTo { es: "Traducido al {to}", en: "Translated to {to}" }
+    WriterNoChanges {
+        es: "Sin cambios: el texto ya estaba bien.",
+        en: "No changes: the text was already fine.",
+    }
+    WriterWhy { es: "Por qué", en: "Why" }
+    WriterFailed { es: "No se pudo procesar el texto", en: "Couldn't process the text" }
+    WriterReplace { es: "Reemplazar", en: "Replace" }
+    WriterReplaceUnavailable {
+        es: "No hay una selección que reemplazar: copiá el resultado y pegalo vos.",
+        en: "There's no selection to replace: copy the result and paste it yourself.",
+    }
+    WriterTokens { es: "Tokens: {pair}", en: "Tokens: {pair}" }
+    SecWriter { es: "Escritura", en: "Writing" }
+    SubWriter {
+        es: "Arreglá o traducí lo que selecciones: atajo, cuenta, idiomas y explicaciones.",
+        en: "Fix or translate whatever you select: shortcut, account, languages and explanations.",
+    }
+    WriterNow { es: "Arreglar o traducir ahora", en: "Fix or translate now" }
+    WriterNowHint {
+        es: "arregla o traduce lo que selecciones en cualquier app.",
+        en: "fixes or translates what you select in any app.",
+    }
+    WriterClipboard { es: "Arreglar o traducir el portapapeles", en: "Fix or translate the clipboard" }
+    WriterNowDemo {
+        es: "DEMO: Escritura usa respuestas de ejemplo, sin tu cuenta ni la selección real.",
+        en: "DEMO: Writing uses sample answers, without your account or the real selection.",
+    }
+    WriterNowPrivacy {
+        es: "Mars voice toma el texto solo al pulsar el atajo o este botón, nunca en segundo plano. Arreglar o traducir envía el texto a Grok y consume tu cuenta.",
+        en: "Mars voice takes the text only when you press the shortcut or this button, never in the background. Fixing or translating sends the text to Grok and uses your account.",
+    }
+    WriterShortcut { es: "Arreglar o traducir la selección", en: "Fix or translate the selection" }
+    WriterShortcutHint {
+        es: "Copia lo que tengas seleccionado y abre la ventana. Mars voice no cambia la configuración de tu escritorio por su cuenta: si editás este campo, actualizá también tu atajo global.",
+        en: "Copies whatever you have selected and opens the window. Mars voice never changes your desktop settings on its own: if you edit this field, update your global shortcut too.",
+    }
+    HyprWriterShortcut {
+        es: "En Hyprland: el atajo vive en ~/.config/hypr/config/dicta.lua (dicta ctl write).",
+        en: "On Hyprland: the shortcut lives in ~/.config/hypr/config/dicta.lua (dicta ctl write).",
+    }
+    WriterRestoreClipboardNote {
+        es: "Después de copiar la selección, devuelve lo que tenías en el portapapeles.",
+        en: "After copying the selection, puts back what your clipboard had.",
+    }
+    WriterOwnMode {
+        es: "Escritura tiene su propio modo, con las mismas credenciales que el dictado. Mars voice nunca cambia de modo por su cuenta ni usa la clave como respaldo.",
+        en: "Writing has its own mode, with the same credentials as dictation. Mars voice never switches modes on its own or falls back to the key.",
+    }
+    WriterCredentials {
+        es: "Las credenciales se guardan y se desconectan en Proveedor.",
+        en: "Credentials are saved and disconnected in Provider.",
+    }
+    WriterResult { es: "Resultado", en: "Result" }
+    WriterDefaultMode { es: "Al pulsar el atajo", en: "When you press the shortcut" }
+    WriterModeAutoNote {
+        es: "Si el texto ya está en el idioma destino, lo arregla; si no, lo traduce.",
+        en: "If the text is already in the target language it fixes it; otherwise it translates it.",
+    }
+    WriterModeFixNote {
+        es: "Corrige el texto sin cambiarle el idioma.",
+        en: "Corrects the text without changing its language.",
+    }
+    WriterModeTranslateNote {
+        es: "Lo pasa siempre al idioma destino.",
+        en: "Always puts it into the target language.",
+    }
+    WriterTarget { es: "Idioma destino", en: "Target language" }
+    WriterTargetHint {
+        es: "Al que se traduce, y en el que Auto arregla. También lo cambiás desde la ventana.",
+        en: "The one it translates to, and the one Auto fixes in. You can also change it from the window.",
+    }
+    WriterStrength { es: "Cuánto cambia", en: "How much it changes" }
+    StrengthMinimal { es: "Lo mínimo", en: "Minimal" }
+    StrengthMinimalNote {
+        es: "Solo gramática, ortografía y puntuación.",
+        en: "Only grammar, spelling and punctuation.",
+    }
+    StrengthNatural { es: "Natural", en: "Natural" }
+    StrengthNaturalNote {
+        es: "Además, lo que un nativo diría distinto.",
+        en: "Also what a native speaker would say differently.",
+    }
+    WriterTone { es: "Tono", en: "Tone" }
+    ToneKeep { es: "Como el original", en: "As written" }
+    ToneCasual { es: "Informal", en: "Casual" }
+    ToneNeutral { es: "Neutro", en: "Neutral" }
+    ToneFormal { es: "Formal", en: "Formal" }
+    Unslop { es: "Evitar texto con aire de IA", en: "Avoid AI-sounding text" }
+    UnslopNote {
+        es: "Sin rayas largas, frases de relleno ni el vocabulario típico de la IA.",
+        en: "No em dashes, filler phrases or typical AI vocabulary.",
+    }
+    WriterCopyOnFinish { es: "Copiar el resultado al terminar", en: "Copy the result when done" }
+    WriterCopyOnFinishNote {
+        es: "Queda listo para pegar apenas llega.",
+        en: "Ready to paste as soon as it arrives.",
+    }
+    Explanations { es: "Explicaciones", en: "Explanations" }
+    ExplainLevel { es: "Detalle", en: "Detail" }
+    ExplainOff { es: "No explicar", en: "Off" }
+    ExplainBrief { es: "Breve", en: "Brief" }
+    ExplainDetailed { es: "Detallada", en: "Detailed" }
+    ExplainLevelHint {
+        es: "Breve: una línea por cambio. Detallada: la regla, con un ejemplo.",
+        en: "Brief: one line per change. Detailed: the rule, with an example.",
+    }
+    ExplainLanguage { es: "Idioma de las explicaciones", en: "Language of the explanations" }
+    ExplainLanguageHint {
+        es: "Automático usa el idioma de la interfaz.",
+        en: "Automatic uses the interface language.",
+    }
+    ModelAndPreferences { es: "Modelo y preferencias", en: "Model and preferences" }
+    WriterPreferences { es: "Preferencias", en: "Preferences" }
+    PhWriterInstructions {
+        es: "Por ejemplo: usá inglés británico",
+        en: "For example: use British English",
+    }
+    WriterInstructionsHint {
+        es: "Se suman a cada pedido. {key} o salir del campo las guarda.",
+        en: "Added to every request. {key} or leaving the field saves them.",
+    }
+    WriterDragHint {
+        es: "Arrastrala desde la barra superior. Se queda donde la dejes mientras está abierta; al volver a abrirse usa esta posición.",
+        en: "Drag it by its top bar. It stays where you leave it while open; when it opens again it uses this position.",
+    }
+    HyprWriterRules {
+        es: "En Hyprland: centrarla y abrirla sin borde depende de reglas para la clase {class} en ~/.config/hypr/config/dicta.lua. Mars voice no las instala por su cuenta.",
+        en: "On Hyprland: centering it and opening it without a border depends on rules for the {class} class in ~/.config/hypr/config/dicta.lua. Mars voice doesn't install them on its own.",
+    }
+    WriterHomeHint {
+        es: "arregla o traduce lo que selecciones, con explicaciones para aprender.",
+        en: "fixes or translates what you select, with explanations to learn from.",
+    }
 }
 
 #[cfg(test)]

@@ -15,6 +15,12 @@
 //! in light and dark, Ajustes → Lectura, Historial → Lecturas and Inicio
 //! with reading metrics. Every text, voice, cost and level is invented.
 //!
+//! Escritura (`DICTA_GALLERY_FILTER=escritura`): the window fixing (diff
+//! and explanations) in the six style × colour combinations; translating,
+//! working, re-running, copying the selection, the language menu and an
+//! error in Señal claro and Órbita oscuro; Ajustes → Escritura. The texts
+//! are invented examples of a Spanish speaker writing English.
+//!
 //! Languages (`DICTA_GALLERY_FILTER=i18n-`): the same overlay, reader,
 //! Proveedor (with the subscription consent), Lectura, General and Inicio
 //! in Spanish and English, `i18n-es-*` and `i18n-en-*`. The English set uses
@@ -39,7 +45,8 @@ use dicta_core::{
 use gpui::{AppContext as _, HeadlessAppContext, px, size};
 
 use crate::{
-    Hub, Lang, OVERLAY_WIDTH, OverlayPlacement, READER_WIDTH, UiState, assets,
+    Hub, Lang, OVERLAY_WIDTH, OverlayPlacement, READER_WIDTH, UiState, WRITER_MAX_HEIGHT,
+    WRITER_WIDTH, assets,
     overlay::Overlay,
     overlay_height,
     reader::{Popover, Reader, reader_height},
@@ -47,6 +54,10 @@ use crate::{
     text_field,
     theme::Palette,
     wave::LevelHistory,
+    writer::Writer,
+};
+use dicta_core::writer::{
+    DiffSpan, WriterChange, WriterMode, WriterOutput, WriterPhase, WriterSnapshot,
 };
 
 const NOW_MS: u64 = 1_791_550_800_000;
@@ -363,6 +374,110 @@ fn reading_levels(until: f32, start: Instant) -> LevelHistory {
     }
     h.freeze_at(start + Duration::from_secs_f32(until));
     h
+}
+
+/// Invented DEMO input for Escritura: English written by a Spanish speaker.
+const WRITE_INPUT: &str = "DEMO. Yesterday I go to the store and buyed two apple. I am agree with you that is very cheap.";
+
+/// The fixed text with its diff and explanations, Spanish or English.
+fn writer_fixed(lang: Lang) -> WriterSnapshot {
+    let why: [&str; 5] = match lang {
+        Lang::Es => [
+            "Con yesterday la acción ya pasó: va el pasado, went.",
+            "Buy es irregular: su pasado es bought.",
+            "Con two, el sustantivo va en plural.",
+            "Agree ya es un verbo: no lleva am.",
+            "En inglés la oración necesita sujeto: it is, o it's.",
+        ],
+        Lang::En => [
+            "Yesterday puts it in the past: use the past tense, went.",
+            "Buy is irregular: its past tense is bought.",
+            "After two, the noun is plural.",
+            "Agree is already a verb, so it takes no am.",
+            "English sentences need a subject: it is, or it's.",
+        ],
+    };
+    let change = |original: &str, corrected: &str, why: &str| WriterChange {
+        original: original.into(),
+        corrected: corrected.into(),
+        why: why.into(),
+    };
+    let same = |t: &str| DiffSpan::Same(t.into());
+    let removed = |t: &str| DiffSpan::Removed(t.into());
+    let added = |t: &str| DiffSpan::Added(t.into());
+    WriterSnapshot {
+        phase: WriterPhase::Ready,
+        request_id: 4,
+        mode: WriterMode::Auto,
+        target_language: "en".into(),
+        input: WRITE_INPUT.into(),
+        output: Some(WriterOutput {
+            mode: WriterMode::Fix,
+            detected_language: "en".into(),
+            text: "DEMO. Yesterday I went to the store and bought two apples. I agree with you \
+                   that it's very cheap."
+                .into(),
+            changes: vec![
+                change("go", "went", why[0]),
+                change("buyed", "bought", why[1]),
+                change("apple", "apples", why[2]),
+                change("am agree", "agree", why[3]),
+                change("is", "it's", why[4]),
+            ],
+        }),
+        diff: vec![
+            same("DEMO. Yesterday I "),
+            removed("go"),
+            added("went"),
+            same(" to the store and "),
+            removed("buyed"),
+            added("bought"),
+            same(" two "),
+            removed("apple."),
+            added("apples."),
+            same(" I "),
+            removed("am "),
+            same("agree with you that "),
+            removed("is"),
+            added("it's"),
+            same(" very cheap."),
+        ],
+        status: match lang {
+            Lang::Es => "Copiado al portapapeles",
+            Lang::En => "Copied to the clipboard",
+        }
+        .into(),
+        input_tokens: Some(412),
+        output_tokens: Some(96),
+        can_replace: true,
+        ..Default::default()
+    }
+}
+
+/// A Spanish message translated to English.
+fn writer_translated() -> WriterSnapshot {
+    WriterSnapshot {
+        phase: WriterPhase::Ready,
+        request_id: 5,
+        mode: WriterMode::Auto,
+        target_language: "en".into(),
+        input: "DEMO. Mañana tengo una reunión con el equipo a las diez, ¿me avisás si llegás \
+                tarde?"
+            .into(),
+        output: Some(WriterOutput {
+            mode: WriterMode::Translate,
+            detected_language: "es".into(),
+            text: "DEMO. I have a meeting with the team tomorrow at ten. Can you let me know \
+                   if you'll be late?"
+                .into(),
+            changes: Vec::new(),
+        }),
+        status: "Copiado al portapapeles".into(),
+        input_tokens: Some(388),
+        output_tokens: Some(41),
+        can_replace: true,
+        ..Default::default()
+    }
 }
 
 fn base(theme: Theme, mode: ColorMode) -> AppSnapshot {
@@ -1179,6 +1294,145 @@ pub fn render_gallery(out: &Path) -> anyhow::Result<Vec<PathBuf>> {
         written.push(path);
     }
 
+    // ---------------------------------------------------------- escritura
+    let writer_shot = |cx: &mut HeadlessAppContext,
+                       name: String,
+                       snap: AppSnapshot,
+                       menu: bool,
+                       written: &mut Vec<PathBuf>|
+     -> anyhow::Result<()> {
+        if !wanted(&name) {
+            return Ok(());
+        }
+        let hub = cx.update(|cx| hub(snap, LevelHistory::default(), cx));
+        let placement = OverlayPlacement::for_writer(&AppConfig::default());
+        let window = cx.open_window(
+            size(px(WRITER_WIDTH), px(WRITER_MAX_HEIGHT)),
+            |window, cx| {
+                cx.new(|cx| {
+                    let w = Writer::new(hub, placement, window, cx);
+                    if menu { w.with_menu() } else { w }
+                })
+            },
+        )?;
+        let path = out.join(format!("{name}.png"));
+        capture(cx, window.into(), &path)?;
+        written.push(path);
+        Ok(())
+    };
+    for mode in [ColorMode::Light, ColorMode::Dark] {
+        for theme in Theme::ALL {
+            let tag = format!("{}-{}", slug(theme), mode_slug(mode));
+            cx.update(|cx| cx.global_mut::<UiState>().palette = Palette::new(theme, mode));
+            let with = |w: WriterSnapshot| {
+                let mut s = base(theme, mode);
+                s.writer = w;
+                s
+            };
+            writer_shot(
+                &mut cx,
+                format!("escritura-{tag}-arreglado"),
+                with(writer_fixed(Lang::Es)),
+                false,
+                &mut written,
+            )?;
+            if !matches!(
+                (theme, mode),
+                (Theme::Signal, ColorMode::Light) | (Theme::Orbit, ColorMode::Dark)
+            ) {
+                continue;
+            }
+            writer_shot(
+                &mut cx,
+                format!("escritura-{tag}-traducido"),
+                with(writer_translated()),
+                false,
+                &mut written,
+            )?;
+            writer_shot(
+                &mut cx,
+                format!("escritura-{tag}-trabajando"),
+                with(WriterSnapshot {
+                    phase: WriterPhase::Working,
+                    request_id: 3,
+                    target_language: "en".into(),
+                    input: WRITE_INPUT.into(),
+                    truncated: true,
+                    ..Default::default()
+                }),
+                false,
+                &mut written,
+            )?;
+            let mut again = writer_fixed(Lang::Es);
+            again.phase = WriterPhase::Working;
+            again.mode = WriterMode::Fix;
+            again.status = String::new();
+            writer_shot(
+                &mut cx,
+                format!("escritura-{tag}-rehaciendo"),
+                with(again),
+                false,
+                &mut written,
+            )?;
+            writer_shot(
+                &mut cx,
+                format!("escritura-{tag}-copiando"),
+                with(WriterSnapshot {
+                    phase: WriterPhase::Capturing,
+                    request_id: 2,
+                    target_language: "en".into(),
+                    ..Default::default()
+                }),
+                false,
+                &mut written,
+            )?;
+            let mut menu = writer_fixed(Lang::Es);
+            menu.can_replace = false;
+            writer_shot(
+                &mut cx,
+                format!("escritura-{tag}-idiomas"),
+                with(menu),
+                true,
+                &mut written,
+            )?;
+            writer_shot(
+                &mut cx,
+                format!("escritura-{tag}-error"),
+                with(WriterSnapshot {
+                    phase: WriterPhase::Error,
+                    request_id: 6,
+                    mode: WriterMode::Fix,
+                    target_language: "en".into(),
+                    input: WRITE_INPUT.into(),
+                    error: Some(
+                        "DEMO: Grok no respondió a tiempo (504).\nTu texto sigue acá; probá de \
+                         nuevo cuando quieras."
+                            .into(),
+                    ),
+                    ..Default::default()
+                }),
+                false,
+                &mut written,
+            )?;
+        }
+    }
+    for (name, theme, mode) in [
+        ("app-senal-claro-escritura", Theme::Signal, ColorMode::Light),
+        ("app-orbita-oscuro-escritura", Theme::Orbit, ColorMode::Dark),
+    ] {
+        if !wanted(name) {
+            continue;
+        }
+        cx.update(|cx| cx.global_mut::<UiState>().palette = Palette::new(theme, mode));
+        let hub = cx.update(|cx| hub(base(theme, mode), LevelHistory::default(), cx));
+        let window = cx.open_window(size(px(1040.), px(3000.)), |window, cx| {
+            cx.new(|cx| Settings::new(hub, window, cx).with_section(Section::Writer))
+        })?;
+        let path = out.join(format!("{name}.png"));
+        capture(&mut cx, window.into(), &path)?;
+        written.push(path);
+    }
+
     render_languages(&mut cx, out, &wanted, start, &mut written)?;
 
     // Animation fixture: each style at rest, during normal speech, loud,
@@ -1423,6 +1677,22 @@ fn render_languages(
             }),
             written,
         )?;
+
+        // Escritura, its explanations in the interface language.
+        let name = format!("i18n-{code}-escritura-arreglado");
+        if wanted(&name) {
+            let mut s = snap(&|_| {});
+            s.writer = writer_fixed(lang);
+            let hub = cx.update(|cx| hub(s, LevelHistory::default(), cx));
+            let placement = OverlayPlacement::for_writer(&AppConfig::default());
+            let window = cx.open_window(
+                size(px(WRITER_WIDTH), px(WRITER_MAX_HEIGHT)),
+                |window, cx| cx.new(|cx| Writer::new(hub, placement, window, cx)),
+            )?;
+            let path = out.join(format!("{name}.png"));
+            capture(cx, window.into(), &path)?;
+            written.push(path);
+        }
 
         // Main window pages.
         let page = |cx: &mut HeadlessAppContext,

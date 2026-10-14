@@ -186,6 +186,7 @@ pub enum Icon {
     Read,
     Minus,
     Plus,
+    Writer,
 }
 
 impl Icon {
@@ -229,6 +230,7 @@ impl Icon {
             Self::Read => "icons/read.svg",
             Self::Minus => "icons/minus.svg",
             Self::Plus => "icons/plus.svg",
+            Self::Writer => "icons/writer.svg",
         }
     }
 }
@@ -278,6 +280,7 @@ const ICONS: &[(&str, &[u8])] = icon_bytes!(
     "icons/read.svg",
     "icons/minus.svg",
     "icons/plus.svg",
+    "icons/writer.svg",
 );
 
 /// Serves the embedded icons to `svg()`.
@@ -345,6 +348,7 @@ mod tests {
             Icon::Read,
             Icon::Minus,
             Icon::Plus,
+            Icon::Writer,
         ] {
             assert!(Assets.load(icon.path()).unwrap().is_some(), "{icon:?}");
         }

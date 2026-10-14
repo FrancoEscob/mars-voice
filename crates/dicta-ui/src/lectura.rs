@@ -65,7 +65,7 @@ fn fmt_window(seconds: u16) -> String {
 }
 
 /// Short line inside a group that starts a sub-topic.
-fn subheading(text: impl Into<SharedString>, p: Palette) -> Div {
+pub(crate) fn subheading(text: impl Into<SharedString>, p: Palette) -> Div {
     div()
         .pt(px(6.))
         .text_size(px(12.5))
@@ -76,7 +76,7 @@ fn subheading(text: impl Into<SharedString>, p: Palette) -> Div {
 
 /// A label on the left and a control on the right that wraps below on
 /// narrow columns.
-fn setting_row(label: &'static str, control: impl IntoElement) -> Div {
+pub(crate) fn setting_row(label: &'static str, control: impl IntoElement) -> Div {
     div()
         .flex()
         .flex_wrap()

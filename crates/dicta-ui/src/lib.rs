@@ -12,6 +12,7 @@ mod assets;
 pub mod bench;
 mod corrections;
 mod errors;
+mod escritura;
 mod format;
 #[cfg(all(feature = "screenshots", target_os = "linux"))]
 pub mod gallery;
@@ -27,6 +28,7 @@ mod text_field;
 mod theme;
 mod wave;
 mod widgets;
+mod writer;
 
 use std::{
     sync::{
@@ -53,6 +55,7 @@ use crate::{
     settings::{Section, Settings},
     theme::{Palette, VoiceStyle},
     wave::LevelHistory,
+    writer::Writer,
 };
 
 actions!(dicta, [Quit, CloseWindow]);
@@ -86,6 +89,12 @@ pub const READER_MAX_HEIGHT: f32 = 440.;
 /// Wayland app_id / X11 class of the read-aloud window, separate from
 /// [`OVERLAY_APP_ID`] so both can be open and ruled independently.
 pub const READER_APP_ID: &str = "dicta-reader";
+/// Escritura window: a floating card like the reader, a little wider for the
+/// mode and language controls. It keeps one height in every phase.
+pub const WRITER_WIDTH: f32 = 480.;
+pub const WRITER_MAX_HEIGHT: f32 = 540.;
+/// Wayland app_id / X11 class of the Escritura window.
+pub use dicta_core::writer::WRITER_APP_ID;
 
 /// Hyprland 0.56 ignores client-side resizes of floating toplevels (checked
 /// live: a 404x100 window stayed 404x100 after `resize`), so on Wayland the
@@ -179,6 +188,24 @@ impl OverlayPlacement {
         }
     }
 
+    /// Placement of the Escritura window, from `config.writer`.
+    pub fn for_writer(config: &AppConfig) -> Self {
+        let w = &config.writer;
+        if w.window_centered {
+            Self {
+                centered: true,
+                x: 0.,
+                y: 0.,
+            }
+        } else {
+            Self {
+                centered: false,
+                x: w.window_x,
+                y: w.window_y,
+            }
+        }
+    }
+
     /// Bottom-anchored offsets keep the card glued to the bottom of a
     /// fixed-height window, so it grows upwards like the configured edge.
     pub fn card_at_bottom(self) -> bool {
@@ -208,6 +235,16 @@ pub fn set_reader_placer(placer: impl Fn(Point<f32>) + Send + Sync + 'static) {
     let _ = READER_PLACER.set(Box::new(placer));
 }
 
+static WRITER_PLACER: OnceLock<Placer> = OnceLock::new();
+
+/// Like [`set_reader_placer`] for the Escritura window ([`WRITER_APP_ID`]):
+/// called right after it opens with `writer.window_centered = false`, with
+/// the top-left corner of a [`WRITER_WIDTH`]×[`WRITER_MAX_HEIGHT`] surface in
+/// logical pixels relative to the monitor. Only the first call has effect.
+pub fn set_writer_placer(placer: impl Fn(Point<f32>) + Send + Sync + 'static) {
+    let _ = WRITER_PLACER.set(Box::new(placer));
+}
+
 /// Latest controller state plus UI-only bookkeeping.
 pub struct Hub {
     pub snap: AppSnapshot,
@@ -222,6 +259,7 @@ pub struct Hub {
     settings_dismissed: bool,
     overlay: Option<(WindowHandle<Overlay>, OverlayPlacement, f32)>,
     reader: Option<(WindowHandle<Reader>, OverlayPlacement, f32)>,
+    writer: Option<(WindowHandle<Writer>, OverlayPlacement)>,
     settings: Option<WindowHandle<Settings>>,
     /// Section the next settings render should show, e.g. Micrófono after
     /// the overlay's "Elegir micrófono". Consumed by `Settings`.
@@ -240,6 +278,7 @@ impl Hub {
             settings_dismissed: false,
             overlay: None,
             reader: None,
+            writer: None,
             settings: None,
             settings_section: None,
         }
@@ -508,6 +547,9 @@ fn same_main_state(a: &AppSnapshot, b: &AppSnapshot) -> bool {
             .all(|(x, y)| x.id == y.id && x.from == y.from && x.to == y.to)
         && same_tts_main_state(&a.tts, &b.tts)
         && same_readings(a, b)
+        // Escritura changes per request, never per frame: the window opens,
+        // closes and redraws through the hub (`Writer` skips the rest).
+        && a.writer == b.writer
 }
 
 /// What of the reading the main window and window management use: whether
@@ -672,6 +714,7 @@ pub fn run(
         widgets::prewarm_grain(cx.global::<UiState>().palette, cx);
         text_field::bind_keys(cx);
         reader::bind_keys(cx);
+        writer::bind_keys(cx);
         // `secondary-` is Cmd on macOS and Ctrl elsewhere.
         cx.bind_keys([
             KeyBinding::new("secondary-q", Quit, None),
@@ -704,6 +747,11 @@ pub fn run(
                     if hub.reader.is_some_and(|(w, _, _)| w.window_id() == id) {
                         hub.reader = None;
                         hub.send(Command::TtsStop);
+                    }
+                    // Closed by the compositor: like ×, cancel and close.
+                    if hub.writer.is_some_and(|(w, _)| w.window_id() == id) {
+                        hub.writer = None;
+                        hub.send(Command::WriterClose);
                     }
                     cx.notify();
                 });
@@ -896,6 +944,7 @@ pub(crate) fn display_bounds(cx: &mut App) -> Bounds<f32> {
 
 fn sync_windows(hub: &Entity<Hub>, cx: &mut App) {
     sync_reader(hub, cx);
+    sync_writer(hub, cx);
     let h = hub.read(cx);
     let want_settings = h.snap.show_settings && !h.settings_dismissed;
     let settings_open = h.settings;
@@ -1051,6 +1100,90 @@ fn open_reader(
             size: display.size,
         };
         placer(placement_origin(placement, reader_size, local));
+    }
+    Ok(handle)
+}
+
+fn wants_writer(snap: &AppSnapshot) -> bool {
+    snap.writer.phase != dicta_core::WriterPhase::Hidden
+}
+
+/// Opens, closes or reopens (placement changed in Ajustes) the Escritura
+/// window, like the reader. Its card keeps one height, so it never resizes.
+fn sync_writer(hub: &Entity<Hub>, cx: &mut App) {
+    let h = hub.read(cx);
+    let want = wants_writer(&h.snap);
+    let placement = OverlayPlacement::for_writer(&h.snap.config);
+    let current = h.writer;
+    let open = current.map(|(_, p)| (p, WRITER_MAX_HEIGHT));
+    match overlay_action(want, open, placement, WRITER_MAX_HEIGHT) {
+        OverlayAction::Keep | OverlayAction::Resize => {}
+        OverlayAction::Open => open_writer_window(hub, placement, cx),
+        OverlayAction::Close | OverlayAction::Reopen => {
+            let Some((handle, _)) = current else {
+                return;
+            };
+            hub.update(cx, |h, _| h.writer = None);
+            handle
+                .update(cx, |_, window, _| window.remove_window())
+                .ok();
+            if want {
+                open_writer_window(hub, placement, cx);
+            }
+        }
+    }
+}
+
+fn open_writer_window(hub: &Entity<Hub>, placement: OverlayPlacement, cx: &mut App) {
+    if let Ok(handle) = open_writer(hub.clone(), placement, cx) {
+        hub.update(cx, |h, cx| {
+            h.writer = Some((handle, placement));
+            cx.notify();
+        });
+    }
+}
+
+/// Opens Escritura like the reader, a borderless floating toplevel dragged
+/// from its header, but focused: the user came to read, edit and act on the
+/// result, and Esc or Ctrl+Enter should work right away. Pasting back into
+/// the original window is the controller's job (`WriterReplace`).
+fn open_writer(
+    hub: Entity<Hub>,
+    placement: OverlayPlacement,
+    cx: &mut App,
+) -> anyhow::Result<WindowHandle<Writer>> {
+    let writer_size = size(WRITER_WIDTH, WRITER_MAX_HEIGHT);
+    let display = display_bounds(cx);
+    let origin = placement_origin(placement, writer_size, display);
+    let bounds: Bounds<Pixels> = Bounds {
+        origin: point(px(origin.x), px(origin.y)),
+        size: size(px(writer_size.width), px(writer_size.height)),
+    };
+    let handle = cx.open_window(
+        WindowOptions {
+            window_bounds: Some(WindowBounds::Windowed(bounds)),
+            titlebar: None,
+            focus: true,
+            show: true,
+            kind: FLOATING_KIND,
+            is_movable: true,
+            is_resizable: false,
+            is_minimizable: false,
+            window_background: WindowBackgroundAppearance::Transparent,
+            app_id: Some(WRITER_APP_ID.into()),
+            ..Default::default()
+        },
+        move |window, cx| cx.new(|cx| Writer::new(hub, placement, window, cx)),
+    )?;
+    if fixed_surface()
+        && !placement.centered
+        && let Some(placer) = WRITER_PLACER.get()
+    {
+        let local = Bounds {
+            origin: point(0., 0.),
+            size: display.size,
+        };
+        placer(placement_origin(placement, writer_size, local));
     }
     Ok(handle)
 }
@@ -1562,6 +1695,66 @@ mod tests {
             overlay_action(snap.tts.show, open, placement, 100.),
             OverlayAction::Close
         );
+    }
+
+    #[test]
+    fn escritura_opens_with_its_own_placement_and_survives_its_phases() {
+        use dicta_core::WriterPhase;
+        let mut config = AppConfig::default();
+        let writer = OverlayPlacement::for_writer(&config);
+        assert!(writer.centered);
+        config.tts.window_centered = false;
+        config.tts.window_x = -24.;
+        assert_eq!(
+            OverlayPlacement::for_writer(&config),
+            writer,
+            "reader offsets"
+        );
+        config.writer.window_centered = false;
+        config.writer.window_x = -24.;
+        config.writer.window_y = 24.;
+        let edge = OverlayPlacement::for_writer(&config);
+        assert!(!edge.centered && !edge.card_at_bottom());
+        let o = placement_origin(edge, size(WRITER_WIDTH, WRITER_MAX_HEIGHT), display());
+        assert_eq!((o.x, o.y), (1920. - WRITER_WIDTH - 24., 24.));
+        assert!(![OVERLAY_APP_ID, READER_APP_ID].contains(&WRITER_APP_ID));
+
+        let mut snap = AppSnapshot::new(AppConfig::default());
+        assert!(!wants_writer(&snap));
+        let mut open = None;
+        for phase in [
+            WriterPhase::Capturing,
+            WriterPhase::Working,
+            WriterPhase::Ready,
+            WriterPhase::Working,
+            WriterPhase::Error,
+        ] {
+            snap.writer.phase = phase;
+            assert!(wants_writer(&snap));
+            let action = overlay_action(true, open, writer, WRITER_MAX_HEIGHT);
+            if open.is_none() {
+                assert_eq!(action, OverlayAction::Open);
+            } else {
+                assert_eq!(action, OverlayAction::Keep, "{phase:?}");
+            }
+            open = Some((writer, WRITER_MAX_HEIGHT));
+        }
+        snap.writer.phase = WriterPhase::Hidden;
+        assert!(!wants_writer(&snap));
+    }
+
+    #[test]
+    fn escritura_changes_reach_the_hub_and_its_window() {
+        let a = recording("hola", "", 0, 1);
+        let mut b = a.clone();
+        b.writer.phase = dicta_core::WriterPhase::Working;
+        assert!(!same_main_state(&a, &b), "phase opens the window");
+        let mut b = a.clone();
+        b.writer.input = "I has a cat".into();
+        assert!(!same_main_state(&a, &b), "input");
+        let mut b = a.clone();
+        b.config.writer.target_language = "pt".into();
+        assert!(!same_main_state(&a, &b), "configuration");
     }
 
     fn bounds(x: f32, y: f32, w: f32, h: f32) -> Bounds<f32> {

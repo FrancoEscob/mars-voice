@@ -586,13 +586,18 @@ impl TextField {
             self.edited(cx);
         }
     }
+    /// Ctrl+Enter and Esc keep bubbling after the field handles them, so a
+    /// container can act on them too (Escritura runs on Ctrl+Enter and
+    /// closes on Esc while its text has focus).
     fn on_commit(&mut self, _: &CommitField, _: &mut Window, cx: &mut Context<Self>) {
         self.dirty = true;
         self.commit(cx);
+        cx.propagate();
     }
     fn on_blur_action(&mut self, _: &Blur, window: &mut Window, cx: &mut Context<Self>) {
         self.commit(cx);
         window.blur(cx);
+        cx.propagate();
     }
 
     fn on_mouse_down(
