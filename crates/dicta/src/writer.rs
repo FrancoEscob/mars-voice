@@ -20,7 +20,7 @@ use dicta_platform::{
 use dicta_provider::{CancellationToken, Credentials, ProviderError, WriterResult, XaiProvider};
 use std::{
     sync::{
-        Arc,
+        Arc, Mutex,
         atomic::{AtomicU64, Ordering},
         mpsc::{self, Receiver, Sender},
     },
@@ -108,7 +108,10 @@ enum WriterEvent {
         request: u64,
         result: Result<WriterResult, ProviderError>,
     },
-    Copied(Result<&'static str, String>),
+    Copied {
+        epoch: u64,
+        result: Result<&'static str, String>,
+    },
     Replaced {
         epoch: u64,
         result: Result<&'static str, String>,
@@ -118,6 +121,8 @@ enum WriterEvent {
 struct InFlight {
     id: u64,
     cancel: CancellationToken,
+    /// Texto enviado. El usuario puede editar el cuadro mientras Grok trabaja.
+    input: String,
 }
 
 /// Estado de la ventana antes de Reemplazar, para reabrirla si el pegado falla.
@@ -142,6 +147,9 @@ pub(crate) struct Writer {
     /// Crece al cerrar o abrir otra escritura: cancela un Reemplazar en cola.
     epoch: Arc<AtomicU64>,
     stash: Option<Stash>,
+    /// Ordena copias del resultado y capturas: una copia de una escritura
+    /// anterior no puede escribir el portapapeles en medio de otra captura.
+    clipboard: Arc<Mutex<()>>,
 }
 
 impl Writer {
@@ -184,6 +192,7 @@ impl Writer {
             source: None,
             epoch: Arc::new(AtomicU64::new(0)),
             stash: None,
+            clipboard: Arc::new(Mutex::new(())),
         }
     }
 
@@ -271,7 +280,9 @@ impl Writer {
         let restore = config.restore_clipboard;
         let terminals = snap.config.tts.terminal_classes.clone();
         let tx = self.events_tx.clone();
+        let clipboard = self.clipboard.clone();
         self.runtime.spawn_blocking(move || {
+            let _clipboard = clipboard.lock().unwrap_or_else(|e| e.into_inner());
             let result = if copy {
                 // Copia en la ventana activa en el momento del atajo, antes de
                 // que cambie el foco. Restaura el portapapeles aunque falle.
@@ -342,8 +353,7 @@ impl Writer {
         let id = w.request_id;
         w.mode = mode;
         w.phase = WriterPhase::Working;
-        w.output = None;
-        w.diff.clear();
+        // El resultado anterior queda visible, atenuado, hasta que llegue el nuevo.
         w.error = None;
         w.input_tokens = None;
         w.output_tokens = None;
@@ -354,12 +364,13 @@ impl Writer {
         }
         .into();
         let cancel = CancellationToken::new();
+        let input = w.input.clone();
         self.request = Some(InFlight {
             id,
             cancel: cancel.clone(),
+            input: input.clone(),
         });
         let config = snap.config.clone();
-        let input = w.input.clone();
         let target = w.target_language.clone();
         let explain = explain_language(&config);
         let tx = self.events_tx.clone();
@@ -426,13 +437,13 @@ impl Writer {
         if !current {
             return;
         }
-        self.request = None;
+        let sent = self.request.take().map(|r| r.input).unwrap_or_default();
         let w = &mut snap.writer;
         match result {
             Ok(result) => {
                 let output = result.output;
                 w.diff = if output.mode == WriterMode::Fix {
-                    (self.ops.diff)(&w.input, &output.text)
+                    (self.ops.diff)(&sent, &output.text)
                 } else {
                     vec![]
                 };
@@ -441,7 +452,7 @@ impl Writer {
                 w.phase = WriterPhase::Ready;
                 w.status = match output.mode {
                     WriterMode::Translate => "Texto traducido",
-                    _ if output.changes.is_empty() && output.text == w.input => {
+                    _ if output.changes.is_empty() && output.text == sent => {
                         "El texto ya estaba bien"
                     }
                     _ => "Texto arreglado",
@@ -492,7 +503,15 @@ impl Writer {
     fn copy_result(&self, text: String) {
         let tx = self.events_tx.clone();
         let demo = self.demo;
+        let epoch = self.epoch.load(Ordering::Acquire);
+        let current = self.epoch.clone();
+        let clipboard = self.clipboard.clone();
         self.runtime.spawn_blocking(move || {
+            let _clipboard = clipboard.lock().unwrap_or_else(|e| e.into_inner());
+            // Otra escritura empezó (o se cerró esta): no pisar su portapapeles.
+            if current.load(Ordering::Acquire) != epoch {
+                return;
+            }
             let result = if demo {
                 Ok("Demo: copiado simulado")
             } else {
@@ -500,7 +519,7 @@ impl Writer {
                     .map(|_| "Resultado copiado al portapapeles")
                     .map_err(|e| e.to_string())
             };
-            let _ = tx.send(WriterEvent::Copied(result));
+            let _ = tx.send(WriterEvent::Copied { epoch, result });
         });
     }
 
@@ -611,8 +630,10 @@ impl Writer {
                     result,
                 } => self.on_captured(capture, empty, result, snap),
                 WriterEvent::Done { request, result } => self.on_done(request, result, snap),
-                WriterEvent::Copied(result) => {
-                    if snap.writer.phase != WriterPhase::Hidden {
+                WriterEvent::Copied { epoch, result } => {
+                    if self.epoch.load(Ordering::Acquire) == epoch
+                        && snap.writer.phase != WriterPhase::Hidden
+                    {
                         snap.writer.status = match result {
                             Ok(message) => message.into(),
                             Err(error) => error,
@@ -899,6 +920,70 @@ mod tests {
             .unwrap();
         f.settle();
         assert_eq!(f.snap.writer.output.as_ref().unwrap().text, "nuevo");
+    }
+
+    #[test]
+    fn edits_while_working_do_not_change_the_diff_base() {
+        let mut f = Fixture::new(Duration::from_secs(60));
+        f.snap.config.writer.copy_on_finish = false;
+        f.send(Command::WriterClipboard);
+        f.until(|w| w.phase == WriterPhase::Working);
+        let sent = f.snap.writer.input.clone();
+        let request = f.snap.writer.request_id;
+        f.send(Command::WriterSetInput("otro texto".into()));
+        f.writer
+            .events_tx
+            .send(WriterEvent::Done {
+                request,
+                result: result(&sent),
+            })
+            .unwrap();
+        f.until(|w| w.phase == WriterPhase::Ready);
+        let w = &f.snap.writer;
+        assert_eq!(w.input, "otro texto");
+        assert_eq!(w.diff[0], DiffSpan::Removed(sent));
+        assert_eq!(w.status, "El texto ya estaba bien");
+    }
+
+    #[test]
+    fn rerun_keeps_the_previous_result_until_the_new_one_arrives() {
+        let mut f = Fixture::new(Duration::from_secs(60));
+        f.snap.config.writer.copy_on_finish = false;
+        f.send(Command::WriterClipboard);
+        f.until(|w| w.phase == WriterPhase::Working);
+        let request = f.snap.writer.request_id;
+        f.writer
+            .events_tx
+            .send(WriterEvent::Done {
+                request,
+                result: result("primero"),
+            })
+            .unwrap();
+        f.until(|w| w.phase == WriterPhase::Ready);
+        f.send(Command::WriterRun(WriterMode::Fix));
+        let w = &f.snap.writer;
+        assert_eq!(w.phase, WriterPhase::Working);
+        assert_eq!(w.output.as_ref().unwrap().text, "primero");
+        assert!(!w.diff.is_empty());
+    }
+
+    #[test]
+    fn a_copy_from_a_previous_session_does_not_touch_the_new_one() {
+        let mut f = Fixture::new(Duration::from_secs(60));
+        f.send(Command::WriterClipboard);
+        f.until(|w| w.phase == WriterPhase::Working);
+        let old = f.writer.epoch.load(Ordering::Acquire);
+        f.send(Command::WriterClipboard);
+        f.until(|w| w.phase == WriterPhase::Working);
+        f.writer
+            .events_tx
+            .send(WriterEvent::Copied {
+                epoch: old,
+                result: Ok("copia vieja"),
+            })
+            .unwrap();
+        f.settle();
+        assert_ne!(f.snap.writer.status, "copia vieja");
     }
 
     #[test]
