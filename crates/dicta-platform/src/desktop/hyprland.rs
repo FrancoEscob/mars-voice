@@ -7,7 +7,9 @@
 //! No clipboard polling, key logging, or background focus tracking. An
 //! explicit paste may restore only the external target remembered for this
 //! dictation, after validating its identity.
-use super::{APP_ID, FloatingWindow, OVERLAY_CLASS, PastePlan, PasteTarget, READER_CLASS};
+use super::{
+    APP_ID, FloatingWindow, OVERLAY_CLASS, PastePlan, PasteTarget, READER_CLASS, WRITER_CLASS,
+};
 use anyhow::{Context, Result, bail, ensure};
 use serde::Deserialize;
 use std::{
@@ -72,13 +74,14 @@ fn validate_identity(target: &PasteTarget) -> Result<()> {
     );
     Ok(())
 }
-/// This process, or any Dicta window class (settings, overlay, reader).
+/// This process, or any Dicta window class (settings, overlay, reader, writer).
 pub(crate) fn is_own_window(target: &PasteTarget, own_pid: u32) -> bool {
     let is_ours = |class: &str| {
         class.eq_ignore_ascii_case(APP_ID)
             || class.eq_ignore_ascii_case("dicta")
             || class.eq_ignore_ascii_case(OVERLAY_CLASS)
             || class.eq_ignore_ascii_case(READER_CLASS)
+            || class.eq_ignore_ascii_case(WRITER_CLASS)
     };
     target.pid == i64::from(own_pid) || is_ours(&target.class) || is_ours(&target.initial_class)
 }
@@ -163,12 +166,78 @@ pub(crate) fn paste_prepared(
         is_current,
     )
 }
+
+const REPLACE_CANCELLED: &str = "Reemplazo cancelado; el resultado quedó en el portapapeles";
+const SOURCE_GONE: &str = "La ventana de origen ya no está abierta o cambió de identidad; el resultado quedó en el portapapeles";
+const SOURCE_UNIDENTIFIED: &str = "Hyprland no identifica la ventana de origen de forma segura; el resultado quedó en el portapapeles";
+const SOURCE_NOT_FOCUSED: &str = "No se pudo volver a la ventana de origen; el resultado quedó en el portapapeles. Hacé clic en ella y pegá";
+/// After focusing the source, how long Hyprland may take to report it active.
+const FOCUS_SETTLE: Duration = Duration::from_millis(300);
+const FOCUS_POLL: Duration = Duration::from_millis(20);
+
+/// Escritura «Reemplazar». The writing window is closing (or already closed)
+/// when this runs, so the active window may be ours, the source, or whatever
+/// Hyprland focused after the close. Copies first; the source must still be
+/// open with the same identity, and is focused by `stableId` when it is not
+/// active. Rechecks focus right before input; never Enter.
+pub(crate) fn paste_into(
+    text: &str,
+    target: &PasteTarget,
+    keys: &str,
+    is_current: impl Fn() -> bool,
+) -> Result<()> {
+    execute_paste_into(
+        &mut LiveDesktop,
+        text,
+        target,
+        keys,
+        std::process::id(),
+        is_current,
+    )
+}
+
+fn execute_paste_into(
+    backend: &mut impl PasteDesktop,
+    text: &str,
+    target: &PasteTarget,
+    keys: &str,
+    own_pid: u32,
+    is_current: impl Fn() -> bool,
+) -> Result<()> {
+    ensure!(is_current(), REPLACE_CANCELLED);
+    backend.copy(text)?;
+    let args = paste_args(keys)?;
+    validate_target(target, own_pid)?;
+    safe_stable_id(target).map_err(|_| anyhow::anyhow!(SOURCE_UNIDENTIFIED))?;
+    ensure!(
+        backend.clients()?.iter().any(|window| window == target),
+        SOURCE_GONE
+    );
+    ensure!(is_current(), REPLACE_CANCELLED);
+    if backend.active().ok().as_ref() != Some(target) {
+        backend
+            .focus(target)
+            .map_err(|_| anyhow::anyhow!(SOURCE_NOT_FOCUSED))?;
+    }
+    let mut waited = Duration::ZERO;
+    while backend.active().ok().as_ref() != Some(target) {
+        ensure!(waited < FOCUS_SETTLE, SOURCE_NOT_FOCUSED);
+        backend.sleep(FOCUS_POLL);
+        waited += FOCUS_POLL;
+    }
+    ensure!(is_current(), REPLACE_CANCELLED);
+    backend.inject(&args)
+}
+
 trait PasteDesktop {
     fn copy(&mut self, text: &str) -> Result<()>;
     fn active(&mut self) -> Result<PasteTarget>;
     fn clients(&mut self) -> Result<Vec<PasteTarget>>;
     fn focus(&mut self, target: &PasteTarget) -> Result<()>;
     fn inject(&mut self, args: &[&str]) -> Result<()>;
+    fn sleep(&mut self, duration: Duration) {
+        std::thread::sleep(duration);
+    }
 }
 struct LiveDesktop;
 impl PasteDesktop for LiveDesktop {
@@ -296,11 +365,17 @@ static READER_PLACEMENT: PlacedWindow = PlacedWindow {
     thread: "dicta-reader-place",
     state: PlacementState::new(),
 };
+static WRITER_PLACEMENT: PlacedWindow = PlacedWindow {
+    class: WRITER_CLASS,
+    thread: "dicta-writer-place",
+    state: PlacementState::new(),
+};
 
 fn placed(window: FloatingWindow) -> &'static PlacedWindow {
     match window {
         FloatingWindow::Overlay => &OVERLAY_PLACEMENT,
         FloatingWindow::Reader => &READER_PLACEMENT,
+        FloatingWindow::Writer => &WRITER_PLACEMENT,
     }
 }
 
@@ -656,6 +731,71 @@ mod tests {
             self.actions.push("paste");
             Ok(())
         }
+        fn sleep(&mut self, _: Duration) {
+            self.actions.push("sleep");
+        }
+    }
+    fn writer() -> PasteTarget {
+        PasteTarget {
+            class: WRITER_CLASS.into(),
+            initial_class: WRITER_CLASS.into(),
+            stable_id: Some("own-writer".into()),
+            ..overlay()
+        }
+    }
+    #[test]
+    fn replace_pastes_into_the_source_and_focuses_it_only_when_needed() {
+        // The source got the focus back when the writing window closed.
+        let mut backend = FakeDesktop::new(vec![target(), target()], vec![target()]);
+        execute_paste_into(&mut backend, "fixture", &target(), "CTRL+V", 77, || true).unwrap();
+        assert_eq!(
+            backend.actions,
+            vec!["copy", "clients", "active", "active", "paste"]
+        );
+        assert!(backend.focused.is_empty());
+        // Still on the writing window, or on another app: focus the source by stable id.
+        let mut other = target();
+        other.address = "0x999".into();
+        other.stable_id = Some("other-app".into());
+        for first in [writer(), other] {
+            let mut backend = FakeDesktop::new(vec![first, writer(), target()], vec![target()]);
+            execute_paste_into(&mut backend, "fixture", &target(), "CTRL+V", 77, || true).unwrap();
+            assert_eq!(backend.focused, vec![target()]);
+            assert_eq!(
+                backend.actions,
+                vec![
+                    "copy", "clients", "active", "focus", "active", "sleep", "active", "paste"
+                ]
+            );
+        }
+    }
+    #[test]
+    fn replace_never_types_into_a_gone_unfocused_or_own_window() {
+        let mut reused = target();
+        reused.stable_id = Some("replacement".into());
+        for clients in [vec![], vec![reused]] {
+            let mut backend = FakeDesktop::new(vec![target()], clients);
+            let error = execute_paste_into(&mut backend, "x", &target(), "CTRL+V", 77, || true)
+                .unwrap_err()
+                .to_string();
+            assert!(error.contains("quedó en el portapapeles"), "{error}");
+            assert_eq!(backend.actions, vec!["copy", "clients"]);
+        }
+        let mut backend = FakeDesktop::new(vec![writer(); 40], vec![target()]);
+        assert!(execute_paste_into(&mut backend, "x", &target(), "CTRL+V", 77, || true).is_err());
+        assert!(!backend.actions.contains(&"paste"));
+        let mut backend = FakeDesktop::new(vec![writer()], vec![target()]);
+        backend.focus_fails = true;
+        assert!(execute_paste_into(&mut backend, "x", &target(), "CTRL+V", 77, || true).is_err());
+        assert!(!backend.actions.contains(&"paste"));
+        for own in [writer(), overlay()] {
+            let mut backend = FakeDesktop::new(vec![own.clone()], vec![own.clone()]);
+            assert!(execute_paste_into(&mut backend, "x", &own, "CTRL+V", 77, || true).is_err());
+            assert_eq!(backend.actions, vec!["copy"]);
+        }
+        let mut backend = FakeDesktop::new(vec![target()], vec![target()]);
+        assert!(execute_paste_into(&mut backend, "x", &target(), "CTRL+V", 77, || false).is_err());
+        assert!(backend.actions.is_empty());
     }
     #[test]
     fn overlay_paste_restores_only_the_remembered_live_window() {

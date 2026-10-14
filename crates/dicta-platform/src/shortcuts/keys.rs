@@ -109,6 +109,8 @@ pub enum Action {
     Read,
     Pause,
     Stop,
+    /// Escritura: arreglar o traducir la selección.
+    Write,
 }
 
 impl Action {
@@ -120,6 +122,7 @@ impl Action {
             Self::Read => "Leer selección en voz alta",
             Self::Pause => "Pausar / reanudar lectura",
             Self::Stop => "Detener lectura",
+            Self::Write => "Arreglar o traducir la selección",
         }
     }
 
@@ -135,6 +138,7 @@ impl Action {
             (Self::Read, true) => Some(Command::ReadSelection),
             (Self::Pause, true) => Some(Command::TtsToggle),
             (Self::Stop, true) => Some(Command::TtsStop),
+            (Self::Write, true) => Some(Command::WriterSelection),
         }
     }
 }
@@ -158,6 +162,7 @@ pub fn bindings(config: &AppConfig) -> (Vec<Binding>, Vec<String>) {
         (Action::Read, &config.tts.read_shortcut),
         (Action::Pause, &config.tts.pause_shortcut),
         (Action::Stop, &config.tts.stop_shortcut),
+        (Action::Write, &config.writer.shortcut),
     ];
     let mut bindings: Vec<Binding> = Vec::new();
     let mut notices = Vec::new();
@@ -303,7 +308,17 @@ mod tests {
             Action::Stop.command(true, 1),
             Some(Command::TtsStop)
         ));
-        for action in [Action::Paste, Action::Read, Action::Pause, Action::Stop] {
+        assert!(matches!(
+            Action::Write.command(true, 1),
+            Some(Command::WriterSelection)
+        ));
+        for action in [
+            Action::Paste,
+            Action::Read,
+            Action::Pause,
+            Action::Stop,
+            Action::Write,
+        ] {
             assert!(action.command(false, 2).is_none());
         }
     }
@@ -318,6 +333,7 @@ mod tests {
         config.tts.read_shortcut = "Ctrl+Alt+Space".into();
         config.tts.pause_shortcut = String::new();
         config.tts.stop_shortcut = "  ".into();
+        config.writer.shortcut = String::new();
         let (bindings, notices) = bindings(&config);
         assert!(notices.is_empty(), "{notices:?}");
         assert_eq!(
@@ -346,6 +362,31 @@ mod tests {
         assert!(notices[0].contains("Iniciar / detener dictado"));
         assert!(notices[1].contains("«Ctrl+Alt+Enter»"), "{}", notices[1]);
         assert!(notices[1].contains("Pausar / reanudar lectura"));
+    }
+
+    #[test]
+    fn writing_uses_its_own_shortcut_and_reports_collisions_by_name() {
+        let mut config = AppConfig {
+            toggle_shortcut: "Ctrl+Space".into(),
+            paste_shortcut: "Ctrl+Alt+V".into(),
+            ..Default::default()
+        };
+        config.tts.read_shortcut = "Ctrl+Alt+Space".into();
+        let (found, notices) = bindings(&config);
+        assert!(notices.is_empty(), "{notices:?}");
+        let write = found.iter().find(|b| b.action == Action::Write).unwrap();
+        assert_eq!(write.shortcut, "Ctrl+Alt+E");
+        assert_eq!(
+            write.combo,
+            combo(true, true, false, false, Key::Letter('E'))
+        );
+        config.writer.shortcut = "ctrl+alt+v".into();
+        let (found, notices) = bindings(&config);
+        assert!(found.iter().all(|b| b.action != Action::Write));
+        assert!(
+            notices[0].contains("Arreglar o traducir la selección"),
+            "{notices:?}"
+        );
     }
 
     #[test]

@@ -52,6 +52,14 @@ impl ksni::Tray for DictaTray {
             }
             .into(),
             StandardItem {
+                label: "Arreglar o traducir el portapapeles".into(),
+                activate: Box::new(|t: &mut Self| {
+                    let _ = t.commands.send(Command::WriterClipboard);
+                }),
+                ..Default::default()
+            }
+            .into(),
+            StandardItem {
                 label: "Abrir Mars voice".into(),
                 activate: Box::new(|t: &mut Self| {
                     let _ = t.commands.send(Command::ShowSettings);
@@ -95,6 +103,7 @@ pub(crate) const MENU: &[(&str, &str)] = &[
     ("dicta-settings", "Abrir ajustes"),
     ("dicta-toggle", "Dictar / detener"),
     ("dicta-read", "Leer selección"),
+    ("dicta-write", "Arreglar o traducir el portapapeles"),
     (QUIT_ID, "Salir"),
 ];
 #[cfg(any(windows, test))]
@@ -107,6 +116,9 @@ pub(crate) fn menu_command(id: &str) -> Option<Command> {
         "dicta-settings" => Some(Command::ShowSettings),
         "dicta-toggle" => Some(Command::Toggle),
         "dicta-read" => Some(Command::ReadSelection),
+        // From the tray the active window is the taskbar, not the text: the
+        // clipboard is the only meaningful source here.
+        "dicta-write" => Some(Command::WriterClipboard),
         QUIT_ID => Some(Command::Quit),
         _ => None,
     }
@@ -143,6 +155,7 @@ mod windows_menu_tests {
                 Some(Command::ShowSettings),
                 Some(Command::Toggle),
                 Some(Command::ReadSelection),
+                Some(Command::WriterClipboard),
                 Some(Command::Quit),
             ]
         ));

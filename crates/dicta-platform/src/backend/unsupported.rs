@@ -4,7 +4,7 @@
 //! Also built for Linux tests, so this code is checked on every platform.
 use super::{Backend, Clipboard, FocusTracker, Injector, SelectionReader, WindowPlacer};
 use crate::desktop::{FloatingWindow, PastePlan, PasteTarget};
-use crate::selection::{CopyOptions, SelectionSource};
+use crate::selection::{CopiedSelection, CopyOptions, SelectionSource};
 use anyhow::{Result, bail};
 
 pub(super) struct Unsupported;
@@ -49,6 +49,16 @@ impl Injector for Unsupported {
     ) -> Result<()> {
         bail!(PASTE)
     }
+    fn paste_into(
+        &self,
+        _text: &str,
+        _target: &PasteTarget,
+        _keys: &str,
+        _extra_terminal_classes: &[String],
+        _is_current: &dyn Fn() -> bool,
+    ) -> Result<()> {
+        bail!(PASTE)
+    }
 }
 
 impl SelectionReader for Unsupported {
@@ -65,6 +75,11 @@ impl SelectionReader for Unsupported {
     fn copy_selection(&self, _options: CopyOptions<'_>) -> Result<Option<String>> {
         bail!(
             "Copiar la selección todavía no está disponible en este sistema; pegá el texto en la ventana de lectura"
+        )
+    }
+    fn copy_selection_from(&self, _options: CopyOptions<'_>) -> Result<CopiedSelection> {
+        bail!(
+            "Copiar la selección todavía no está disponible en este sistema; pegá el texto en la ventana de Escritura"
         )
     }
 }
@@ -108,6 +123,18 @@ mod tests {
             backend
                 .selection
                 .read_text(SelectionSource::Clipboard, 64)
+                .unwrap_err(),
+            backend
+                .injector
+                .paste_into("contenido-privado", &target, "CTRL+V", &[], &|| true)
+                .unwrap_err(),
+            backend
+                .selection
+                .copy_selection_from(CopyOptions {
+                    max_bytes: 64,
+                    restore_clipboard: true,
+                    extra_terminal_classes: &[],
+                })
                 .unwrap_err(),
             backend.selection.copy_selection(options).unwrap_err(),
         ];

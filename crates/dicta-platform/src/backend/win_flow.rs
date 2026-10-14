@@ -7,7 +7,7 @@
 //! Only explicit user actions get here. Nothing logs or reports clipboard
 //! content, and no key sequence contains Enter.
 use crate::desktop::{PastePlan, PasteTarget};
-use crate::selection::{CopyOptions, READ_TIMEOUT, SelectionSource};
+use crate::selection::{CopiedSelection, CopyOptions, READ_TIMEOUT, SelectionSource};
 use anyhow::{Context, Result, anyhow, bail, ensure};
 use std::time::{Duration, Instant};
 
@@ -46,6 +46,9 @@ const LOST: &str =
 const SEND_PASTE: &str = "El texto quedó copiado, pero Windows no permitió escribir en la ventana activa (por ejemplo, una app abierta como administrador). Pegá con Ctrl+V";
 const SEND_COPY: &str =
     "Windows no permitió enviar Ctrl+C a la ventana activa. Copiá el texto y usá Leer portapapeles";
+const REPLACE_CANCELLED: &str = "Reemplazo cancelado; el resultado quedó en el portapapeles";
+const SOURCE_GONE: &str = "La ventana de origen ya no está abierta o cambió de identidad; el resultado quedó en el portapapeles";
+const SOURCE_NOT_ACTIVATED: &str = "Windows no permitió volver a la ventana de origen; el resultado quedó en el portapapeles. Hacé clic en ella y pegá con Ctrl+V";
 const NO_PRIMARY: &str = "Windows no tiene selección primaria. Elegí «Copiar la selección automáticamente» o «Solo el portapapeles» en Ajustes > Lectura";
 
 /// Key combinations this backend ever types.
@@ -328,6 +331,43 @@ pub(crate) fn paste_prepared(
     type_into(desk, target, keys, is_current)
 }
 
+/// Escritura «Reemplazar»: paste into the window the selection was copied
+/// from. The writing window is closing, so Windows usually gives the
+/// foreground back to the source; otherwise it is activated (best effort:
+/// Windows allows it only while this process owns the foreground). Copies
+/// first, so every error leaves the result in the clipboard. Terminals get
+/// Ctrl+Shift+V for Ctrl+V. Never Enter.
+pub(crate) fn paste_into(
+    desk: &mut impl Desktop,
+    text: &str,
+    target: &PasteTarget,
+    keys: &str,
+    extra_terminal_classes: &[String],
+    is_current: &dyn Fn() -> bool,
+) -> Result<()> {
+    ensure!(is_current(), REPLACE_CANCELLED);
+    copy(desk, text)?;
+    let mut keys = paste_keys(keys)?;
+    if keys == Keys::CtrlV && is_terminal(target, extra_terminal_classes) {
+        keys = Keys::CtrlShiftV;
+    }
+    ensure!(
+        target.pid > 0 && target.pid != own(desk) && hwnd_of(target).is_some(),
+        OWN_PASTE
+    );
+    ensure!(desk.is_alive(target), SOURCE_GONE);
+    ensure!(is_current(), REPLACE_CANCELLED);
+    if desk.foreground().ok().as_ref() != Some(target) {
+        desk.activate(target);
+        let end = desk.now() + ACTIVATE_WAIT;
+        while desk.foreground().ok().as_ref() != Some(target) {
+            ensure!(desk.now() < end, SOURCE_NOT_ACTIVATED);
+            desk.sleep(POLL_INTERVAL);
+        }
+    }
+    type_into(desk, target, keys, is_current)
+}
+
 /// One read of the clipboard. Windows has no primary selection.
 pub(crate) fn read_text(
     desk: &mut impl Desktop,
@@ -358,6 +398,14 @@ pub(crate) fn copy_selection<D: Desktop>(
     desk: &mut D,
     options: &CopyOptions<'_>,
 ) -> Result<Option<String>> {
+    copy_selection_from(desk, options).map(|copied| copied.text)
+}
+
+/// [`copy_selection`] plus the window that received the copy keys.
+pub(crate) fn copy_selection_from<D: Desktop>(
+    desk: &mut D,
+    options: &CopyOptions<'_>,
+) -> Result<CopiedSelection> {
     let target = desk.foreground()?;
     ensure!(target.pid != own(desk), OWN_COPY);
     let keys = if is_terminal(&target, options.extra_terminal_classes) {
@@ -381,11 +429,14 @@ pub(crate) fn copy_selection<D: Desktop>(
             break;
         }
         if desk.now() >= end {
-            return Ok(None);
+            return Ok(CopiedSelection {
+                text: None,
+                source: target,
+            });
         }
     }
     let copied = read_copied(desk, options.max_bytes);
-    match saved {
+    let text = match saved {
         None => copied,
         Some(Saved::Unrestorable) => match copied {
             // Like a manual copy: the selection replaced what was there.
@@ -401,7 +452,11 @@ pub(crate) fn copy_selection<D: Desktop>(
             (Err(error), Ok(())) => Err(error),
             (Err(error), Err(_)) => Err(anyhow!("{error}. {NOT_RESTORED}")),
         },
-    }
+    }?;
+    Ok(CopiedSelection {
+        text,
+        source: target,
+    })
 }
 
 /// The source app may still hold the clipboard open right after it changed.
@@ -738,6 +793,74 @@ mod tests {
         let mut desk = Fake::new(ours());
         assert!(paste_prepared(&mut desk, "hola", &plan, "CTRL+V", &current).is_err());
         assert_eq!(desk.actions, vec!["set_text"]);
+    }
+
+    #[test]
+    fn replace_types_into_the_source_window_after_ours_closes() {
+        // Windows gave the foreground back to the source: no activation.
+        let mut desk = Fake::new(notepad());
+        paste_into(&mut desk, "resultado", &notepad(), "CTRL+V", &[], &|| true).unwrap();
+        assert_eq!(desk.actions, vec!["set_text", "send CtrlV"]);
+        // Still on our window, or another app took it: activate the source.
+        for first in [ours(), window(0x55, 9, "Chrome_WidgetWin_1", "chrome.exe")] {
+            let mut desk = Fake::new(first);
+            paste_into(&mut desk, "resultado", &notepad(), "CTRL+V", &[], &|| true).unwrap();
+            assert_eq!(
+                desk.actions,
+                vec!["set_text", "activate 0x1a2b", "send CtrlV"]
+            );
+        }
+        // Terminals get Ctrl+Shift+V.
+        let terminal = window(
+            0x77,
+            5,
+            "CASCADIA_HOSTING_WINDOW_CLASS",
+            "WindowsTerminal.exe",
+        );
+        let mut desk = Fake::new(terminal.clone());
+        paste_into(&mut desk, "resultado", &terminal, "CTRL+V", &[], &|| true).unwrap();
+        assert_eq!(desk.sent(), vec!["CtrlShiftV"]);
+    }
+
+    #[test]
+    fn replace_keeps_the_result_copied_when_the_source_is_gone_or_refused() {
+        let mut desk = Fake::new(ours());
+        desk.alive = false;
+        let error = paste_into(&mut desk, "resultado", &notepad(), "CTRL+V", &[], &|| true)
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains("ya no está abierta"), "{error}");
+        assert_eq!(desk.actions, vec!["set_text"]);
+        let mut desk = Fake::new(ours());
+        desk.activation_works = false;
+        let error = paste_into(&mut desk, "resultado", &notepad(), "CTRL+V", &[], &|| true)
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains("no permitió volver"), "{error}");
+        assert!(desk.sent().is_empty());
+        let mut desk = Fake::new(ours());
+        assert!(paste_into(&mut desk, "resultado", &ours(), "CTRL+V", &[], &|| true).is_err());
+        assert!(desk.sent().is_empty());
+        let mut desk = Fake::new(notepad());
+        assert!(paste_into(&mut desk, "resultado", &notepad(), "CTRL+V", &[], &|| false).is_err());
+        assert!(desk.actions.is_empty());
+    }
+
+    #[test]
+    fn copy_reports_the_window_it_copied_from() {
+        let mut desk = Fake::new(notepad());
+        let options = CopyOptions {
+            max_bytes: 64,
+            restore_clipboard: true,
+            extra_terminal_classes: &[],
+        };
+        let copied = copy_selection_from(&mut desk, &options).unwrap();
+        assert_eq!(copied.text.as_deref(), Some("texto elegido"));
+        assert_eq!(copied.source, notepad());
+        let mut desk = Fake::new(notepad());
+        desk.selection = None;
+        let copied = copy_selection_from(&mut desk, &options).unwrap();
+        assert_eq!((copied.text, copied.source), (None, notepad()));
     }
 
     #[test]

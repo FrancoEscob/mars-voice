@@ -63,6 +63,7 @@ pub(super) async fn run(
                         "tts-read"=>Command::ReadSelection,
                         "tts-pause"=>Command::TtsToggle,
                         "tts-stop"=>Command::TtsStop,
+                        "writer"=>Command::WriterSelection,
                         _=>continue
                     };
                     if commands.send(command).is_err() {break;}
@@ -86,8 +87,9 @@ struct BindingSpec {
     trigger: String,
 }
 
-/// Dictation toggle/paste are mandatory. Reading shortcuts are registered only
-/// when configured (non-empty); only toggle/paste must be confirmed as bound.
+/// Dictation toggle/paste are mandatory. Reading and writing shortcuts are
+/// registered only when configured (non-empty); only toggle/paste must be
+/// confirmed as bound.
 fn portal_bindings(config: &AppConfig) -> Result<Vec<BindingSpec>> {
     let required = [
         (
@@ -109,6 +111,11 @@ fn portal_bindings(config: &AppConfig) -> Result<Vec<BindingSpec>> {
             &config.tts.pause_shortcut,
         ),
         ("tts-stop", "Detener lectura", &config.tts.stop_shortcut),
+        (
+            "writer",
+            "Arreglar o traducir la selección",
+            &config.writer.shortcut,
+        ),
     ];
     let mut specs: Vec<BindingSpec> = Vec::new();
     let configured = optional
@@ -212,6 +219,7 @@ mod tests {
         config.tts.read_shortcut = "Ctrl+Alt+Space".into();
         config.tts.pause_shortcut = String::new();
         config.tts.stop_shortcut = "  ".into();
+        config.writer.shortcut = String::new();
         let ids = |specs: Vec<BindingSpec>| -> Vec<_> {
             specs.into_iter().map(|s| (s.id, s.trigger)).collect()
         };
@@ -234,6 +242,20 @@ mod tests {
                 ("tts-pause", "CTRL+ALT+p".to_owned()),
                 ("tts-stop", "CTRL+ALT+s".to_owned()),
             ]
+        );
+        config.writer.shortcut = "Ctrl+Alt+E".into();
+        assert_eq!(
+            portal_bindings(&config)
+                .unwrap()
+                .last()
+                .map(|s| (s.id, s.trigger.clone())),
+            Some(("writer", "CTRL+ALT+e".to_owned()))
+        );
+        config.writer.shortcut = "Ctrl+Alt+S".into();
+        let error = portal_bindings(&config).unwrap_err().to_string();
+        assert!(
+            error.contains("Arreglar o traducir la selección"),
+            "{error}"
         );
     }
     #[test]
