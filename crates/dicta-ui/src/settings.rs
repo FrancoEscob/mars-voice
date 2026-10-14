@@ -45,14 +45,16 @@ pub(crate) enum Section {
     Overlay,
     Background,
     Reading,
+    Writer,
 }
 
 impl Section {
     #[cfg(test)]
-    const ALL: [Self; 14] = [
+    const ALL: [Self; 15] = [
         Self::Home,
         Self::History,
         Self::Reading,
+        Self::Writer,
         Self::General,
         Self::Provider,
         Self::Writing,
@@ -82,6 +84,7 @@ impl Section {
             Self::Overlay => Msg::SecOverlay,
             Self::Background => Msg::SecBackground,
             Self::Reading => Msg::SecReading,
+            Self::Writer => Msg::SecWriter,
         })
     }
 
@@ -101,6 +104,7 @@ impl Section {
             Self::Overlay => Icon::Overlay,
             Self::Background => Icon::Background,
             Self::Reading => Icon::Read,
+            Self::Writer => Icon::Writer,
         }
     }
 
@@ -121,6 +125,7 @@ impl Section {
             Self::Overlay => Msg::SubOverlay,
             Self::Background => Msg::SubBackground,
             Self::Reading => Msg::SubReading,
+            Self::Writer => Msg::SubWriter,
         })
     }
 
@@ -132,7 +137,15 @@ impl Section {
 
 /// Sidebar groups, in order. The first has no heading.
 const NAV_GROUPS: [(Option<Msg>, &[Section]); 4] = [
-    (None, &[Section::Home, Section::History, Section::Reading]),
+    (
+        None,
+        &[
+            Section::Home,
+            Section::History,
+            Section::Reading,
+            Section::Writer,
+        ],
+    ),
     (
         Some(Msg::NavDictation),
         &[
@@ -168,12 +181,14 @@ pub(crate) enum Confirm {
     ClearReadings,
 }
 
-/// Where the subscription consent card is open: the dictation provider or
-/// the read-aloud account. Accepting it sets `subscription_acknowledged`.
+/// Where the subscription consent card is open: the dictation provider,
+/// the read-aloud account or Escritura's. Accepting it sets
+/// `subscription_acknowledged`.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub(crate) enum Consent {
     Dictation,
     Reading,
+    Writer,
 }
 
 /// The section that shows an error of this origin inline, if any.
@@ -213,6 +228,11 @@ pub(crate) struct Fields {
     pub(crate) tts_terminal: Entity<TextField>,
     /// Text pasted to be read; only "Leer" sends it.
     pub(crate) tts_paste: Entity<TextField>,
+    pub(crate) writer_shortcut: Entity<TextField>,
+    pub(crate) writer_model: Entity<TextField>,
+    pub(crate) writer_instructions: Entity<TextField>,
+    pub(crate) writer_x: Entity<TextField>,
+    pub(crate) writer_y: Entity<TextField>,
 }
 
 pub struct Settings {
@@ -414,6 +434,19 @@ impl Settings {
             tts_paste: cx.new(|cx| {
                 TextField::new(String::new(), Msg::PhPasteToRead, window, cx).multiline()
             }),
+            writer_shortcut: field!(c.writer.shortcut.clone(), "Ctrl+Alt+E"),
+            writer_model: field!(c.writer.model.clone(), "grok-4.3"),
+            writer_instructions: cx.new(|cx| {
+                TextField::new(
+                    c.writer.instructions.clone(),
+                    Msg::PhWriterInstructions,
+                    window,
+                    cx,
+                )
+                .multiline()
+            }),
+            writer_x: field!(fmt_offset(c.writer.window_x), "24"),
+            writer_y: field!(fmt_offset(c.writer.window_y), "24"),
         };
 
         let mut subs = Vec::new();
@@ -515,6 +548,33 @@ impl Settings {
             }),
             Err(e) => s.fail(e, cx),
         });
+        on_commit(&fields.writer_shortcut, |s, t, cx| {
+            s.edit(cx, |c| c.writer.shortcut = t.trim().to_string())
+        });
+        on_commit(&fields.writer_model, |s, t, cx| {
+            s.edit(cx, |c| c.writer.model = t.trim().to_string())
+        });
+        on_commit(&fields.writer_instructions, |s, t, cx| {
+            s.edit(cx, |c| c.writer.instructions = t)
+        });
+        on_commit(&fields.writer_x, |s, t, cx| {
+            match parse_offset(&t, lang(cx)) {
+                Ok(v) => s.edit(cx, |c| {
+                    c.writer.window_x = v;
+                    c.writer.window_centered = false;
+                }),
+                Err(e) => s.fail(e, cx),
+            }
+        });
+        on_commit(&fields.writer_y, |s, t, cx| {
+            match parse_offset(&t, lang(cx)) {
+                Ok(v) => s.edit(cx, |c| {
+                    c.writer.window_y = v;
+                    c.writer.window_centered = false;
+                }),
+                Err(e) => s.fail(e, cx),
+            }
+        });
         // The controller filters the history as the user types. A literal
         // search over a large history costs the controller tens of
         // milliseconds, so keystrokes are debounced: the query goes out
@@ -595,7 +655,7 @@ impl Settings {
     /// the digest brings them here.
     fn sync_fields(&self, c: &AppConfig, l: Lang, cx: &mut Context<Self>) {
         let f = &self.fields;
-        let pairs: [(&Entity<TextField>, String); 17] = [
+        let pairs: [(&Entity<TextField>, String); 22] = [
             (&f.language, c.language.clone()),
             (&f.polish_model, c.polish_model.clone()),
             (&f.instructions, c.instructions.clone()),
@@ -619,6 +679,11 @@ impl Settings {
             (&f.tts_language, c.tts.language.clone()),
             (&f.tts_x, fmt_offset(c.tts.window_x)),
             (&f.tts_y, fmt_offset(c.tts.window_y)),
+            (&f.writer_shortcut, c.writer.shortcut.clone()),
+            (&f.writer_model, c.writer.model.clone()),
+            (&f.writer_instructions, c.writer.instructions.clone()),
+            (&f.writer_x, fmt_offset(c.writer.window_x)),
+            (&f.writer_y, fmt_offset(c.writer.window_y)),
         ];
         for (field, text) in pairs {
             field.update(cx, |field, cx| field.sync(&text, cx));
@@ -742,6 +807,7 @@ impl Settings {
         self.edit(cx, |c| match target {
             Consent::Dictation => c.provider = ProviderMode::ApiKey,
             Consent::Reading => c.tts.provider = ProviderMode::ApiKey,
+            Consent::Writer => c.writer.provider = ProviderMode::ApiKey,
         });
     }
 }
@@ -750,6 +816,7 @@ fn subscribe(c: &mut AppConfig, target: Consent) {
     match target {
         Consent::Dictation => c.provider = ProviderMode::Subscription,
         Consent::Reading => c.tts.provider = ProviderMode::Subscription,
+        Consent::Writer => c.writer.provider = ProviderMode::Subscription,
     }
 }
 
@@ -1533,6 +1600,7 @@ impl Settings {
         let (api_id, sub_id, sub_desc) = match target {
             Consent::Dictation => ("api", "sub", Msg::ProviderSubDesc),
             Consent::Reading => ("tts-api", "tts-sub", Msg::ReadingSubDesc),
+            Consent::Writer => ("writer-api", "writer-sub", Msg::ReadingSubDesc),
         };
         let mut rows = vec![
             radio_row_with(
@@ -2406,6 +2474,7 @@ impl Render for Settings {
             Section::Overlay => self.overlay(p, cx),
             Section::Background => self.background(p, cx),
             Section::Reading => self.reading(p, column, cx),
+            Section::Writer => self.writer(p, cx),
         };
         let content = if matches!(
             self.section,
@@ -2769,6 +2838,10 @@ mod tests {
             NAV_GROUPS[0].1.contains(&Section::Reading),
             "Lectura is a page of its own"
         );
+        assert!(
+            NAV_GROUPS[0].1.contains(&Section::Writer),
+            "Escritura is a page of its own"
+        );
         assert!(Section::History.full_bleed() && !Section::Home.full_bleed());
     }
 
@@ -2811,6 +2884,13 @@ mod tests {
         );
         subscribe(&mut c, Consent::Reading);
         assert_eq!(c.tts.provider, ProviderMode::Subscription);
+        assert_eq!(
+            c.writer.provider,
+            ProviderMode::ApiKey,
+            "Escritura keeps its own mode"
+        );
+        subscribe(&mut c, Consent::Writer);
+        assert_eq!(c.writer.provider, ProviderMode::Subscription);
         c.validate().unwrap();
     }
 }

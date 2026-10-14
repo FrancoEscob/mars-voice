@@ -139,6 +139,7 @@ impl Settings {
         let rm = snap.reading_metrics.clone();
         let show_tts_cost = snap.config.tts.show_cost;
         let read_key = snap.config.tts.read_shortcut.clone();
+        let write_key = snap.config.writer.shortcut.clone();
 
         let hero = div()
             .flex()
@@ -369,6 +370,29 @@ impl Settings {
             .child(reading_rows)
             .child(hint(l.t(Msg::ReadingUsageFromHistory), p));
 
+        // Escritura has no history yet: the entry point and its shortcut.
+        let writer = group(l.t(Msg::SecWriter), p).child(
+            div()
+                .flex()
+                .flex_wrap()
+                .items_center()
+                .gap(px(8.))
+                .when(!write_key.trim().is_empty(), |d| d.child(kbd(write_key, p)))
+                .child(hint(l.t(Msg::WriterHomeHint), p).flex_1().min_w(px(200.)))
+                .child(
+                    icon_label_button(
+                        "home-writer-clipboard",
+                        Icon::Paste,
+                        l.t(Msg::WriterClipboard),
+                        Kind::Ghost,
+                        p,
+                    )
+                    .on_click(
+                        cx.listener(|this, _, _, cx| this.send(cx, Command::WriterClipboard)),
+                    ),
+                ),
+        );
+
         let mut list = group(l.t(Msg::RecentNotes), p);
         if !history_on {
             list = list.child(
@@ -413,6 +437,7 @@ impl Settings {
             .child(hero)
             .child(usage)
             .child(reading)
+            .child(writer)
             .child(list)
     }
 

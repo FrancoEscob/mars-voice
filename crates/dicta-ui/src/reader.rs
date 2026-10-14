@@ -2081,7 +2081,7 @@ fn meter(level: f32, p: Palette) -> Div {
         )
 }
 
-fn shadow(p: Palette) -> BoxShadow {
+pub(crate) fn shadow(p: Palette) -> BoxShadow {
     BoxShadow {
         color: p.shadow,
         offset: point(px(0.), px(4.)),
@@ -2114,7 +2114,7 @@ fn dot(window: &mut Window, x: Pixels, y: Pixels, r: f32, color: gpui::Rgba) {
     );
 }
 
-fn menu_row(
+pub(crate) fn menu_row(
     id: impl Into<gpui::ElementId>,
     title: impl Into<SharedString>,
     detail: Option<String>,

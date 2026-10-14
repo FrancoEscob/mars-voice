@@ -11,6 +11,7 @@
 //! code unchanged; on systems without a backend yet they return an actionable
 //! Spanish error.
 use crate::backend;
+use crate::desktop::PasteTarget;
 use anyhow::Result;
 use std::time::Duration;
 
@@ -38,6 +39,16 @@ pub struct CopyOptions<'a> {
     pub extra_terminal_classes: &'a [String],
 }
 
+/// What [`copy_selection_from`] copied, and from which window.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CopiedSelection {
+    /// `None` when nothing was selected, like [`copy_selection`].
+    pub text: Option<String>,
+    /// The external window that received the copy shortcut. Never one of
+    /// this process's windows. Used to paste a result back over the selection.
+    pub source: PasteTarget,
+}
+
 /// Blocking. Reads the selection or clipboard as text. `Ok(None)` when nothing
 /// is selected/copied, the content is only whitespace, or no textual type is
 /// offered. Content larger than `max_bytes`, invalid UTF-8 and a source app
@@ -57,4 +68,11 @@ pub fn read_text(source: SelectionSource, max_bytes: usize) -> Result<Option<Str
 /// the error).
 pub fn copy_selection(options: CopyOptions<'_>) -> Result<Option<String>> {
     backend::current().selection.copy_selection(options)
+}
+
+/// Same as [`copy_selection`], and also returns the window the selection was
+/// copied from (Hyprland `stableId` / Windows HWND), for a later
+/// [`crate::desktop::paste_into`].
+pub fn copy_selection_from(options: CopyOptions<'_>) -> Result<CopiedSelection> {
+    backend::current().selection.copy_selection_from(options)
 }

@@ -104,7 +104,7 @@ fn run() -> Result<()> {
     }
     if args.iter().any(|s| s == "--help" || s == "-h") {
         println!(
-            "Mars voice — dictado nativo para {}\n\n  dicta [--demo] [--theme signal|regolith|orbit] [--portal-shortcuts]\n  dicta --headless [--no-tray]\n  dicta --read-selection\n  dicta ctl toggle|start|stop|cancel|copy|paste|settings|show|hide|read|read-clipboard|tts-toggle|tts-stop|quit|status\n\nOpciones:\n  --demo                 Ejemplo sin micrófono, API, llavero ni portapapeles real\n  --background           Iniciar residente sin abrir ajustes\n  --toggle               Iniciar o detener dictado; abre Dicta si hace falta\n  --read-selection       Leer en voz alta la selección; abre Mars voice si hace falta\n  --shortcut-press       Pulsación del atajo; respeta modo alternar/mantener\n  --shortcut-release     Liberación del atajo; nunca inicia Dicta\n  --shortcut-token N     Identificador creciente compartido por pulsación/liberación\n  --shortcut-seed        Imprimir reloj monotónico para inicializar binds y salir\n  --headless             Ejecutar sin interfaz gráfica\n  --no-tray              No crear icono en la bandeja\n  --color-mode MODO      light o dark, independiente del estilo\n  --theme TEMA           Apariencia inicial (se guarda al editar ajustes)\n  --portal-shortcuts     Solicitar al portal los atajos globales\n  --allow-env-api-key    Permitir DICTA_XAI_API_KEY en modo API explícito\n  --quit-after SEGUNDOS  Salir tras el plazo (pruebas)\n\nPara controlar la demo: dicta --demo ctl COMANDO.\nLos binds manuales pueden usar dicta --toggle. Al abrir normalmente no se activa el micrófono.",
+            "Mars voice — dictado nativo para {}\n\n  dicta [--demo] [--theme signal|regolith|orbit] [--portal-shortcuts]\n  dicta --headless [--no-tray]\n  dicta --read-selection\n  dicta --write-selection\n  dicta ctl toggle|start|stop|cancel|copy|paste|settings|show|hide|read|read-clipboard|tts-toggle|tts-stop|write|write-clipboard|quit|status\n\nOpciones:\n  --demo                 Ejemplo sin micrófono, API, llavero ni portapapeles real\n  --background           Iniciar residente sin abrir ajustes\n  --toggle               Iniciar o detener dictado; abre Dicta si hace falta\n  --read-selection       Leer en voz alta la selección; abre Mars voice si hace falta\n  --write-selection      Arreglar o traducir la selección; abre Mars voice si hace falta\n  --shortcut-press       Pulsación del atajo; respeta modo alternar/mantener\n  --shortcut-release     Liberación del atajo; nunca inicia Dicta\n  --shortcut-token N     Identificador creciente compartido por pulsación/liberación\n  --shortcut-seed        Imprimir reloj monotónico para inicializar binds y salir\n  --headless             Ejecutar sin interfaz gráfica\n  --no-tray              No crear icono en la bandeja\n  --color-mode MODO      light o dark, independiente del estilo\n  --theme TEMA           Apariencia inicial (se guarda al editar ajustes)\n  --portal-shortcuts     Solicitar al portal los atajos globales\n  --allow-env-api-key    Permitir DICTA_XAI_API_KEY en modo API explícito\n  --quit-after SEGUNDOS  Salir tras el plazo (pruebas)\n\nPara controlar la demo: dicta --demo ctl COMANDO.\nLos binds manuales pueden usar dicta --toggle. Al abrir normalmente no se activa el micrófono.",
             if cfg!(windows) { "Windows" } else { "Linux" }
         );
         return Ok(());
@@ -118,6 +118,7 @@ fn run() -> Result<()> {
     let mut background = false;
     let mut toggle = false;
     let mut read = false;
+    let mut write = false;
     let mut shortcut = None;
     let mut shortcut_token = None;
     let mut theme = None;
@@ -130,6 +131,7 @@ fn run() -> Result<()> {
             "--background" => background = true,
             "--toggle" => toggle = true,
             "--read-selection" => read = true,
+            "--write-selection" => write = true,
             "--shortcut-press" | "--shortcut-release" => {
                 if shortcut.is_some() {
                     bail!("Usá una sola acción de atajo por lanzamiento");
@@ -174,6 +176,7 @@ fn run() -> Result<()> {
     if (toggle && ctl.is_some())
         || (shortcut.is_some() && (toggle || ctl.is_some()))
         || (read && (toggle || ctl.is_some() || shortcut.is_some()))
+        || (write && (read || toggle || ctl.is_some() || shortcut.is_some()))
     {
         bail!("Usá una acción de atajo o ctl COMANDO, no ambos en el mismo lanzamiento");
     }
@@ -247,6 +250,20 @@ fn run() -> Result<()> {
             }
         }
     }
+    if write {
+        // Igual que --read-selection: el residente copia la selección; el texto
+        // nunca pasa por la línea de comandos ni por el socket.
+        hand_off_foreground();
+        match ipc::send(&paths.runtime, "write") {
+            Ok(_) => return Ok(()),
+            Err(error) if server_absent(&error) => {}
+            Err(error) => {
+                return Err(error).context(
+                    "No se confirmó la escritura; no se repitió para evitar copiar dos veces",
+                );
+            }
+        }
+    }
     if !cfg!(feature = "gui") && !headless {
         bail!(
             "Este binario se compiló sin GPUI. Usá --headless o recompilá con las features predeterminadas"
@@ -269,7 +286,7 @@ fn run() -> Result<()> {
     }
     let mut initial = AppSnapshot::new(config);
     initial.demo = options.demo;
-    if background || toggle || read || shortcut.is_some() {
+    if background || toggle || read || write || shortcut.is_some() {
         initial.show_settings = false;
         initial.show_overlay = initial.config.show_idle_overlay;
     }
@@ -293,6 +310,8 @@ fn run() -> Result<()> {
         Some(Command::Toggle)
     } else if read {
         Some(Command::ReadSelection)
+    } else if write {
+        Some(Command::WriterSelection)
     } else {
         None
     };
@@ -304,6 +323,8 @@ fn run() -> Result<()> {
                 "toggle"
             } else if read {
                 "read"
+            } else if write {
+                "write"
             } else {
                 "settings"
             });
@@ -360,6 +381,12 @@ fn run() -> Result<()> {
             );
             dicta_ui::set_reader_placer(|origin| {
                 dicta_platform::desktop::place_reader(origin.x, origin.y);
+            });
+            dicta_platform::desktop::set_writer_placement_enabled(
+                !initial.config.writer.window_centered,
+            );
+            dicta_ui::set_writer_placer(|origin| {
+                dicta_platform::desktop::place_writer(origin.x, origin.y);
             });
             let result = dicta_ui::run(initial, command_tx.clone(), snapshots_rx);
             let _ = command_tx.send(Command::Quit);

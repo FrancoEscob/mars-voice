@@ -8,8 +8,8 @@
 //! copy shortcut to that exact window → poll the clipboard as text → restore.
 //! Restoring runs after success, timeouts and errors alike. Nothing here logs or
 //! reports clipboard content. Linux backend for [`super::copy_selection`].
-use super::CopyOptions;
 use super::wl_paste::{Failure, Fetch, Flavor, fetch, read_with};
+use super::{CopiedSelection, CopyOptions};
 use crate::desktop::{PasteTarget, hyprland};
 use anyhow::{Result, anyhow, ensure};
 use std::{
@@ -30,7 +30,28 @@ pub(crate) fn copy_selection(options: CopyOptions<'_>) -> Result<Option<String>>
         std::env::var_os("WAYLAND_DISPLAY").as_deref(),
         std::env::var_os("HYPRLAND_INSTANCE_SIGNATURE").as_deref(),
     )?;
+    copy_with(&mut LiveDesktop, &options, std::process::id()).map(|copied| copied.text)
+}
+
+/// [`copy_selection`] plus the window that received the copy shortcut, so
+/// Escritura can paste its result back there.
+pub(crate) fn copy_selection_from(options: CopyOptions<'_>) -> Result<CopiedSelection> {
+    ensure_copy_env(
+        std::env::var_os("WAYLAND_DISPLAY").as_deref(),
+        std::env::var_os("HYPRLAND_INSTANCE_SIGNATURE").as_deref(),
+    )?;
     copy_with(&mut LiveDesktop, &options, std::process::id())
+}
+
+/// Ctrl+V would reach a terminal's program as a literal ^V; terminals paste
+/// with Ctrl+Shift+V, the counterpart of the copy shortcut sent to them.
+/// Any other combination is kept as configured.
+pub(crate) fn paste_keys_for<'a>(target: &PasteTarget, keys: &'a str, extra: &[String]) -> &'a str {
+    if keys.trim().eq_ignore_ascii_case("CTRL+V") && is_terminal(target, extra) {
+        "CTRL+SHIFT+V"
+    } else {
+        keys
+    }
 }
 
 /// Everything up to reading the copied text.
@@ -85,7 +106,7 @@ const TERMINAL_CLASSES: &[&str] = &[
 ];
 
 const ENV_ERROR: &str = "Copiar la selección automáticamente requiere Hyprland en Wayland. Elegí «Solo el portapapeles» en Ajustes > Lectura y copiá el texto antes de leer";
-const OWN_WINDOW: &str = "Seleccioná el texto en otra ventana y repetí el atajo de lectura";
+const OWN_WINDOW: &str = "Seleccioná el texto en otra ventana y repetí el atajo";
 const NO_STABLE_ID: &str = "Hyprland no identifica la ventana activa de forma segura. Actualizá Hyprland o elegí «Solo el portapapeles» en Ajustes > Lectura";
 const CLEAR_FAILED: &str =
     "No se pudo vaciar el portapapeles antes de copiar; comprobá wl-clipboard";
@@ -325,7 +346,7 @@ fn copy_with(
     desk: &mut impl CopyDesktop,
     options: &CopyOptions<'_>,
     own_pid: u32,
-) -> Result<Option<String>> {
+) -> Result<CopiedSelection> {
     let deadline = desk.now() + BUDGET;
     let target = desk.active()?;
     // Validated before the clipboard is touched.
@@ -336,7 +357,7 @@ fn copy_with(
         None
     };
     let copied = copy_and_read(desk, &shortcut, options.max_bytes, deadline);
-    match saved {
+    let text = match saved {
         None => copied,
         Some(Saved::Unrestorable) => match copied {
             Ok(Some(text)) => Ok(Some(text)),
@@ -351,7 +372,11 @@ fn copy_with(
             (Err(error), Ok(())) => Err(error),
             (Err(error), Err(_)) => Err(anyhow!("{error}. {NOT_RESTORED}")),
         },
-    }
+    }?;
+    Ok(CopiedSelection {
+        text,
+        source: target,
+    })
 }
 
 #[cfg(test)]
@@ -413,7 +438,7 @@ mod tests {
                 restore_clipboard: restore,
                 extra_terminal_classes: extra,
             };
-            copy_with(self, &options, OWN_PID)
+            copy_with(self, &options, OWN_PID).map(|copied| copied.text)
         }
         /// Actions with consecutive polls collapsed, for readable assertions.
         fn steps(&self) -> Vec<&str> {
@@ -709,5 +734,42 @@ mod tests {
             let error = ensure_copy_env(w, h).unwrap_err().to_string();
             assert!(error.contains("Solo el portapapeles"), "{error}");
         }
+    }
+
+    #[test]
+    fn copy_reports_the_source_window_for_a_later_replace() {
+        let mut fake = Fake::new(&[(UTF8, b"viejo")], Some("nuevo"));
+        let options = CopyOptions {
+            max_bytes: 1024,
+            restore_clipboard: true,
+            extra_terminal_classes: &[],
+        };
+        let copied = copy_with(&mut fake, &options, OWN_PID).unwrap();
+        assert_eq!(copied.text.as_deref(), Some("nuevo"));
+        assert_eq!(copied.source, window("firefox"));
+        // Nothing selected still names the window; our own window never does.
+        let mut empty = Fake::new(&[], None);
+        assert_eq!(copy_with(&mut empty, &options, OWN_PID).unwrap().text, None);
+        let mut own = Fake::new(&[], Some("x"));
+        own.target.pid = i64::from(OWN_PID);
+        assert!(copy_with(&mut own, &options, OWN_PID).is_err());
+    }
+
+    #[test]
+    fn terminals_paste_with_ctrl_shift_v_and_other_keys_are_kept() {
+        let extra = vec!["mi-terminal".to_owned()];
+        assert_eq!(
+            paste_keys_for(&window("kitty"), "CTRL+V", &[]),
+            "CTRL+SHIFT+V"
+        );
+        assert_eq!(
+            paste_keys_for(&window("mi-terminal"), "ctrl+v", &extra),
+            "CTRL+SHIFT+V"
+        );
+        assert_eq!(paste_keys_for(&window("firefox"), "CTRL+V", &[]), "CTRL+V");
+        assert_eq!(
+            paste_keys_for(&window("kitty"), "SHIFT+INSERT", &[]),
+            "SHIFT+INSERT"
+        );
     }
 }

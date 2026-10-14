@@ -12,7 +12,7 @@
 Mars voice queda abierto en segundo plano, con un icono en la **bandeja** (junto al reloj; si no lo ves, buscalo en la flecha **^**):
 
 - **Clic** en el icono: abre los Ajustes.
-- **Clic derecho**: *Abrir ajustes*, *Dictar / detener*, *Leer selección* y *Salir*.
+- **Clic derecho**: *Abrir ajustes*, *Dictar / detener*, *Leer selección*, *Arreglar o traducir el portapapeles* y *Salir*.
 - Cerrar la ventana de Ajustes **no** cierra la app. Para salir, usá *Salir* en la bandeja.
 - Si abrís `MarsVoice.exe` otra vez mientras ya está abierto, se muestran los Ajustes de la instancia que ya corre.
 
@@ -29,9 +29,11 @@ Mars voice queda abierto en segundo plano, con un icono en la **bandeja** (junto
 | Dictar (alternar o mantener) | `Ctrl+Space` |
 | Pegar el último dictado | `Ctrl+Alt+V` |
 | Leer en voz alta lo seleccionado | `Ctrl+Alt+Space` |
+| Arreglar o traducir lo seleccionado | `Ctrl+Alt+E` |
 
 - Funcionan desde cualquier programa, sin configurar nada más.
-- Se cambian en **Ajustes → Atajos** y **Ajustes → Lectura**, y el cambio se aplica al guardar, sin reiniciar. Se aceptan `Ctrl`, `Alt`, `Shift` y `Win` con una letra, un número, `Space` o `F1`–`F24`.
+- `Ctrl+Alt` es `AltGr` en muchos teclados europeos y latinoamericanos: si `AltGr+E` escribe `€` en el tuyo, cambiá el atajo de Escritura en **Ajustes → Escritura**, porque Windows lo toma antes que el programa.
+- Se cambian en **Ajustes → Atajos**, **Ajustes → Lectura** y **Ajustes → Escritura**, y el cambio se aplica al guardar, sin reiniciar. Se aceptan `Ctrl`, `Alt`, `Shift` y `Win` con una letra, un número, `Space` o `F1`–`F24`.
 - Si otro programa (o Windows) ya usa la combinación, Mars voice muestra un aviso con el atajo que no pudo registrar. Elegí otra combinación.
 - **Mantener para hablar**: el dictado termina al soltar `Space` (la tecla principal del atajo).
 

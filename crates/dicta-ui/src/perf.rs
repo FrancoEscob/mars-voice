@@ -74,6 +74,8 @@ counters! {
     /// Live-only snapshots that redrew the reader alone (position, word,
     /// generation, output level).
     READER_TICKS,
+    /// `Writer::render` calls (Escritura window frames).
+    WRITER_RENDERS,
 }
 
 /// Counting is compiled in for tests and the harness only.

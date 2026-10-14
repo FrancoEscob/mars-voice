@@ -3,7 +3,7 @@
 //! `desktop/hyprland.rs`, `selection/wl_paste.rs` and `selection/copy.rs`.
 use super::{Clipboard, FocusTracker, Injector, SelectionReader, WindowPlacer};
 use crate::desktop::{FloatingWindow, PastePlan, PasteTarget, hyprland};
-use crate::selection::{CopyOptions, SelectionSource, copy, wl_paste};
+use crate::selection::{CopiedSelection, CopyOptions, SelectionSource, copy, wl_paste};
 use anyhow::Result;
 
 pub(super) struct WaylandHyprland;
@@ -36,6 +36,17 @@ impl Injector for WaylandHyprland {
     ) -> Result<()> {
         hyprland::paste_prepared(text, plan, keys, is_current)
     }
+    fn paste_into(
+        &self,
+        text: &str,
+        target: &PasteTarget,
+        keys: &str,
+        extra_terminal_classes: &[String],
+        is_current: &dyn Fn() -> bool,
+    ) -> Result<()> {
+        let keys = copy::paste_keys_for(target, keys, extra_terminal_classes);
+        hyprland::paste_into(text, target, keys, is_current)
+    }
 }
 
 impl SelectionReader for WaylandHyprland {
@@ -44,6 +55,9 @@ impl SelectionReader for WaylandHyprland {
     }
     fn copy_selection(&self, options: CopyOptions<'_>) -> Result<Option<String>> {
         copy::copy_selection(options)
+    }
+    fn copy_selection_from(&self, options: CopyOptions<'_>) -> Result<CopiedSelection> {
+        copy::copy_selection_from(options)
     }
 }
 

@@ -323,7 +323,7 @@ fn tray_icon_image() -> Result<Icon> {
 pub struct Hotkeys {
     commands: Sender<Command>,
     /// The shortcut strings last applied, to skip needless re-registration.
-    applied: Option<[String; 5]>,
+    applied: Option<[String; 6]>,
 }
 
 impl Hotkeys {
@@ -391,13 +391,14 @@ impl Drop for Hotkeys {
     }
 }
 
-fn signature(config: &AppConfig) -> [String; 5] {
+fn signature(config: &AppConfig) -> [String; 6] {
     [
         config.toggle_shortcut.trim().to_owned(),
         config.paste_shortcut.trim().to_owned(),
         config.tts.read_shortcut.trim().to_owned(),
         config.tts.pause_shortcut.trim().to_owned(),
         config.tts.stop_shortcut.trim().to_owned(),
+        config.writer.shortcut.trim().to_owned(),
     ]
 }
 

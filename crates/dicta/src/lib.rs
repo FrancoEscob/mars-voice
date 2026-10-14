@@ -8,3 +8,4 @@ mod history_ops;
 mod reader;
 pub mod recording;
 mod wav;
+mod writer;

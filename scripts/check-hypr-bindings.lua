@@ -63,3 +63,10 @@ if read then
     assert(not action:find("--shortcut", 1, true), "reading has no hold gesture")
     print("OK: lectura en voz alta con Ctrl+Alt+Space")
 end
+local write = bindings["CTRL + ALT + E"]
+if write then
+    local action = write[1].action
+    assert(type(action) == "string" and action:find("--write-selection", 1, true), "write bind must call --write-selection")
+    assert(not action:find("--shortcut", 1, true), "writing has no hold gesture")
+    print("OK: escritura con Ctrl+Alt+E")
+end

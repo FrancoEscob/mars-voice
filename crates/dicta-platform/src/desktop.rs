@@ -22,6 +22,8 @@ pub const APP_ID: &str = "io.github.francoescob.Dicta";
 pub const OVERLAY_CLASS: &str = "dicta-overlay";
 /// Read-aloud window class (Wayland app_id).
 pub const READER_CLASS: &str = "dicta-reader";
+/// Writing window class (Wayland app_id): fix and translate the selection.
+pub const WRITER_CLASS: &str = dicta_core::writer::WRITER_APP_ID;
 
 /// A window that can receive a paste. Today's fields come from Hyprland's
 /// `hyprctl -j activewindow`; other backends fill the closest equivalent.
@@ -71,12 +73,15 @@ pub enum FloatingWindow {
     Overlay,
     /// The read-aloud window, class [`READER_CLASS`].
     Reader,
+    /// The writing window, class [`WRITER_CLASS`].
+    Writer,
 }
 impl FloatingWindow {
     pub fn class(self) -> &'static str {
         match self {
             Self::Overlay => OVERLAY_CLASS,
             Self::Reader => READER_CLASS,
+            Self::Writer => WRITER_CLASS,
         }
     }
 }
@@ -125,6 +130,26 @@ pub fn paste_prepared(
         .paste_prepared(text, plan, keys, &is_current)
 }
 
+/// Writing "Reemplazar": copies first, then pastes into `target`, a window
+/// remembered when its selection was copied ([`crate::selection::copy_selection_from`]).
+/// Refuses this process's windows and a target that is gone or changed
+/// identity; the text then stays in the clipboard. Focuses `target` when it is
+/// not active (on Windows only while this process may set the foreground) and
+/// rechecks focus right before input; never Enter. Terminals (built-in list
+/// plus `extra_terminal_classes`) get Ctrl+Shift+V instead of Ctrl+V.
+/// `is_current` cancels before focus changes or keys are typed.
+pub fn paste_into(
+    text: &str,
+    target: &PasteTarget,
+    keys: &str,
+    extra_terminal_classes: &[String],
+    is_current: impl Fn() -> bool,
+) -> Result<()> {
+    backend::current()
+        .injector
+        .paste_into(text, target, keys, extra_terminal_classes, &is_current)
+}
+
 /// Enable manual offsets from controller config. Disabling cancels pending
 /// placements so an old callback cannot move a newly centered overlay.
 pub fn set_overlay_placement_enabled(enabled: bool) {
@@ -158,4 +183,18 @@ pub fn place_reader(x: f32, y: f32) {
     backend::current()
         .placement
         .place(FloatingWindow::Reader, x, y);
+}
+
+/// Same contract as [`set_overlay_placement_enabled`], for the writing window.
+pub fn set_writer_placement_enabled(enabled: bool) {
+    backend::current()
+        .placement
+        .set_placement_enabled(FloatingWindow::Writer, enabled);
+}
+
+/// Same contract as [`place_overlay`], for this process's floating `dicta-writer`.
+pub fn place_writer(x: f32, y: f32) {
+    backend::current()
+        .placement
+        .place(FloatingWindow::Writer, x, y);
 }

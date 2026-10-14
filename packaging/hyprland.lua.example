@@ -54,6 +54,13 @@ hl.bind("CTRL + ALT + SPACE", hl.dsp.exec_cmd("~/.local/bin/dicta --read-selecti
     description = "Mars voice: leer la selección en voz alta",
 })
 
+-- Escritura: copia la selección, la arregla o la traduce con Grok y abre una
+-- ventana con el resultado. Como la lectura, el texto nunca pasa por la línea
+-- de comandos.
+hl.bind("CTRL + ALT + E", hl.dsp.exec_cmd("~/.local/bin/dicta --write-selection"), {
+    description = "Mars voice: arreglar o traducir la selección",
+})
+
 -- Para la demo, sustituí "dicta ctl" por "dicta --demo ctl".
 -- --shortcut-press abre Dicta si está cerrado; ctl paste necesita un dictado en memoria.
 -- El inicio automático opcional se entrega en packaging/dicta.service.
@@ -82,6 +89,25 @@ hl.window_rule({
 hl.window_rule({
     name = "dicta-reader-window",
     match = { class = "^dicta-reader$" },
+    float = true,
+    center = true,
+    pin = true,
+    no_initial_focus = true,
+    no_blur = true,
+    no_shadow = true,
+    no_anim = true,
+    border_size = 0,
+    rounding = 0,
+    opacity = "1.0 override 1.0 override 1.0 override",
+    tag = "+hyprglass_disabled",
+})
+
+-- Ventana de Escritura: flotante, centrada al abrir (o donde la dejaste, según
+-- Ajustes → Escritura) y sin robar el foco, así la ventana de origen sigue
+-- activa para Reemplazar. Un clic la enfoca para editar el texto.
+hl.window_rule({
+    name = "dicta-writer-window",
+    match = { class = "^dicta-writer$" },
     float = true,
     center = true,
     pin = true,

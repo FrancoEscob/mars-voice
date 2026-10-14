@@ -17,7 +17,7 @@
 //! All methods may block (subprocesses, compositor IPC); call them from a
 //! worker thread. None of them polls, watches or logs content.
 use crate::desktop::{FloatingWindow, PastePlan, PasteTarget};
-use crate::selection::{CopyOptions, SelectionSource};
+use crate::selection::{CopiedSelection, CopyOptions, SelectionSource};
 use anyhow::Result;
 
 #[cfg(any(not(any(target_os = "linux", windows)), test))]
@@ -58,6 +58,16 @@ pub trait Injector: Send + Sync {
         keys: &str,
         is_current: &dyn Fn() -> bool,
     ) -> Result<()>;
+    /// Paste into a remembered `target` (the source of a copied selection),
+    /// focusing it when needed. Terminals get Ctrl+Shift+V for Ctrl+V.
+    fn paste_into(
+        &self,
+        text: &str,
+        target: &PasteTarget,
+        keys: &str,
+        extra_terminal_classes: &[String],
+        is_current: &dyn Fn() -> bool,
+    ) -> Result<()>;
 }
 
 /// Reads selected or copied text for read-aloud.
@@ -67,6 +77,8 @@ pub trait SelectionReader: Send + Sync {
     /// Send the copy shortcut to the focused window, read the result and
     /// (optionally) restore the previous clipboard.
     fn copy_selection(&self, options: CopyOptions<'_>) -> Result<Option<String>>;
+    /// Same, also returning the window that received the copy shortcut.
+    fn copy_selection_from(&self, options: CopyOptions<'_>) -> Result<CopiedSelection>;
 }
 
 /// Moves this process's floating windows after they are mapped.

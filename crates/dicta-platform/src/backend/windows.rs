@@ -15,7 +15,7 @@
 use super::win_flow::{self, ClipText, Desktop, Keys, Saved, Vk};
 use super::{Backend, Clipboard, FocusTracker, Injector, SelectionReader, WindowPlacer};
 use crate::desktop::{FloatingWindow, PastePlan, PasteTarget};
-use crate::selection::{CopyOptions, SelectionSource};
+use crate::selection::{CopiedSelection, CopyOptions, SelectionSource};
 use anyhow::{Result, anyhow, bail};
 use std::time::{Duration, Instant};
 use windows_sys::Win32::{
@@ -85,6 +85,23 @@ impl Injector for Windows {
     ) -> Result<()> {
         win_flow::paste_prepared(&mut Live::default(), text, plan, keys, is_current)
     }
+    fn paste_into(
+        &self,
+        text: &str,
+        target: &PasteTarget,
+        keys: &str,
+        extra_terminal_classes: &[String],
+        is_current: &dyn Fn() -> bool,
+    ) -> Result<()> {
+        win_flow::paste_into(
+            &mut Live::default(),
+            text,
+            target,
+            keys,
+            extra_terminal_classes,
+            is_current,
+        )
+    }
 }
 
 impl SelectionReader for Windows {
@@ -93,6 +110,9 @@ impl SelectionReader for Windows {
     }
     fn copy_selection(&self, options: CopyOptions<'_>) -> Result<Option<String>> {
         win_flow::copy_selection(&mut Live::default(), &options)
+    }
+    fn copy_selection_from(&self, options: CopyOptions<'_>) -> Result<CopiedSelection> {
+        win_flow::copy_selection_from(&mut Live::default(), &options)
     }
 }
 

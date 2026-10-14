@@ -84,6 +84,31 @@ Con la ventana enfocada (un clic), Espacio pausa, las flechas saltan, `[`/`]` ca
 
 En la demo (`--demo`) la lectura usa un texto fijo y audio sintético silencioso: no lee tu selección, no usa la API ni abre la salida de audio.
 
+## Escritura (arreglar y traducir)
+
+Pensada para escribir en otro idioma mientras lo aprendés. Seleccioná texto en cualquier aplicación y pulsá **Ctrl+Alt+E**. Mars voice copia la selección igual que la lectura (Ctrl+C con `send_shortcut`, Ctrl+Shift+C en terminales, y te devuelve el portapapeles como estaba), se la pasa a Grok y abre una ventana flotante con:
+
+- el texto arreglado, con las palabras quitadas y agregadas marcadas sobre el original;
+- una explicación corta de cada cambio, en el idioma de la interfaz (o el que elijas), para entender la regla y no repetir el error;
+- **Arreglar** o **Traducir** para volver a pedirlo, y el idioma destino (inglés por defecto);
+- **Copiar**, **Reemplazar** (pega el resultado sobre tu selección original) y **Escuchar** (lo lee en voz alta con la misma voz de la lectura).
+
+En modo automático, si el texto ya está en el idioma destino se arregla; si no, se traduce. Al terminar, el resultado se copia al portapapeles (se puede apagar). Si no había nada seleccionado, la ventana se abre vacía para que escribas o pegues el texto.
+
+- **Reemplazar**: cierra la ventana, vuelve a la ventana de la que copiaste y pega con tu combinación de pegado (Ctrl+Shift+V en terminales). Si esa ventana ya se cerró, el resultado queda en el portapapeles y la ventana de Escritura vuelve a abrirse con el aviso. No envía Enter.
+- **Cuenta**: las mismas credenciales que el dictado, con su propio selector (Suscripción o API key). Nunca cambia sola a la API paga ni reintenta un pedido fallido.
+- **Coste**: un pedido por cada Arreglar, Traducir o cambio de idioma, hasta 8 000 caracteres; el resto se descarta con aviso. Los tokens que devuelve xAI se muestran en la ventana.
+- **Seguridad del texto**: Grok recibe tu texto como texto, nunca como instrucciones. El texto no se guarda en el historial ni viaja por el socket de control.
+- **Configuración**: Ajustes → Escritura (atajo, modo, idioma destino y de las explicaciones, cuánto cambiar, tono, instrucciones propias, ventana y portapapeles).
+
+```bash
+./target/release/dicta --write-selection    # lo que ejecuta el atajo
+./target/release/dicta ctl write            # igual, con Mars voice abierto
+./target/release/dicta ctl write-clipboard  # desde el portapapeles
+```
+
+En Hyprland, el bind y la regla de ventana (`dicta-writer`) están en `packaging/hyprland.lua.example`. Desde la bandeja, *Arreglar o traducir el portapapeles* usa lo que copiaste, porque al abrir el menú la ventana activa ya no es la tuya. En la demo (`--demo`) la Escritura arregla siempre la misma frase de ejemplo, sin red ni portapapeles real, y Reemplazar se simula.
+
 ## Inicio e historial
 
 Inicio muestra notas recientes y métricas por Hoy, últimos 7 días o Todo. Historial permite buscar, abrir, copiar y eliminar notas; los audios guardados se reproducen bajo demanda y pueden borrarse sin quitar la transcripción. Los resultados fallidos con texto o audio también se conservan para recuperación.

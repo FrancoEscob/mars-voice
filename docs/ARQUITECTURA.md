@@ -64,3 +64,16 @@ Audio-reactividad: `level_seq` solo cambia con muestras nuevas; la UI no agrega 
 - **Cancelación**: cada lectura, versión y sesión tiene su identificador. Detener o reemplazar cancela la sesión y descarta los eventos tardíos.
 - **Historial**: tabla `readings`, con caracteres enviados como métrica de coste estimado. El audio es optativo: un WAV privado del prefijo generado, con la distribución por fragmento para reproducirlo sin regenerar.
 - **Exclusión**: dictar pausa o detiene la lectura, según el ajuste. El audio de notas (`pw-play`) y la lectura no suenan a la vez.
+
+
+## Escritura (arreglar y traducir)
+
+`crates/dicta/src/writer.rs` vive en el hilo del controlador, como la lectura. `Writer::handle` atiende los `Command::Writer*` y `Writer::poll` corre en cada vuelta del bucle. El estado visible es `AppSnapshot.writer`; la ventana existe mientras `phase != Hidden`.
+
+- **Captura**: el atajo (`dicta --write-selection`, `ctl write`, portal o Windows) copia la selección con `selection::copy_selection_from`, el mismo flujo que la lectura (portapapeles guardado y restaurado según `writer.restore_clipboard`, terminales de `tts.terminal_classes`). Devuelve además la ventana de origen (`stableId` en Hyprland, HWND en Windows), que el controlador recuerda solo para Reemplazar. Nunca toma una ventana propia. `ctl write-clipboard` y la bandeja leen el portapapeles y no permiten Reemplazar. En Windows la ventana se abre después de copiar, porque Ctrl+C va a la ventana en primer plano; en Hyprland se abre al empezar (fase `Capturing`), porque el atajo va a la ventana por `stableId`.
+- **Pedido**: `prepare_input` recorta a 8 000 caracteres. Cada Arreglar, Traducir o cambio de idioma cancela el pedido anterior, incrementa `request_id` y llama una vez a `XaiProvider::rewrite` con la credencial de `writer.provider`, sin reintentos ni cambio automático a la API paga. Una respuesta con otro `request_id` se descarta. Las explicaciones usan `writer.explain_language` o, con `auto`, el idioma de la interfaz.
+- **Resultado**: `diff = word_diff(input, output.text)` solo cuando se arregló (al traducir queda vacío). Con `copy_on_finish` el resultado se copia. Los errores del proveedor se muestran con su texto, salvo los que nombran el dictado (403, cierre, fallo de xAI), que tienen uno propio.
+- **Reemplazar**: primero oculta la ventana. Después, en un hilo aparte, `desktop::paste_into` copia el resultado, comprueba que la ventana de origen siga abierta con la misma identidad, la enfoca si hace falta y pega con `paste_keys` (Ctrl+Shift+V en terminales cuando la combinación es Ctrl+V). Si falla, el resultado queda en el portapapeles y la ventana se reabre en `Error` con el resultado. Cerrar o abrir otra escritura invalida un Reemplazar en cola.
+- **Escuchar**: el controlador reenvía el resultado como `Command::ReadText`, así la lectura aplica sus propias reglas (no lee mientras se dicta).
+- **Convivencia**: dictar no cancela un pedido de Escritura en curso.
+- **Demo**: texto fijo («I has went to the store yesterday.»), resultado determinista sin red y copia y Reemplazar simulados.
