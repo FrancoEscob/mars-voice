@@ -38,6 +38,15 @@ Los DTOs están en `dicta-core/src/tts.rs` (`TtsConfig`, `TtsSnapshot`, `VoiceSe
 - **UI**: ventana `dicta-reader` (`set_reader_placer`), sección Ajustes → Lectura, historial Dictados/Lecturas y métricas de lectura en Inicio. Solo envía `Command`; no hace audio, red ni portapapeles.
 - **IPC**: `read`, `read-clipboard`, `tts-toggle`, `tts-stop`. Nunca transporta texto.
 
+## Escritura (14-10-2026)
+
+Los DTOs están en `dicta-core/src/writer.rs` (`WriterConfig`, `WriterSnapshot`, `WriterOutput`, `DiffSpan`) y los comandos `Command::Writer*` en `lib.rs`.
+
+- **Proveedor**: `XaiProvider::rewrite(bearer, request, cancel) -> WriterResult`. Un pedido, sin reintentos.
+- **Plataforma**: `selection::copy_selection_from(options) -> CopiedSelection { text, source }` (como `copy_selection`, más la ventana de origen) y `desktop::paste_into(text, target, keys, extra_terminal_classes, is_current)` para Reemplazar. `desktop::set_writer_placement_enabled` / `place_writer` para la clase `dicta-writer` (`FloatingWindow::Writer`).
+- **UI**: ventana `dicta-writer` (`set_writer_placer`) y Ajustes → Escritura. Solo envía `Command`.
+- **IPC**: `write`, `write-clipboard`. Nunca transporta texto.
+
 ## Plataformas (MP-01, 12-10-2026)
 
 `dicta-platform` compila en Linux, Windows y macOS. Lo exclusivo de Linux (wl-clipboard, wtype, hyprctl, grupos de procesos y señales, ksni y ashpd; el crate no usa `/proc`) está detrás de `cfg(target_os = "linux")`. En el resto hay stubs que devuelven errores accionables en español («… todavía no está disponible en este sistema»). Las firmas públicas no cambiaron.

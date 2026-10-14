@@ -18,6 +18,9 @@ dicta-ui = { path = "../dicta-ui", optional = true }
 tokio.workspace = true
 serde_json.workspace = true
 serde.workspace = true
+# Idioma del sistema para las explicaciones de Escritura con `ui_language = "auto"`.
+# Ya está en el grafo por dicta-core.
+sys-locale = "0.3"
 
 [target.'cfg(unix)'.dependencies]
 # Socket peer credentials and O_NOFOLLOW/O_DIRECTORY for the IPC runtime folder.

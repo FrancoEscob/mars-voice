@@ -285,9 +285,11 @@ fn parse(command: &str) -> Result<Option<Command>> {
         "read-clipboard" => Command::ReadClipboard,
         "tts-toggle" => Command::TtsToggle,
         "tts-stop" => Command::TtsStop,
+        "write" => Command::WriterSelection,
+        "write-clipboard" => Command::WriterClipboard,
         "status" => return Ok(None),
         _ => bail!(
-            "Comando desconocido. Usá start, stop, toggle, cancel, copy, paste, settings, show, hide, read, read-clipboard, tts-toggle, tts-stop, quit o status"
+            "Comando desconocido. Usá start, stop, toggle, cancel, copy, paste, settings, show, hide, read, read-clipboard, tts-toggle, tts-stop, write, write-clipboard, quit o status"
         ),
     }))
 }
@@ -599,6 +601,17 @@ mod tests {
         assert!(rx.try_recv().is_err());
         drop(server);
         assert!(!runtime.join(SOCKET).exists());
+    }
+    #[test]
+    fn writing_commands_never_carry_text() {
+        assert!(matches!(parse("write"), Ok(Some(Command::WriterSelection))));
+        assert!(matches!(
+            parse("write-clipboard"),
+            Ok(Some(Command::WriterClipboard))
+        ));
+        for line in ["write hola", "write:hola", "write-text", "WRITE"] {
+            assert!(parse(line).is_err(), "{line}");
+        }
     }
     #[cfg(unix)]
     #[test]

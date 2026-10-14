@@ -342,3 +342,53 @@ fn warm_read_selection_and_tts_controls_reach_the_resident_without_text() {
     assert!(String::from_utf8_lossy(&rejected.stderr).contains("no ambos"));
     assert!(rx.try_recv().is_err());
 }
+
+#[test]
+fn warm_write_selection_and_write_clipboard_reach_the_resident_without_text() {
+    let temp = Temp::new();
+    let (tx, rx) = mpsc::channel();
+    let _server = ipc::start(&temp.runtime(), tx).unwrap();
+    let write = temp
+        .process(&["--demo", "--write-selection"])
+        .wait(Duration::from_secs(3));
+    assert!(
+        write.status.success(),
+        "{}",
+        String::from_utf8_lossy(&write.stderr)
+    );
+    assert!(matches!(
+        rx.recv_timeout(Duration::from_secs(2)).unwrap(),
+        Command::WriterSelection
+    ));
+    for (verb, check) in [
+        (
+            "write",
+            (|c: &Command| matches!(c, Command::WriterSelection)) as fn(&Command) -> bool,
+        ),
+        ("write-clipboard", |c: &Command| {
+            matches!(c, Command::WriterClipboard)
+        }),
+    ] {
+        let output = temp
+            .process(&["--demo", "ctl", verb])
+            .wait(Duration::from_secs(3));
+        assert!(output.status.success(), "{verb}");
+        assert!(
+            check(&rx.recv_timeout(Duration::from_secs(2)).unwrap()),
+            "{verb}"
+        );
+    }
+    for args in [
+        &["--demo", "--write-selection", "ctl", "write"][..],
+        &["--demo", "--write-selection", "--read-selection"][..],
+        &["--demo", "--write-selection", "--toggle"][..],
+    ] {
+        let rejected = temp.process(args).wait(Duration::from_secs(3));
+        assert!(!rejected.status.success(), "{args:?}");
+        assert!(
+            String::from_utf8_lossy(&rejected.stderr).contains("no ambos"),
+            "{args:?}"
+        );
+    }
+    assert!(rx.try_recv().is_err());
+}

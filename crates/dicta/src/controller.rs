@@ -1,6 +1,7 @@
 use crate::history_ops::{self, Playback};
 use crate::reader::{self, Reader};
 use crate::session::{self, SessionEvent};
+use crate::writer::{self, Writer};
 use anyhow::Result;
 use dicta_core::{
     AppConfig, AppPaths, AppSnapshot, Command, LoginPrompt, NoteStatus, Phase, ProviderMode,
@@ -78,6 +79,7 @@ pub fn run(
 ) -> Result<()> {
     desktop::set_overlay_placement_enabled(!snapshot.config.overlay_centered);
     desktop::set_reader_placement_enabled(!snapshot.config.tts.window_centered);
+    desktop::set_writer_placement_enabled(!snapshot.config.writer.window_centered);
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(2)
         .enable_all()
@@ -96,6 +98,12 @@ pub fn run(
     let mut last_prune = Instant::now();
     let credentials = Credentials::new();
     let mut reader = Reader::new(
+        runtime.handle().clone(),
+        options.demo,
+        options.allow_env_key,
+        credentials.clone(),
+    )?;
+    let mut writer = Writer::new(
         runtime.handle().clone(),
         options.demo,
         options.allow_env_key,
@@ -215,6 +223,15 @@ pub fn run(
                             if outcome.save_config {
                                 let config = snapshot.config.clone();
                                 save_config(&paths, &mut snapshot, config, options.demo);
+                            }
+                        }
+                    }
+                    command if writer::is_writer_command(&command) => {
+                        if let Ok(outcome) = writer.handle(command, &mut snapshot) {
+                            // La lectura es otro módulo: Escuchar entra como
+                            // cualquier ReadText, con sus mismas reglas.
+                            if let Some(text) = outcome.speak {
+                                let _ = command_tx.send(Command::ReadText(text));
                             }
                         }
                     }
@@ -876,6 +893,9 @@ pub fn run(
         if reader.poll(&mut snapshot, &store, &paths) {
             dirty = true;
         }
+        if writer.poll(&mut snapshot) {
+            dirty = true;
+        }
         match playback.poll() {
             Ok(id) if id != snapshot.audio_playing_note_id => {
                 snapshot.audio_playing_note_id = id;
@@ -912,10 +932,12 @@ pub fn run(
         }
     }
     reader.shutdown(&mut snapshot, &store, &paths);
+    writer.shutdown(&mut snapshot);
     playback.stop();
     output_control.invalidate();
     desktop::set_overlay_placement_enabled(false);
     desktop::set_reader_placement_enabled(false);
+    desktop::set_writer_placement_enabled(false);
     if let Some(active) = job {
         active.cancel.cancel();
     }
@@ -959,6 +981,7 @@ fn save_config(
         Ok(()) => {
             desktop::set_overlay_placement_enabled(!config.overlay_centered);
             desktop::set_reader_placement_enabled(!config.tts.window_centered);
+            desktop::set_writer_placement_enabled(!config.writer.window_centered);
             snapshot.config = config;
             snapshot.error = None;
             true
@@ -1445,6 +1468,61 @@ mod tests {
             token: Some(2),
         })
         .unwrap();
+    }
+    /// Necesita `dicta_core::writer::{prepare_input, word_diff}` implementadas.
+    #[test]
+    fn demo_controller_runs_writer_and_hands_the_result_to_the_reader() {
+        let (tx, commands) = mpsc::channel();
+        let (snapshot_tx, snapshot_rx) = mpsc::channel();
+        let paths = AppPaths {
+            config: "/nonexistent/dicta-test-config".into(),
+            data: "/nonexistent/dicta-test-data".into(),
+            runtime: "/nonexistent/dicta-test-runtime".into(),
+        };
+        let mut initial = AppSnapshot::new(AppConfig::default());
+        initial.demo = true;
+        let controller_tx = tx.clone();
+        let worker = std::thread::spawn(move || {
+            run(
+                paths,
+                initial,
+                commands,
+                controller_tx,
+                snapshot_tx,
+                Options {
+                    demo: true,
+                    ..Default::default()
+                },
+            )
+        });
+        let until = |predicate: &dyn Fn(&AppSnapshot) -> bool| {
+            let deadline = Instant::now() + Duration::from_secs(5);
+            loop {
+                let next = snapshot_rx
+                    .recv_timeout(deadline.saturating_duration_since(Instant::now()))
+                    .expect("snapshot esperado");
+                if predicate(&next) {
+                    break next;
+                }
+            }
+        };
+        use dicta_core::WriterPhase;
+        tx.send(Command::WriterSelection).unwrap();
+        let fixed = until(&|s| s.writer.phase == WriterPhase::Ready && s.writer.output.is_some());
+        assert!(fixed.writer.can_replace);
+        assert_eq!(
+            fixed.writer.output.unwrap().text,
+            "I went to the store yesterday."
+        );
+        assert!(!fixed.writer.diff.is_empty());
+        // Escuchar llega a la lectura como un ReadText.
+        tx.send(Command::WriterSpeak).unwrap();
+        until(&|s| s.tts.show);
+        tx.send(Command::TtsStop).unwrap();
+        tx.send(Command::WriterReplace).unwrap();
+        until(&|s| s.writer.phase == WriterPhase::Hidden && s.status == "Demo: reemplazo simulado");
+        tx.send(Command::Quit).unwrap();
+        worker.join().unwrap().unwrap();
     }
     #[tokio::test]
     async fn cancelled_demo_cannot_finish() {
