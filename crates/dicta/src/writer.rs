@@ -216,14 +216,14 @@ impl Writer {
             }
             Command::WriterRun(mode) if visible => self.run(mode, snap),
             Command::WriterSetTarget(language) => self.set_target(&language, snap),
-            Command::WriterCopy if visible => match &snap.writer.output {
+            Command::WriterCopy if visible => match ready_output(&snap.writer) {
                 Some(output) => {
                     let text = output.text.clone();
                     self.copy_result(text);
                 }
                 None => snap.writer.status = "Todavía no hay un resultado para copiar".into(),
             },
-            Command::WriterSpeak if visible => match &snap.writer.output {
+            Command::WriterSpeak if visible => match ready_output(&snap.writer) {
                 Some(output) => {
                     outcome.speak = Some(output.text.clone());
                     snap.writer.status = "Leyendo el resultado en voz alta".into();
@@ -698,6 +698,12 @@ fn friendly_error(error: &ProviderError) -> String {
     }
 }
 
+/// El resultado sobre el que actúan Copiar y Escuchar. Al rehacer o tras un
+/// error, el anterior sigue a la vista pero ya no es el resultado vigente.
+fn ready_output(w: &WriterSnapshot) -> Option<&WriterOutput> {
+    w.output.as_ref().filter(|_| w.phase == WriterPhase::Ready)
+}
+
 /// Ventana de origen ficticia: en la demo Reemplazar se simula.
 fn demo_source() -> PasteTarget {
     PasteTarget {
@@ -965,6 +971,12 @@ mod tests {
         assert_eq!(w.phase, WriterPhase::Working);
         assert_eq!(w.output.as_ref().unwrap().text, "primero");
         assert!(!w.diff.is_empty());
+        // Se ve, pero mientras trabaja no se copia, lee ni reemplaza.
+        assert!(f.send(Command::WriterSpeak).speak.is_none());
+        f.send(Command::WriterReplace);
+        assert_eq!(f.snap.writer.phase, WriterPhase::Working);
+        f.send(Command::WriterCopy);
+        assert!(f.snap.writer.status.contains("Todavía no hay"));
     }
 
     #[test]

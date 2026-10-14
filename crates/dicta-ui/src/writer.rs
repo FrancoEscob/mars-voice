@@ -73,6 +73,12 @@ const INPUT_DEBOUNCE: std::time::Duration = std::time::Duration::from_millis(400
 // --------------------------------------------------------------- wording
 
 /// A language in its own name, for the target selector.
+/// Copiar, Reemplazar y Escuchar solo actúan sobre un resultado listo. Al
+/// rehacer o tras un error, el resultado anterior se ve pero no se usa.
+fn actionable(w: &WriterSnapshot) -> bool {
+    w.phase == WriterPhase::Ready && w.output.is_some()
+}
+
 pub(crate) fn native_name(code: &str) -> SharedString {
     match code {
         "en" => "English".into(),
@@ -415,7 +421,7 @@ impl Writer {
     }
 
     fn has_output(&self, cx: &App) -> bool {
-        self.hub.read(cx).snap.writer.output.is_some()
+        actionable(&self.hub.read(cx).snap.writer)
     }
 
     fn copy(&mut self, cx: &mut Context<Self>) {
@@ -426,7 +432,7 @@ impl Writer {
 
     fn replace(&mut self, cx: &mut Context<Self>) {
         let w = &self.hub.read(cx).snap.writer;
-        if w.output.is_some() && w.can_replace {
+        if actionable(w) && w.can_replace {
             self.send(cx, Command::WriterReplace);
         }
     }
@@ -846,7 +852,7 @@ impl Writer {
 
     fn footer(&self, w: &WriterSnapshot, p: Palette, cx: &mut Context<Self>) -> Div {
         let l = lang(cx);
-        let ready = w.output.is_some();
+        let ready = actionable(w);
         let tokens = (w.input_tokens.is_some() || w.output_tokens.is_some()).then(|| {
             tf!(
                 l,
