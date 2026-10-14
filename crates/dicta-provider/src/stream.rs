@@ -58,6 +58,8 @@ pub struct Timeouts {
     pub write: Duration,
     pub finalize: Duration,
     pub polish: Duration,
+    /// Escritura: pedido completo a la Responses API, respuesta incluida.
+    pub writer: Duration,
     pub http: Duration,
     /// Hard cap so a lost Stop cannot keep a billable session open forever.
     pub session: Duration,
@@ -79,6 +81,7 @@ impl Default for Timeouts {
             write: Duration::from_secs(10),
             finalize: Duration::from_secs(20),
             polish: Duration::from_secs(10),
+            writer: Duration::from_secs(30),
             http: Duration::from_secs(20),
             session: Duration::from_secs(15 * 60),
             tts_first_audio: Duration::from_secs(30),
