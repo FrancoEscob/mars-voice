@@ -28,17 +28,17 @@ const NO_WINDOW: &str =
     "No hay una ventana activa; hacé clic en el campo de destino y repetí el atajo";
 const OWN_PASTE: &str =
     "Seleccioná el campo de destino fuera de Mars voice y repetí el atajo de pegar";
-const OWN_COPY: &str = "Seleccioná el texto en otra ventana y repetí el atajo de lectura";
+const OWN_COPY: &str = "Seleccioná el texto en otra ventana y repetí el atajo";
 const FOCUS_CHANGED: &str =
     "Cambió la ventana activa; el texto quedó copiado. Volvé al destino y repetí el atajo de pegar";
 const HELD_PASTE: &str = "El texto quedó copiado, pero las teclas del atajo seguían pulsadas. Soltalas y pegá con Ctrl+V";
-const HELD_COPY: &str = "Soltá las teclas del atajo de lectura y volvé a intentarlo";
+const HELD_COPY: &str = "Soltá las teclas del atajo y volvé a intentarlo";
 const CANCELLED: &str = "Pegado cancelado";
 const TARGET_GONE: &str =
     "El destino original ya no está abierto o cambió de identidad; el texto quedó copiado";
 const NOT_ACTIVATED: &str = "Windows no permitió volver a la ventana de destino; el texto quedó copiado. Hacé clic en el destino y pegá con Ctrl+V";
 const COPY_FOCUS_CHANGED: &str =
-    "Cambió la ventana activa antes de copiar; seleccioná el texto y repetí el atajo de lectura";
+    "Cambió la ventana activa antes de copiar; seleccioná el texto y repetí el atajo";
 const BUSY: &str = "Otra aplicación está usando el portapapeles; volvé a intentarlo";
 const NOT_RESTORED: &str = "No se pudo restaurar el portapapeles anterior";
 const LOST: &str =

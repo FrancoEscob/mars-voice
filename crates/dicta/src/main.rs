@@ -385,11 +385,9 @@ fn run() -> Result<()> {
             dicta_platform::desktop::set_writer_placement_enabled(
                 !initial.config.writer.window_centered,
             );
-            // TODO(Escritura, integración UI): activar al unir la rama de
-            // dicta-ui, que agrega `set_writer_placer` igual que `set_reader_placer`.
-            // dicta_ui::set_writer_placer(|origin| {
-            //     dicta_platform::desktop::place_writer(origin.x, origin.y);
-            // });
+            dicta_ui::set_writer_placer(|origin| {
+                dicta_platform::desktop::place_writer(origin.x, origin.y);
+            });
             let result = dicta_ui::run(initial, command_tx.clone(), snapshots_rx);
             let _ = command_tx.send(Command::Quit);
             result

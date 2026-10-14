@@ -106,7 +106,7 @@ const TERMINAL_CLASSES: &[&str] = &[
 ];
 
 const ENV_ERROR: &str = "Copiar la selección automáticamente requiere Hyprland en Wayland. Elegí «Solo el portapapeles» en Ajustes > Lectura y copiá el texto antes de leer";
-const OWN_WINDOW: &str = "Seleccioná el texto en otra ventana y repetí el atajo de lectura";
+const OWN_WINDOW: &str = "Seleccioná el texto en otra ventana y repetí el atajo";
 const NO_STABLE_ID: &str = "Hyprland no identifica la ventana activa de forma segura. Actualizá Hyprland o elegí «Solo el portapapeles» en Ajustes > Lectura";
 const CLEAR_FAILED: &str =
     "No se pudo vaciar el portapapeles antes de copiar; comprobá wl-clipboard";
